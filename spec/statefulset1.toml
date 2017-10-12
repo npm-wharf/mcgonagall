@@ -1,0 +1,35 @@
+name = "mydb.data"
+stateful = true
+image = "pretend/mydb:1.0.0"
+command = 'bash -exc export HOST="$(hostname).datums" mydb'
+serviceAlias = "datums"
+metadata = "owner=npm;branch=master"
+
+[scale]
+  containers = 2
+  ram = "> 500Mi < 1Gi"
+  cpu = "> 500Mi < 1000Mi"
+
+[env]
+  ONE = "http://one:1234/wat"
+
+  [env.config-map]
+    TWO = "a_thing"
+
+[ports]
+  tcp = "9080"
+  http = "8080"
+
+[mounts]
+  mydb-data = "/data"
+  config = "/etc/mydb"
+
+[volumes]
+  config = "actual-config::mydb.conf,ssl.cert=cert/ssl.cert"
+
+[storage]
+  mydb-data = "10Gi:exclusive"
+
+[probes]
+  ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"
+  live = "mydb test,initial=5,period=30"

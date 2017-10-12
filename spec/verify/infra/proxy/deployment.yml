@@ -1,0 +1,55 @@
+apiVersion: apps/v1beta
+kind: Deployment
+metadata:
+  namespace: infra
+  name: proxy
+spec:
+  replicas: 2
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      containers:
+        - name: proxy
+          image: 'nginx:1.13-alpine'
+          env: []
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 0.1
+            limits:
+              memory: 200Mi
+              cpu: 0.2
+          volumeMounts:
+            - name: config-files
+              mountPath: /etc/nginx
+            - name: nginx-cache
+              mountPath: /etc/nginx/cache
+      volumes:
+        - name: config-files
+          configMap:
+            name: nginx-files
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+              - key: mime.types
+                path: mime.types
+    volumeClaimTemplates:
+      - metadata:
+          name: nginx-cache
+          namespace: infra
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
