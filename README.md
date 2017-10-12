@@ -11,6 +11,10 @@ mcgonagall provides TOML specifications that focus on the desired end state in h
 
 ## Installation
 
+```shell
+npm i mcgonagall
+```
+
 ## Use
 
 ## Lib API
@@ -32,6 +36,17 @@ If you provide only the path to folder or tarball, mcgonagall returns the full c
 }
 ```
 
+```js
+const mcgonagall = require('mcgonagall')
+
+mcgonagall
+  .transfigure('./path/to/source')
+  .then(
+    cluster => {}
+    err => {}
+  )
+```
+
 If you provide a destination folder, mcgonagall will write out a set of folders, files and the cluster spec in the following structure:
 
 ```shell
@@ -43,6 +58,17 @@ If you provide a destination folder, mcgonagall will write out a set of folders,
   |  |- ? account.yml
   |  |- ? roleBinding.yml
   ...
+```
+
+```js
+const mcgonagall = require('mcgonagall')
+
+mcgonagall
+  .transfigure('./path/to/source', './path/to/output')
+  .then(
+    done => {}
+    err => {}
+  )
 ```
 
 If you don't like the folder structure, just start with the cluster spec as JSON and persist it to disk another way.
