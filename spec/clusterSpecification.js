@@ -244,7 +244,7 @@ module.exports = {
           name: "heapster",
         },
         roleRef: {
-          apiGroup: "rba.authorization.k8s.io",
+          apiGroup: "rbac.authorization.k8s.io",
           kind: "ClusterRole",
           name: "system:heapster"
         },

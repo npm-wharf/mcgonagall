@@ -17,7 +17,7 @@ module.exports = {
       name: 'dbowner',
     },
     roleRef: {
-      apiGroup: 'rba.authorization.k8s.io',
+      apiGroup: 'rbac.authorization.k8s.io',
       kind: 'ClusterRole',
       name: 'system:dbowner'
     },

@@ -294,7 +294,7 @@ function getRoleBinding (config) {
           name: config.security.account,
         },
         roleRef: {
-          apiGroup: 'rba.authorization.k8s.io',
+          apiGroup: 'rbac.authorization.k8s.io',
           kind: 'ClusterRole',
           name: role
         },
