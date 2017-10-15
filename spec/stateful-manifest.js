@@ -3,7 +3,7 @@ module.exports = {
   name: 'mydb',
   namespace: 'data',
   statefulSet: {
-    apiVersion: 'apps/v1beta',
+    apiVersion: 'apps/v1beta1',
     kind: 'StatefulSet',
     metadata: {
       namespace: 'data',
@@ -121,24 +121,24 @@ module.exports = {
               }
             }
           ]
-        },
-        volumeClaimTemplates: [
-          {
-            metadata: {
-              namespace: 'data',
-              name: 'mydb-data'
-            },
-            spec: {
-              accessModes: [ 'ReadWriteOnce' ],
-              resources: {
-                requests: {
-                  storage: '10Gi'
-                }
+        }
+      },
+      volumeClaimTemplates: [
+        {
+          metadata: {
+            namespace: 'data',
+            name: 'mydb-data'
+          },
+          spec: {
+            accessModes: [ 'ReadWriteOnce' ],
+            resources: {
+              requests: {
+                storage: '10Gi'
               }
             }
           }
-        ]
-      }
+        }
+      ]
     }
   },
   services: [

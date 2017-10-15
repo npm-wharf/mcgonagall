@@ -9,13 +9,20 @@ require('yargs')
     command: 'transfigure <source> [target]',
     aliases: [],
     desc: 'transfigures a source specification (directory or tarball) into a Kubernetes compatible cluster specificiation.',
+    builder: {
+      apiVersion: {
+        alias: 'v',
+        describe: 'the Kubernetes API to build manifests for',
+        default: '1.7'
+      }
+    },
     handler: (argv) => {
       if (!fs.existsSync(path.resolve(argv.source))) {
         console.error(`I'll not have my time wasted chasing down non-existent specifications!`)
         process.exit(100)
       }
       mcgonagall
-        .transfigure(argv.source, argv.target)
+        .transfigure(argv.source, { version: argv.apiVersion, output: argv.target })
         .then(
           result => {
             if (argv.target) {

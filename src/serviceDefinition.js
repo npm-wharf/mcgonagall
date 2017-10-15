@@ -11,6 +11,8 @@ const NUMBER_TAG = '[object Number]'
 const STRING_TAG = '[object String]'
 const NOT_AN_OBJECT = ''
 
+const API_VERSION_MAP = require('./apiVersionMap')
+
 function buildService (config) {
   const result = validation.validateConfig(config)
   if (result.error) {
@@ -112,7 +114,7 @@ function clone (source, target) {
 function getAccount (config) {
   return {
     account: {
-      apiVersion: 'v1',
+      apiVersion: getApiVersion(config, 'account'),
       kind: 'ServiceAccount',
       metadata: {
         name: config.security.account,
@@ -120,6 +122,10 @@ function getAccount (config) {
       }
     }
   }
+}
+
+function getApiVersion (config, type) {
+  return API_VERSION_MAP[type][config.apiVersion]
 }
 
 function getContainer (config) {
@@ -196,7 +202,7 @@ function getDaemonSet (config) {
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
   const definition = {
     daemonSet: {
-      apiVersion: 'extensions/v1beta1',
+      apiVersion: getApiVersion(config, 'daemonSet'),
       kind: 'DaemonSet',
       metadata: {
         namespace: config.namespace,
@@ -235,7 +241,7 @@ function getDeployment (config) {
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
   const definition = {
     deployment: {
-      apiVersion: 'apps/v1beta',
+      apiVersion: getApiVersion(config, 'deployment'),
       kind: 'Deployment',
       metadata: {
         namespace: config.namespace,
@@ -253,9 +259,9 @@ function getDeployment (config) {
           spec: {
             containers: [ container ],
             volumes: volumes
-          },
-          volumeClaimTemplates: volumeClaims
-        }
+          }
+        },
+        volumeClaimTemplates: volumeClaims
       }
     }
   }
@@ -288,7 +294,7 @@ function getRoleBinding (config) {
   if (clusterRole) {
     const definition = {
       roleBinding: {
-        apiVersion: 'rbac.authorization.k8s.io/v1beta1',
+        apiVersion: getApiVersion(config, 'roleBinding'),
         kind: 'ClusterRoleBinding',
         metadata: {
           name: config.security.account,
@@ -317,7 +323,7 @@ function getService (config) {
   }
 
   const service = {
-    apiVersion: 'v1',
+    apiVersion: getApiVersion(config, 'service'),
     kind: 'Service',
     metadata: {
       namespace: config.namespace,
@@ -344,11 +350,15 @@ function getService (config) {
   service.spec.ports = ports
 
   if (config.stateful) {
-    statefulService = clone(service)
-    statefulService.spec.clusterIP = 'None'
-    service.metadata.name = config.name
-    service.metadata.labels.app = config.name
-    definition.services.push(statefulService)
+    if (config.serviceAlias && config.serviceAlias !== config.name) {
+      statefulService = clone(service)
+      statefulService.spec.clusterIP = 'None'
+      service.metadata.name = config.name
+      service.metadata.labels.app = config.name
+      definition.services.push(statefulService)
+    } else {
+      service.spec.clusterIP = 'None'
+    }
   }
 
   if (config.loadbalance) {
@@ -367,7 +377,7 @@ function getStatefulSet (config) {
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
   const definition = {
     statefulSet: {
-      apiVersion: 'apps/v1beta',
+      apiVersion: getApiVersion(config, 'statefulSet'),
       kind: 'StatefulSet',
       metadata: {
         namespace: config.namespace,
@@ -386,9 +396,9 @@ function getStatefulSet (config) {
           spec: {
             containers: [ container ],
             volumes: volumes
-          },
-          volumeClaimTemplates: volumeClaims
-        }
+          }
+        },
+        volumeClaimTemplates: volumeClaims
       }
     }
   }
@@ -443,19 +453,20 @@ function parse(toml) {
   const config = toml.parse(raw)
 }
 
-function parseTOMLFile (filePath, addConfigFile) {
+function parseTOMLFile (apiVersion, filePath, addConfigFile) {
   const fullPath = path.resolve(filePath)
   try {
     const raw = fs.readFileSync(fullPath, 'utf8')
     const addFile = addConfigFile ? addConfigFile.bind(null, path.dirname(fullPath)) : null
-    return parseTOMLContent(raw, addFile)
+    return parseTOMLContent(apiVersion, raw, addFile)
   } catch (ex) {
     throw new Error(`Failed to parse TOML file ${fullPath}: ${ex.message}, ${ex.stack}`)
   }
 }
 
-function parseTOMLContent (raw, addConfigFile) {
+function parseTOMLContent (apiVersion, raw, addConfigFile) {
   const config = toml.parse(raw)
+  config.apiVersion = apiVersion
   if (addConfigFile) {
     config.addConfigFile = addConfigFile
   }

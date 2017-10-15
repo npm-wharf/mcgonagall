@@ -19,9 +19,9 @@ npm i mcgonagall
 
 ## Lib API
 
-mcgonagall's API is simple. 
+### `mcgonagall.transfigure(source)`
 
-If you provide only the path to folder or tarball, mcgonagall returns the full cluster specification as JSON.
+With only the path to the specification (either files or a tarball containing them), mcgonagall returns the full cluster specification as JSON:
 
 ```js
 {
@@ -47,7 +47,9 @@ mcgonagall
   )
 ```
 
-If you provide a destination folder, mcgonagall will write out a set of folders, files and the cluster spec in the following structure:
+### `mcgonagall.transfigure(source, [options])`
+
+Providing a destination folder via the options hash will write the output to a set of folders, files and the cluster spec in the following structure:
 
 ```shell
 --[./]
@@ -64,14 +66,32 @@ If you provide a destination folder, mcgonagall will write out a set of folders,
 const mcgonagall = require('mcgonagall')
 
 mcgonagall
-  .transfigure('./path/to/source', './path/to/output')
+  .transfigure('./path/to/source', { output: './path/to/output' })
   .then(
     done => {}
     err => {}
   )
 ```
 
-If you don't like the folder structure, just start with the cluster spec as JSON and persist it to disk another way.
+Note: to change folder structure or file formats, just start with the cluster spec as JSON and persist it to disk another way.
+
+### Controlling For Versions
+
+Some Kubernetes API versions require changes to the manifests that get produced. As of now, the default Kubernetes API version is 1.7. To change this, provide a different version number via the `version` property in the option hash.
+
+```js
+const mcgonagall = require('mcgonagall')
+
+mcgonagall
+  .transfigure('./path/to/source', { 
+    output: './path/to/output', 
+    version: '1.6' 
+  })
+  .then(
+    done => {}
+    err => {}
+  )
+```
 
 ## CLI
 

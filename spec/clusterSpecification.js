@@ -19,6 +19,7 @@ module.exports = {
       }
     }
   ],
+  apiVersion: '1.7',
   levels: [0, 1, 2],
   namespaces: [
     "kube-system",
@@ -41,7 +42,7 @@ module.exports = {
   services: {
     "chronograf.data": {
       statefulSet: {
-        apiVersion: "apps/v1beta",
+        apiVersion: "apps/v1beta1",
         kind: "StatefulSet",
         metadata: {
           name: "chronograf",
@@ -97,26 +98,26 @@ module.exports = {
                   ]
                 }
               ]
-            },
-            volumeClaimTemplates: [
-              {
-                metadata: {
-                  name: "chronograf-data",
-                  namespace: "data"
-                },
-                spec: {
-                  accessModes: [
-                    "ReadWriteOnce"
-                  ],
-                  resources: {
-                    requests: {
-                      storage: "2Gi"
-                    }
+            }
+          },
+          volumeClaimTemplates: [
+            {
+              metadata: {
+                name: "chronograf-data",
+                namespace: "data"
+              },
+              spec: {
+                accessModes: [
+                  "ReadWriteOnce"
+                ],
+                resources: {
+                  requests: {
+                    storage: "2Gi"
                   }
                 }
               }
-            ]
-          }
+            }
+          ]
         }
       },
       fqn: "chronograf.data",
@@ -188,7 +189,7 @@ module.exports = {
         }
       },
       deployment: {
-        apiVersion: "apps/v1beta",
+        apiVersion: "apps/v1beta1",
         kind: "Deployment",
         metadata: {
           name: "heapster",
@@ -264,7 +265,7 @@ module.exports = {
     },
     "influxdb.data": {
       statefulSet: {
-        apiVersion: "apps/v1beta",
+        apiVersion: "apps/v1beta1",
         kind: "StatefulSet",
         metadata: {
           name: "influxdb",
@@ -316,26 +317,26 @@ module.exports = {
                   ]
                 }
               ]
-            },
-            volumeClaimTemplates: [
-              {
-                metadata: {
-                  name: "influx-data",
-                  namespace: "data"
-                },
-                spec: {
-                  accessModes: [
-                    "ReadWriteOnce"
-                  ],
-                  resources: {
-                    requests: {
-                      storage: "20Gi"
-                    }
+            }
+          },
+          volumeClaimTemplates: [
+            {
+              metadata: {
+                name: "influx-data",
+                namespace: "data"
+              },
+              spec: {
+                accessModes: [
+                  "ReadWriteOnce"
+                ],
+                resources: {
+                  requests: {
+                    storage: "20Gi"
                   }
                 }
               }
-            ]
-          }
+            }
+          ]
         }
       },
       fqn: "influxdb.data",
@@ -399,7 +400,7 @@ module.exports = {
     },
     "kapacitor.data": {
       statefulSet: {
-        apiVersion: "apps/v1beta",
+        apiVersion: "apps/v1beta1",
         kind: "StatefulSet",
         metadata: {
           name: "kapacitor",
@@ -451,26 +452,26 @@ module.exports = {
                   ]
                 }
               ]
-            },
-            volumeClaimTemplates: [
-              {
-                metadata: {
-                  name: "kapacitor-data",
-                  namespace: "data"
-                },
-                spec: {
-                  accessModes: [
-                    "ReadWriteOnce"
-                  ],
-                  resources: {
-                    requests: {
-                      storage: "10Gi"
-                    }
+            }
+          },
+          volumeClaimTemplates: [
+            {
+              metadata: {
+                name: "kapacitor-data",
+                namespace: "data"
+              },
+              spec: {
+                accessModes: [
+                  "ReadWriteOnce"
+                ],
+                resources: {
+                  requests: {
+                    storage: "10Gi"
                   }
                 }
               }
-            ]
-          }
+            }
+          ]
         }
       },
       fqn: "kapacitor.data",
@@ -505,30 +506,6 @@ module.exports = {
             },
             clusterIP: "None"
           }
-        },
-        {
-          apiVersion: "v1",
-          kind: "Service",
-          metadata: {
-            labels: {
-              app: "kapacitor"
-            },
-            name: "kapacitor",
-            namespace: "data"
-          },
-          spec: {
-            ports: [
-              {
-                name: "http",
-                port: 9092,
-                protocol: "TCP",
-                targetPort: 9092
-              }
-            ],
-            selector: {
-              app: "kapacitor"
-            }
-          }
         }
       ]
     },
@@ -543,7 +520,7 @@ module.exports = {
         small: "+0"
       },
       deployment: {
-        apiVersion: "apps/v1beta",
+        apiVersion: "apps/v1beta1",
         kind: "Deployment",
         metadata: {
           name: "proxy",
@@ -590,10 +567,6 @@ module.exports = {
                     {
                       mountPath: "/etc/nginx",
                       name: "config-files"
-                    },
-                    {
-                      mountPath: "/etc/nginx/cache",
-                      name: "nginx-cache"
                     }
                   ]
                 }
@@ -616,23 +589,7 @@ module.exports = {
                   }
                 }
               ]
-            },
-            volumeClaimTemplates: [
-              {
-                metadata: {
-                  name: "nginx-cache",
-                  namespace: "infra"
-                },
-                spec: {
-                  accessModes: [ "ReadWriteOnce" ],
-                  resources: {
-                    requests: {
-                      storage: "20Gi"
-                    }
-                  }
-                }
-              }
-            ]
+            }
           }
         }
       },

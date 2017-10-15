@@ -14,11 +14,11 @@ function ensurePath(fullPath) {
   }
 }
 
-function transfigure (source, target) {
-  return cluster.getClusterConfig(source)
+function transfigure (source, options = {}) {
+  return cluster.getClusterConfig(source, options)
     .then(config => {
-      if(target) {
-        return write(target, config)
+      if(options.output) {
+        return write(options.output, config)
       } else {
         return config
       }

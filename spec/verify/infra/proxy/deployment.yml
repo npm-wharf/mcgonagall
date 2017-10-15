@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   namespace: infra
@@ -32,8 +32,6 @@ spec:
           volumeMounts:
             - name: config-files
               mountPath: /etc/nginx
-            - name: nginx-cache
-              mountPath: /etc/nginx/cache
       volumes:
         - name: config-files
           configMap:
@@ -43,13 +41,3 @@ spec:
                 path: nginx.conf
               - key: mime.types
                 path: mime.types
-    volumeClaimTemplates:
-      - metadata:
-          name: nginx-cache
-          namespace: infra
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 20Gi

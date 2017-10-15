@@ -13,10 +13,6 @@ loadbalance = true
 
 [mounts]
   config-files = "/etc/nginx"
-  nginx-cache = "/etc/nginx/cache"
 
 [volumes]
   config-files = "nginx-files::nginx.conf,mime.types"
-
-[storage]
-  nginx-cache = "20Gi:exclusive"

@@ -61,7 +61,7 @@ function loadClusterFile (fullPath) {
   }
 }
 
-function getClusterConfig (fullPath) {
+function getClusterConfig (fullPath, options) {
   let wait = Promise.resolve(true)
   if (path.extname(fullPath) === '.tgz') {
     fullPath = path.dirname(fullPath)
@@ -70,7 +70,7 @@ function getClusterConfig (fullPath) {
   return wait
     .then( () => loadClusterFile(fullPath) )
     .then( config => {
-      const cluster = processConfig(config)
+      const cluster = processConfig(config, options)
       return processDefinitions(fullPath, cluster)
         .then(services => {
           const keys = Object.keys(services)
@@ -101,12 +101,13 @@ function getNginxServerConfig (cluster) {
   }, []).join('\n\n')
 }
 
-function processConfig (config) {
+function processConfig (config, options = {}) {
   const cluster = {
     namespaces: [],
     services: {},
     order: {},
     levels: new Set(),
+    apiVersion: options.version || '1.7',
     configuration: []
   }
 
@@ -148,7 +149,7 @@ function processDefinitions (fullPath, cluster) {
     .then(files => {
       return files.reduce((acc, file) => {
         if (!/cluster[.]toml/.test(file)) {
-          const definition = service.parseTOMLFile(file, addConfigFile.bind(null, cluster))
+          const definition = service.parseTOMLFile(cluster.apiVersion, file, addConfigFile.bind(null, cluster))
           acc[definition.fqn] = definition
         }
         return acc

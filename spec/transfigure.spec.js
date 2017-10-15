@@ -5,7 +5,7 @@ const path = require('path')
 const hasher = require('folder-hash')
 const jsdiff = require('diff')
 const rimraf = require('rimraf') //behold i am become rimraf destroyer of files
-const colors = require('colors')
+const chalk = require('chalk')
 const index = require('../src/index')
 
 const clusterSpecification = require('./clusterSpecification')
@@ -29,7 +29,7 @@ describe('Transfiguration', function () {
         })
     })
     it('should output files', function () {
-      return index.transfigure('./spec/source', './spec/target')
+      return index.transfigure('./spec/source', { output: './spec/target' })
         .then(cluster => {
 
           const json1 = fs.readFileSync('./spec/verify/cluster.json', 'utf8')
@@ -47,9 +47,9 @@ describe('Transfiguration', function () {
               var color = part.added ? 'green' :
                 part.removed ? 'red' : 'grey';
               if (part.value !== '\n') {
-                console.log(part.value[color])
+                console.log(chalk[color](part.value))
               } else {
-                console.log('newline'[color])
+                console.log(chalk[color]('newline'))
               }
             });
           }

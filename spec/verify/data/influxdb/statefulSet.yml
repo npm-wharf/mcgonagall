@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta
+apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   namespace: data
@@ -32,13 +32,13 @@ spec:
           volumeMounts:
             - name: influx-data
               mountPath: /var/lib/influxdb
-    volumeClaimTemplates:
-      - metadata:
-          name: influx-data
-          namespace: data
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 20Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: influx-data
+        namespace: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi

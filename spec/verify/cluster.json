@@ -22,6 +22,7 @@
     1,
     2
   ],
+  "apiVersion": "1.7",
   "configuration": [
     {
       "apiVersion": "v1",

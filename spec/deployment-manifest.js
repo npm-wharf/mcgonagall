@@ -30,7 +30,7 @@ module.exports = {
     ]
   },
   deployment: {
-    apiVersion: 'apps/v1beta',
+    apiVersion: 'apps/v1beta1',
     kind: 'Deployment',
     metadata: {
       namespace: 'data',
