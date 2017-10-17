@@ -257,22 +257,41 @@ function parseStorage (expression) {
 }
 
 function parseVolume (name, expression) {
-  const [mapName,mappings] = expression.split('::')
-  const items = mappings.split(',').map(i => {
-    const set = {
-      key: i,
-      path: i
+  if (/::/.test(expression)) {
+    const [mapName,mappings] = expression.split('::')
+    if (mapName === 'secret') {
+      return {
+        name: name,
+        secret: {
+          secretName: mappings
+        }
+      }
+    } else {
+      const items = mappings.split(',').map(i => {
+        const set = {
+          key: i,
+          path: i
+        }
+        if (/=/.test(i)) {
+          [ set.key, set.path ] = i.split('=')
+        }
+        return set
+      })
+      return {
+        name: name,
+        configMap: {
+          name: mapName,
+          items: items
+        }
+      }
     }
-    if (/=/.test(i)) {
-      [ set.key, set.path ] = i.split('=')
-    }
-    return set
-  })
-  return {
-    name: name,
-    configMap: {
-      name: mapName,
-      items: items
+  } else {
+    return {
+      name: name,
+      hostPath: {
+        path: expression,
+        type: 'Directory'
+      }
     }
   }
 }

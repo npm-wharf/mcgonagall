@@ -13,6 +13,15 @@ loadbalance = true
 
 [mounts]
   config-files = "/etc/nginx"
+  cert-files = "/etc/nginx/cert"
 
 [volumes]
   config-files = "nginx-files::nginx.conf,mime.types"
+  cert-files = "secret::ssl"
+
+[deployment]
+  unavailable = 1
+  surge = "100%"
+  deadline = 30
+  ready = 10
+  history = 2

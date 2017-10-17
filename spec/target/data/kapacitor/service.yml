@@ -1,0 +1,16 @@
+- apiVersion: v1
+  kind: Service
+  metadata:
+    namespace: data
+    name: kapacitor
+    labels:
+      app: kapacitor
+  spec:
+    selector:
+      app: kapacitor
+    ports:
+      - name: http
+        port: 9092
+        targetPort: 9092
+        protocol: TCP
+    clusterIP: None

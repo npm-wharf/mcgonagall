@@ -1,0 +1,32 @@
+name = "create-cert.infra"
+image = "arobson/alpine-util:latest"
+command = "/etc/create-cert/create-cert.sh"
+job = true
+
+[scale]
+  containers = 1
+  ram = "> 50 Mi < 200 Mi"
+  cpu = "> 10% < 20%"
+
+[env]
+  DOMAINS = "*.test.com"
+  EMAIL = "me@test.com"
+  NAMESPACE = "infra"
+  SECRET = "ssl"
+  COUNTRY = "US"
+  STATE = "Tennessee"
+  LOCAL = "Murfreesboro"
+  ORGANIZATION = "OSS"
+  UNIT = "Software"
+  FQN = "*.test.com"
+
+[deployment]
+  history = 2
+  backoff = 4
+  timelime = 600
+
+[mounts]
+  files = "/etc/create-cert"
+
+[volumes]
+  files = "self-sign-files::create-cert.sh,secret-template.json"

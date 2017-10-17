@@ -5,6 +5,10 @@
     medium = "+1"
     large = "+2"
 
+
+[infra.create-cert]
+  order = 0
+
 [data.chronograf]
   order = 1
   [data.chronograf.scale]

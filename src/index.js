@@ -41,11 +41,17 @@ function write(target, config) {
         case 'account':
           writeAccount(target, namespace, name, definition[type])
           break;
+        case 'cronJob':
+          writeCronJob(target, namespace, name, definition[type])
+          break;
         case 'daemonSet':
           writeDaemonSet(target, namespace, name, definition[type])
           break;
         case 'deployment':
           writeDeployment(target, namespace, name, definition[type])
+          break;
+        case 'job':
+          writeJob(target, namespace, name, definition[type])
           break;
         case 'nginxBlock':
           writeNginx(target, namespace, name, definition[type])
@@ -86,6 +92,27 @@ function writeCluster (target, definition) {
   }
 }
 
+function writeConfigFile (taget, namespace, fileName, file) {
+  const fullPath = path.join(target, namespace, name, fileName)
+  try {
+    ensurePath(fullPath)
+    fs.writeFileSync(fullPath, file, 'utf8')
+  } catch (e) {
+    throw new Error(`Failed to write configuration file to ${fullPath} because: ${e.message}`)
+  }
+}
+
+function writeCronJob (target, namespace, name, definition) {
+  const fullPath = path.join(target, namespace, name, 'cronJob.yml')
+  const yml = yaml.safeDump(definition)
+  try {
+    ensurePath(fullPath)
+    fs.writeFileSync(fullPath, yml, 'utf8')
+  } catch (e) {
+    throw new Error(`Failed to write cron job to ${fullPath} because: ${e.message}`)
+  }
+}
+
 function writeDaemonSet (target, namespace, name, definition) {
   const fullPath = path.join(target, namespace, name, 'daemonSet.yml')
   const yml = yaml.safeDump(definition)
@@ -108,13 +135,14 @@ function writeDeployment (target, namespace, name, definition) {
   }
 }
 
-function writeConfigFile (taget, namespace, fileName, file) {
-  const fullPath = path.join(target, namespace, name, fileName)
+function writeJob (target, namespace, name, definition) {
+  const fullPath = path.join(target, namespace, name, 'job.yml')
+  const yml = yaml.safeDump(definition)
   try {
     ensurePath(fullPath)
-    fs.writeFileSync(fullPath, file, 'utf8')
+    fs.writeFileSync(fullPath, yml, 'utf8')
   } catch (e) {
-    throw new Error(`Failed to write configuration file to ${fullPath} because: ${e.message}`)
+    throw new Error(`Failed to write job to ${fullPath} because: ${e.message}`)
   }
 }
 

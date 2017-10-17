@@ -68,13 +68,13 @@ describe('Transfiguration', function () {
     })
 
     after(function (done) {
-      rimraf('./spec/target', (ohnoes) => {
-        if(ohnoes) {
-          console.log('McGonagall frowns and offers you a biscuit all the same.', ohnoes)
-        }
-        done()
-      })
-      // done()
+      // rimraf('./spec/target', (ohnoes) => {
+      //   if(ohnoes) {
+      //     console.log('McGonagall frowns and offers you a biscuit all the same.', ohnoes)
+      //   }
+      //   done()
+      // })
+      done()
     })
   })
 })

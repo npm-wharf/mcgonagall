@@ -15,7 +15,7 @@ describe('Expression Parser', function () {
     })
   })
 
-  it('should parse command', function() {
+  it('should parse command', function () {
     expressionParser.parseCommand(
       'testCommand --arg1=one --arg2 2 --arg3 /file/path'
     )
@@ -28,6 +28,49 @@ describe('Expression Parser', function () {
         '--arg3',
         '/file/path'
       ]
+    })
+  })
+
+  describe('volume parser', function () {
+    it('should parse config maps', function () {
+      expressionParser.parseVolume('vol-name', 'test::file1.txt,file2.txt')
+        .should.eql({
+          name: 'vol-name',
+          configMap: {
+            name: 'test',
+            items: [
+              {
+                key: 'file1.txt',
+                path: 'file1.txt'
+              },
+              {
+                key: 'file2.txt',
+                path: 'file2.txt'
+              }
+            ]
+          }
+        })
+    })
+
+    it('should parse secret', function () {
+      expressionParser.parseVolume('vol-name', 'secret::my-secret')
+        .should.eql({
+          name: 'vol-name',
+          secret: {
+            secretName: 'my-secret'
+          }
+        })
+    })
+
+    it('should parse host path', function () {
+      expressionParser.parseVolume('vol-name', '/a/path/to/thing')
+        .should.eql({
+          name: 'vol-name',
+          hostPath: {
+            path: '/a/path/to/thing',
+            type: 'Directory'
+          }
+        })
     })
   })
 

@@ -6,6 +6,13 @@ module.exports = {
     '1.7': 'v1',
     '1.8': 'v1'
   },
+  cronjob: {
+    '1.4': 'batch/v2alpha1',
+    '1.5': 'batch/v2alpha1',
+    '1.6': 'batch/v2alpha1',
+    '1.7': 'batch/v2alpha1',
+    '1.8': 'batch/v1beta1'
+  },
   daemonSet: {
     '1.4': 'apps/v1beta1',
     '1.5': 'apps/v1beta1',
@@ -19,6 +26,13 @@ module.exports = {
     '1.6': 'apps/v1beta1',
     '1.7': 'apps/v1beta1',
     '1.8': 'apps/v1beta2'
+  },
+  job: {
+    '1.4': 'batch/v1',
+    '1.5': 'batch/v1',
+    '1.6': 'batch/v1',
+    '1.7': 'batch/v1',
+    '1.8': 'batch/v1'
   },
   role: {
     '1.4': 'rbac.authorization.k8s.io/v1beta1',

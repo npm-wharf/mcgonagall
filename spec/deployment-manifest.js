@@ -41,6 +41,12 @@ module.exports = {
     spec: {
       replicas: 2,
       revisionHistoryLimit: 1,
+      strategy: {
+        rollingUpdate: {
+          maxUnavailable: 1,
+          maxSurge: 1
+        }
+      },
       template: {
         metadata: {
           labels: {
@@ -168,8 +174,8 @@ module.exports = {
       root      /usr/shar/nginx/html;
 
       ssl on;
-      ssl_certificate       "/etc/nginx/cert.pem";
-      ssl_certificate_key   "/etc/nginx/cert.pem";
+      ssl_certificate       "/etc/nginx/cert/cert.pem";
+      ssl_certificate_key   "/etc/nginx/cert/cert.pem";
 
       ssl_session_cache shared:SSL:1m;
       ssl_session_timeout 10m;

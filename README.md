@@ -208,18 +208,27 @@ The following demonstrates how all the sections would work together. Well over 2
 name = "app-name.namespace"
 stateful = true
 daemon = false
+job = false
 serviceAlias = "my-app"
 image = "docker-repo/docker-image:latest"
 command = "ash -exc node index.js"
 metadata = "owner=npm;branch=master"
 subdomain = "app-name"
 port = 8080
-historyLimit = 1
 
 [scale]
   containers = 2
   ram = "> 500Mi < 1Gi"
   cpu = "> 50% < 100%"
+
+[deployment]
+  unavailable=1
+  surge=100%
+  deadline=15
+  ready=10
+  history=1
+  restart = "Always|Never|OnFailure"
+  backOff = 6
 
 [env]
   ONE = "http://test:8080"
@@ -259,6 +268,7 @@ Top level properties describe the name, type of service and Docker image that wi
  * `metadata` - optional metadata to tag the service with, important for CD
  * `labelMetadata` - optional, nested label metadata for the specification (part of Kubernetes convention)
  * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress.
+ 
 
 #### name
 
@@ -362,6 +372,12 @@ Similar to the flat file approach, use the mount name as the key and the path on
   host-mount = "/tmp/ohno"
 ```
 
+#### Secrets as Volumes
+
+Works similarly to flat files except instead of a config map name, use the keyword `secret` followed by the name of the secret:
+
+`name-of-the-mount = "secret::secret-name"`
+
 ### [storage]
 
 The storage block enumerates persistent storage requirements for services that have specified `stateful = true`.
@@ -416,6 +432,86 @@ The example below demonstrates how to create a `heapster` account and assign it 
   account = "heapster"
   role = "ClusterRole;system:heapster"
 ```
+
+### [deployment]
+
+The deployment section is a set of optional settings that control how Kubernetes will handle deployment and rolling-upgrades of the resource. Some of the options will depend on the kind of resource you intend to deploy.
+
+> Note: please be sure you're familiar with the Kubernetes documentation before using or changing settings. It's a bad idea to fiddle with values to "see what will happen".
+
+```toml
+[deployment]
+  pull = "IfNotAvailable"
+  unavailable=1
+  surge="100%"
+  deadline=15
+  ready=10
+  history=1
+  restart = "Always|Never|OnFailure"
+  backoff = 6
+  timeLimit = 0
+  completions = 1
+  schedule = "1 * * * *"
+```
+ 
+ * `pull` - controls when the image is pulled, defaults to `IfNotAvailable`
+ * `unavailable` - limit how few pods must be in a ready state when performing a rolling upgrade (either whole number or percentage). Default is 1.
+ * `surge` - limit how many pods can be in existence over the replicas count (either whole number or percentage). Default is 1.
+ * `deadline` - how many seconds Kubernetes should wait before reporting the initial creation/upgrade as Progress Failed.
+ * `ready` - how many seconds pods must be up without failing to report a create/rolling upgrade as Ready True
+ * `history` - how many old versions to keep available for roll backs (default is 1)
+ * `restart` - default depends on type of resource.
+    * Default is `Always` for statefulSets, daemonSets and deployments
+    * Default is `OnFailure` for jobs and cronJobs
+ * `backoff` - used for jobs to control exponential backoff, default is 6
+ * `timeLimit` - the number of seconds a job has to complete (including retries) before being marked as DeadlineExceeded.
+ * `completions` - the number of jobs that should complete to consider the job done (defaults to 1)
+
+The following table provides a reference for which properties are valid for which kinds of resource:
+
+|   | Deployment  | StatefulSet | DaemonSet | Job/Cron Job |
+|--:|:-:|:-:|:-:|:-:|
+| `pull` | √ | √ | √ | √ |
+| `unavailable` | √ | √ |   |   |
+| `surge` | √ | √ |   |   |
+| `deadline` | √ | √ |   | √ |
+| `ready` | √ | √ |   |   |
+| `history` | √ | √ | √ |   |
+| `restart` |   |   |   | √ |
+| `backoff` |   |   |   | √ |
+| `timeLimit` |   |   |   | √ |
+| `completions` |   |   |   | √ |
+| `schedule` |   |   |   | √ |
+
+## Cron Job Specifications
+
+Those familiar with Cron Job specifications and the concurrency policy may be wondering how to set that.
+
+Setting `scale.containers` > 0 is the same as `Allow` which will allow Cron Jobs that have unfinished to continue running thus resulting in overlap of the containers.
+
+Setting `dployment.completions` to 1 is the same as `Forbid` meaning that if a scheduled job hasn't completed yet, the next one will be skipped.
+
+Otherwise, the default will be `Replace` which will cancel the currently running job and start a new one.
+
+### Schedule Format
+
+The schedule string takes 5 positional arguments that look like:
+
+```"* * * * *"```
+
+From left to right, these arguments are:
+
+ 1. minute (0-59)
+ 1. hour (0-23)
+ 1. day of month (1-31)
+ 1. month (1-12)
+ 1. day of the week (0-6, Sunday=0)
+
+Examples:
+
+ * `* 20 * * 1-5` - every weekday at 8 PM
+ * `* 1,4 * * * 0,5` - at 1am and 4am on Friday and Sunday
+ * `* 0 1,15 * *` - midnight on the 1st and 15th of every month
 
 [travis-url]: https://travis-ci.com/npm/mcgonagall
 [travis-image]: https://travis-ci.com/npm/mcgonagall.svg?token=nx7pjhpjyWEn4WyoMujZ&branch=master

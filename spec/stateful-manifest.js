@@ -15,6 +15,12 @@ module.exports = {
       serviceName: 'datums',
       replicas: 2,
       revisionHistoryLimit: 1,
+      upgradeStrategy: {
+        rollingUpdate: {
+          maxUnavailable: 1,
+          maxSurge: 1
+        }
+      },
       template: {
         metadata: {
           labels: {

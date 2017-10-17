@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: infra
+  name: create-cert
+spec:
+  autoSelector: true
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      labels:
+        app: create-cert
+    spec:
+      containers:
+        - name: create-cert
+          image: 'arobson/alpine-util:latest'
+          env:
+            - name: DOMAINS
+              value: '*.test.com'
+            - name: EMAIL
+              value: me@test.com
+            - name: NAMESPACE
+              value: infra
+            - name: SECRET
+              value: ssl
+            - name: COUNTRY
+              value: US
+            - name: STATE
+              value: Tennessee
+            - name: LOCAL
+              value: Murfreesboro
+            - name: ORGANIZATION
+              value: OSS
+            - name: UNIT
+              value: Software
+            - name: FQN
+              value: '*.test.com'
+          ports: []
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 0.1
+            limits:
+              memory: 200Mi
+              cpu: 0.2
+          command:
+            - /etc/create-cert/create-cert.sh
+          volumeMounts:
+            - name: files
+              mountPath: /etc/create-cert
+      restartPolicy: Never
+      backoffLimit: 4
+      volumes:
+        - name: files
+          configMap:
+            name: self-sign-files
+            items:
+              - key: create-cert.sh
+                path: create-cert.sh
+              - key: secret-template.json
+                path: secret-template.json

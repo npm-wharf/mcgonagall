@@ -10,8 +10,12 @@ const DATE_TAG = '[object Date]'
 const NUMBER_TAG = '[object Number]'
 const STRING_TAG = '[object String]'
 const NOT_AN_OBJECT = ''
-
 const API_VERSION_MAP = require('./apiVersionMap')
+const DEPLOYMENT_DEFAULTS = {
+  unavailable: 1,
+  surge: 1,
+  history: 1
+}
 
 function buildService (config) {
   const result = validation.validateConfig(config)
@@ -33,7 +37,11 @@ function buildService (config) {
     Object.assign(definition, service)
   }
 
-  if (config.stateful) {
+  if (config.job) {
+    let job = config.deployment.schedule ?
+      getCronJob(config) : getJob(config)
+    Object.assign(definition, job)
+  } else if (config.stateful) {
     const set = getStatefulSet(config)
     Object.assign(definition, set)
   } else if (config.daemon) {
@@ -69,8 +77,8 @@ function buildNginxBlock (config) {
       root      /usr/shar/nginx/html;
 
       ssl on;
-      ssl_certificate       "/etc/nginx/cert.pem";
-      ssl_certificate_key   "/etc/nginx/cert.pem";
+      ssl_certificate       "/etc/nginx/cert/cert.pem";
+      ssl_certificate_key   "/etc/nginx/cert/cert.pem";
 
       ssl_session_cache shared:SSL:1m;
       ssl_session_timeout 10m;
@@ -172,6 +180,10 @@ function getContainer (config) {
     Object.assign(container, command)
   }
 
+  if (config.pull) {
+    container.imagePullPolicy = config.deployment.pull
+  }
+
   if (config.probes) {
     if (config.probes.ready) {
       container.readinessProbe = expressionParser.parseProbe(config.probes.ready)
@@ -195,6 +207,60 @@ function getContainer (config) {
   return container
 }
 
+function getCronJob (config) {
+  const container = getContainer(config)
+  const volumes = getVolumes(config)
+  const volumeClaims = getVolumeClaims(config)
+  const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
+  let concurrency
+  if (config.scale && config.scale.containers) {
+    concurrency = 'Allow'
+  } else if (completions === 1) {
+    concurrency = 'Forbid'
+  } else {
+    concurrency = 'Replace'
+  }
+  const definition = {
+    cronJob: {
+      apiVersion: getApiVersion(config, 'cronjob'),
+      kind: 'CronJob',
+      metadata: {
+        namespace: config.namespace,
+        name: config.name
+      },
+      spec: {
+        successfulJobsHistoryLimit: config.deployment.history || 1,
+        failedJobsHistoryLimit: config.deployment.history || 1,
+        concurrencyPolicy: concurrency,
+        template: {
+          metadata: {
+            labels: {
+              app: config.name
+            }
+          },
+          spec: {
+            containers: [ container ],
+            restartPolicy: config.deployment.restart || 'Never',
+            backoffLimit: config.deployment.backoff || 6,
+            volumes: volumes
+          }
+        },
+        volumeClaimTemplates: volumeClaims
+      }
+    }
+  }
+  if (config.deployment.timeLimit) {
+    definition.cronJob.spec.startingDeadlineSeconds = config.deployment.timeLimit
+  }
+
+  const labels = expressionParser.parseMetadata(config.labels || '') || {}
+  if (Object.keys(labels).length) {
+    Object.assign(definition.cronJob.spec.template.metadata.labels, labels)
+  }
+  Object.assign(definition.cronJob.metadata, metadata || {})
+  return definition
+}
+
 function getDaemonSet (config) {
   const container = getContainer(config)
   const volumes = getVolumes(config)
@@ -210,7 +276,7 @@ function getDaemonSet (config) {
       },
       spec: {
         replicas: config.scale.containers,
-        revisionHistoryLimit: config.historyLimit || 1,
+        revisionHistoryLimit: config.deployment.history,
         template: {
           metadata: {
             labels: {
@@ -226,6 +292,7 @@ function getDaemonSet (config) {
       }
     }
   }
+
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
     Object.assign(definition.daemonSet.spec.template.metadata.labels, labels)
@@ -249,7 +316,13 @@ function getDeployment (config) {
       },
       spec: {
         replicas: config.scale.containers,
-        revisionHistoryLimit: config.historyLimit || 1,
+        revisionHistoryLimit: config.deployment.history,
+        strategy: {
+          rollingUpdate: {
+            maxUnavailable: config.deployment.unavailable,
+            maxSurge: config.deployment.surge
+          }
+        },
         template: {
           metadata: {
             labels: {
@@ -265,11 +338,68 @@ function getDeployment (config) {
       }
     }
   }
+
+  if (config.deployment.deadline) {
+    definition.deployment.spec.progressDeadlineSeconds = config.deployment.deadline
+  }
+  if (config.deployment.ready) {
+    definition.deployment.spec.minReadySeconds = config.deployment.ready
+  }
+
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
     Object.assign(definition.deployment.spec.template.metadata.labels, labels)
   }
   Object.assign(definition.deployment.metadata, metadata || {})
+  return definition
+}
+
+function getJob (config) {
+  const container = getContainer(config)
+  const volumes = getVolumes(config)
+  const volumeClaims = getVolumeClaims(config)
+  const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
+  const definition = {
+    job: {
+      apiVersion: getApiVersion(config, 'job'),
+      kind: 'Job',
+      metadata: {
+        namespace: config.namespace,
+        name: config.name
+      },
+      spec: {
+        autoSelector: true,
+        successfulJobsHistoryLimit: config.deployment.history || 1,
+        failedJobsHistoryLimit: config.deployment.history || 1,
+        parallelism: config.scale.containers,
+        completions: config.deployment.completions || config.scale.containers,
+        template: {
+          metadata: {
+            labels: {
+              app: config.name
+            }
+          },
+          spec: {
+            containers: [ container ],
+            restartPolicy: config.deployment.restart || 'Never',
+            backoffLimit: config.deployment.backoff || 6,
+            volumes: volumes
+          }
+        },
+        volumeClaimTemplates: volumeClaims
+      }
+    }
+  }
+
+  if (config.deployment.timeLimit) {
+    definition.job.spec.activeDeadlineSeconds = config.deployment.timeLimit
+  }
+
+  const labels = expressionParser.parseMetadata(config.labels || '') || {}
+  if (Object.keys(labels).length) {
+    Object.assign(definition.job.spec.template.metadata.labels, labels)
+  }
+  Object.assign(definition.job.metadata, metadata || {})
   return definition
 }
 
@@ -386,7 +516,13 @@ function getStatefulSet (config) {
       spec: {
         serviceName: config.serviceAlias,
         replicas: config.scale.containers,
-        revisionHistoryLimit: config.historyLimit || 1,
+        revisionHistoryLimit: config.deployment.history || 1,
+        upgradeStrategy: {
+          rollingUpdate: {
+            maxUnavailable: config.deployment.unavailable,
+            maxSurge: config.deployment.surge
+          }
+        },
         template: {
           metadata: {
             labels: {
@@ -402,6 +538,14 @@ function getStatefulSet (config) {
       }
     }
   }
+
+  if (config.deployment.deadline) {
+    definition.statefulSet.spec.progressDeadlineSeconds = config.deployment.deadline
+  }
+  if (config.deployment.ready) {
+    definition.statefulSet.spec.minReadySeconds = config.deployment.ready
+  }
+
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
     Object.assign(definition.statefulSet.spec.template.metadata.labels, labels)
@@ -449,10 +593,6 @@ function isObject (value) {
   return value != null && (type === 'object' || type === 'function')
 }
 
-function parse(toml) {
-  const config = toml.parse(raw)
-}
-
 function parseTOMLFile (apiVersion, filePath, addConfigFile) {
   const fullPath = path.resolve(filePath)
   try {
@@ -470,6 +610,10 @@ function parseTOMLContent (apiVersion, raw, addConfigFile) {
   if (addConfigFile) {
     config.addConfigFile = addConfigFile
   }
+  if (!config.deployment) {
+    config.deployment = {}
+  }
+  config.deployment = Object.assign({}, DEPLOYMENT_DEFAULTS, config.deployment)
   return omitEmptyKeys(buildService(config))
 }
 

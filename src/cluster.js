@@ -119,6 +119,7 @@ function processConfig (config, options = {}) {
     }
   })
   cluster.levels = Array.from(cluster.levels)
+  cluster.levels.sort()
   cluster.configuration = processConfigMaps(config.configuration || {})
   return cluster
 }

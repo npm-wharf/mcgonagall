@@ -17,18 +17,31 @@ module.exports = {
         'mime.types': MIME_TYPES,
         'nginx.conf': NGINX_CONF
       }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "self-sign-files",
+        "namespace": "infra"
+      },
+      "data": {
+        "create-cert.sh": "#!/bin/ash\n\nopenssl req -x509 \\\n  -nodes \\\n  -days 365 \\\n  -newkey rsa:2048 \\\n  -keyout ./self-signed.key \\\n  -out ./self-signed.crt \\\n  -subj \"/C=$COUNTRY/ST=$STATE/L=$LOCAL/O=$ORGANIZATION/OU=$UNIT/CN=$FQN/emailAddress=$EMAIL\"\n\ncat ./self-signed.crt ./self-signed.key > ./self-signed.pem\n\ncat ./secret-template.json | \\\n\tsed \"s/NAMESPACE/${NAMESPACE}/\" | \\\n\tsed \"s/NAME/${SECRET}/\" | \\\n\tsed \"s/TLSCERT/$(cat ./self-signed.crt | base64 | tr -d '\\n')/\" | \\\n\tsed \"s/TLSKEY/$(cat ./self-signed.key |  base64 | tr -d '\\n')/\" | \\\n\tsed \"s/TLSPEM/$(cat ./self-signed.pem |  base64 | tr -d '\\n')/\" \\\n\t> ./secret.json\n\n# /var/run/secrets/kubernetes.io/serviceaccount/token\ncurl -v --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \\\n  -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\" \\\n  -H \"Accept: application/json, */*\" \\\n  -H \"Content-Type: application/json\" \\\n  -k -v -X POST \\\n  -d @./secret.json \\\n  https://kubernetes/api/v1/namespaces/${NAMESPACE}/secrets/${SECRET}\n",
+        "secret-template.json": "{\n    \"kind\": \"Secret\",\n    \"apiVersion\": \"v1\",\n    \"metadata\": {\n        \"name\": \"NAME\",\n        \"namespace\": \"NAMESPACE\"\n    },\n    \"data\": {\n       \"cert.crt\": \"TLSCERT\",\n       \"cert.key\": \"TLSKEY\",\n       \"cert.pem\": \"TLSPEM\"\n    },\n    \"type\": \"Opaque\"\n}\n"
+      }
     }
   ],
   apiVersion: '1.7',
   levels: [0, 1, 2],
   namespaces: [
     "kube-system",
-    "data",
     "infra",
+    "data"
   ],
   order: {
     0: [
-      "heapster.kube-system"
+      "heapster.kube-system",
+      "create-cert.infra"
     ],
     1: [
       "chronograf.data",
@@ -51,6 +64,12 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
+          upgradeStrategy: {
+            rollingUpdate: {
+              maxUnavailable: 1,
+              maxSurge: 1
+            }
+          },
           serviceName: "chrono",
           template: {
             metadata: {
@@ -198,6 +217,12 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
+          strategy: {
+            rollingUpdate: {
+              maxUnavailable: 1,
+              maxSurge: 1
+            }
+          },
           template: {
             metadata: {
               labels: {
@@ -274,6 +299,12 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
+          upgradeStrategy: {
+            rollingUpdate: {
+              maxUnavailable: 1,
+              maxSurge: 1
+            }
+          },
           serviceName: "influx",
           template: {
             metadata: {
@@ -409,6 +440,12 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
+          upgradeStrategy: {
+            rollingUpdate: {
+              maxUnavailable: 1,
+              maxSurge: 1
+            }
+          },
           serviceName: "kapacitor",
           template: {
             metadata: {
@@ -509,6 +546,122 @@ module.exports = {
         }
       ]
     },
+    "create-cert.infra": {
+      "name": "create-cert",
+      "namespace": "infra",
+      "fqn": "create-cert.infra",
+      "order": 0,
+      "job": {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+          "name": "create-cert",
+          "namespace": "infra"
+        },
+        "spec": {
+          "autoSelector": true,
+          "completions": 1,
+          "failedJobsHistoryLimit": 2,
+          "parallelism": 1,
+          "successfulJobsHistoryLimit": 2,
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "create-cert"
+              }
+            },
+            "spec": {
+              "backoffLimit": 4,
+              "containers": [
+                {
+                  "command": [ "/etc/create-cert/create-cert.sh" ],
+                  "env": [
+                    {
+                      "name": "DOMAINS",
+                      "value": "*.test.com"
+                    },
+                    {
+                      "name": "EMAIL",
+                      "value": "me@test.com"
+                    },
+                    {
+                      "name": "NAMESPACE",
+                      "value": "infra"
+                    },
+                    {
+                      "name": "SECRET",
+                      "value": "ssl"
+                    },
+                    {
+                      "name": "COUNTRY",
+                      "value": "US"
+                    },
+                    {
+                      "name": "STATE",
+                      "value": "Tennessee"
+                    },
+                    {
+                      "name": "LOCAL",
+                      "value": "Murfreesboro"
+                    },
+                    {
+                      "name": "ORGANIZATION",
+                      "value": "OSS"
+                    },
+                    {
+                      "name": "UNIT",
+                      "value": "Software"
+                    },
+                    {
+                      "name": "FQN",
+                      "value": "*.test.com"
+                    }
+                  ],
+                  "image": "arobson/alpine-util:latest",
+                  "name": "create-cert",
+                  "ports": [],
+                  "resources": {
+                    "limits": {
+                      "cpu": 0.2,
+                      "memory": "200Mi"
+                    },
+                    "requests": {
+                      "cpu": 0.1,
+                      "memory": "50Mi"
+                    }
+                  },
+                  "volumeMounts": [
+                    {
+                      "mountPath": "/etc/create-cert",
+                      "name": "files"
+                    }
+                  ]
+                }
+              ],
+              "restartPolicy": "Never",
+              "volumes": [
+                {
+                  "configMap": {
+                    "items": [
+                      {
+                        "key": "create-cert.sh",
+                        "path": "create-cert.sh"
+                      },
+                      {
+                        "key": "secret-template.json",
+                        "path": "secret-template.json"
+                      }
+                    ],
+                    "name": "self-sign-files"
+                  },
+                  "name": "files"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
     "proxy.infra": {
       fqn: "proxy.infra",
       name: "proxy",
@@ -528,7 +681,15 @@ module.exports = {
         },
         spec: {
           replicas: 2,
-          revisionHistoryLimit: 1,
+          revisionHistoryLimit: 2,
+          minReadySeconds: 10,
+          progressDeadlineSeconds: 30,
+          strategy: {
+            rollingUpdate: {
+              maxUnavailable: 1,
+              maxSurge: "100%"
+            }
+          },
           template: {
             metadata: {
               labels: {
@@ -567,6 +728,10 @@ module.exports = {
                     {
                       mountPath: "/etc/nginx",
                       name: "config-files"
+                    },
+                    {
+                      mountPath: "/etc/nginx/cert",
+                      name: "cert-files"
                     }
                   ]
                 }
@@ -586,6 +751,12 @@ module.exports = {
                         path: "mime.types"
                       }
                     ]
+                  }
+                },
+                {
+                  name: "cert-files",
+                  secret: {
+                    secretName: "ssl"
                   }
                 }
               ]
