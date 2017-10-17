@@ -260,13 +260,20 @@ function parseVolume (name, expression) {
   if (/::/.test(expression)) {
     const [mapName,mappings] = expression.split('::')
     if (mapName === 'secret') {
-      return {
+      const set = {
         name: name,
         secret: {
           secretName: mappings
         }
       }
+      if (/:/.test(mappings)) {
+        let octal
+        [set.secret.secretName, octal] = mappings.split(':')
+        set.secret.defaultMode = parseInt(octal, 8)
+      }
+      return set
     } else {
+      let mode = 0
       const items = mappings.split(',').map(i => {
         const set = {
           key: i,
@@ -274,16 +281,36 @@ function parseVolume (name, expression) {
         }
         if (/=/.test(i)) {
           [ set.key, set.path ] = i.split('=')
+          if (/:/.test(set.path)) {
+            let octal
+            [set.path, octal] = set.path.split(':')
+            set.defaultMode = parseInt(octal, 8)
+            if(set.defaultMode > mode) {
+              mode = set.defaultMode
+            }
+          }
+        } else if (/:/.test(set.key)) {
+          let octal
+          [set.key, octal] = set.key.split(':')
+          set.path = set.key
+          set.defaultMode = parseInt(octal, 8)
+          if(set.defaultMode > mode) {
+            mode = set.defaultMode
+          }
         }
         return set
       })
-      return {
+      const configMap = {
         name: name,
         configMap: {
           name: mapName,
           items: items
         }
       }
+      if (mode !== 420 && mode > 0) {
+        configMap.configMap.defaultMode = mode
+      }
+      return configMap
     }
   } else {
     return {

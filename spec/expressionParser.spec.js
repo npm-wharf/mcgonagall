@@ -52,12 +52,46 @@ describe('Expression Parser', function () {
         })
     })
 
+    it('should parse config maps with permissions', function () {
+      expressionParser.parseVolume('vol-name', 'test::file1.txt=subdir/file.txt:0664,file2.txt:0400')
+        .should.eql({
+          name: 'vol-name',
+          configMap: {
+            name: 'test',
+            items: [
+              {
+                defaultMode: 436,
+                key: 'file1.txt',
+                path: 'subdir/file.txt'
+              },
+              {
+                defaultMode: 256,
+                key: 'file2.txt',
+                path: 'file2.txt'
+              }
+            ],
+            defaultMode: 436
+          }
+        })
+    })
+
     it('should parse secret', function () {
       expressionParser.parseVolume('vol-name', 'secret::my-secret')
         .should.eql({
           name: 'vol-name',
           secret: {
             secretName: 'my-secret'
+          }
+        })
+    })
+
+    it('should parse secret with permissions', function () {
+      expressionParser.parseVolume('vol-name', 'secret::my-secret:0400')
+        .should.eql({
+          name: 'vol-name',
+          secret: {
+            secretName: 'my-secret',
+            defaultMode: 256
           }
         })
     })

@@ -23,7 +23,6 @@ job = true
 [deployment]
   history = 2
   backoff = 4
-  timelime = 600
 
 [mounts]
   files = "/etc/create-cert"

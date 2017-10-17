@@ -352,12 +352,15 @@ In some rare cases, it might make sense to mount host paths to the container its
 
 The format for this should follow:
 
-`name-of-the-mount = "config-map-name::file-name-1.ext,file-name-2.ext,file-name-3.ext=relative/path/file-name-3.ext"`
+`name-of-the-mount = "config-map-name::file-name-1.ext:0644,file-name-2.ext,file-name-3.ext=relative/path/file-name-3.ext"`
 
  * the key is the name of the mount
  * the first value in string is an arbitrary, but unique name within the namespace to assign to this set of files
  * after the `::`, the list of files to be uploaded and mounted should be comma delimited
  * if the filename should be different in the container or needs to be in a path relative to the mount's location, provide that using an `=`
+ * if you need to control the access mode for the files, you can provide it in octal mode after a single `:`
+
+> Note: because of a quirk in how Kubernetes assigns the permissions, the most gracious permission mode provided (if multiple are) will be assigned to all files in the map
 
 #### Host Paths as Volumes
 
@@ -377,6 +380,8 @@ Similar to the flat file approach, use the mount name as the key and the path on
 Works similarly to flat files except instead of a config map name, use the keyword `secret` followed by the name of the secret:
 
 `name-of-the-mount = "secret::secret-name"`
+
+> Note: the same convention is used for controlling access modes here as with the flat-files
 
 ### [storage]
 
