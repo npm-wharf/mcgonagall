@@ -48,6 +48,13 @@ spec:
               cpu: 0.2
           command:
             - /etc/create-cert/create-cert.sh
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              - NET_ADMIN
+              - SYS_TIME
+            runAsUser: 1000
+            fsGroup: 1000
           volumeMounts:
             - name: files
               mountPath: /etc/create-cert

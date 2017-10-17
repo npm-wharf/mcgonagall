@@ -37,6 +37,11 @@ const unitConverters = {
   }
 }
 
+const contextMap = {
+  user: 'runAsUser',
+  group: 'fsGroup'
+}
+
 const unitList = Object.keys(unitConverters)
 
 function addResourceFromExpression (resources, expression) {
@@ -78,6 +83,10 @@ function getResourceAmount (resource, regex, set) {
   }
 }
 
+function parseArgs (expression) {
+  return { args: expression.split(' ') }
+}
+
 function parseCLIProbe (expression) {
   const list = expression.split(',')
   const probe = {
@@ -96,7 +105,7 @@ function parseCLIProbe (expression) {
 }
 
 function parseCommand (expression) {
-  return { command: expression.split(' ') }
+  return { command: expression.split(' ')}
 }
 
 function parseConfigBlock (name, block) {
@@ -128,6 +137,17 @@ function parseContainerPort (name, expression) {
     containerPort: port,
     protocol: (protocol || 'tcp').toUpperCase()
   }
+}
+
+function parseContext (expression) {
+  const sets = expression.split(';')
+  return sets.reduce((acc,set) => {
+    if (set) {
+      const [name, val] = set.split('=')
+      acc[contextMap[name.trim()]] = parseInt(val.trim())
+    }
+    return acc
+  }, {})
 }
 
 function parseCPU (expression, factors = { resources: {} }) {
@@ -325,8 +345,10 @@ function parseVolume (name, expression) {
 
 module.exports = {
   addResource: addResource,
+  parseArgs: parseArgs,
   parseCommand: parseCommand,
   parseContainer: parseContainer,
+  parseContext: parseContext,
   parseCPU: parseCPU,
   parseEnvironmentBlock: parseEnvironmentBlock,
   parseMetadata: parseMetadata,

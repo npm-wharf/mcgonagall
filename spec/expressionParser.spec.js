@@ -31,6 +31,15 @@ describe('Expression Parser', function () {
     })
   })
 
+  it('should parse security context', function () {
+    expressionParser.parseContext(
+      'group=2000;user=1000'
+    ).should.eql({
+      runAsUser: 1000,
+      fsGroup: 2000
+    })
+  })
+
   describe('volume parser', function () {
     it('should parse config maps', function () {
       expressionParser.parseVolume('vol-name', 'test::file1.txt,file2.txt')

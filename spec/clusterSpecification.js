@@ -630,6 +630,12 @@ module.exports = {
                       "memory": "50Mi"
                     }
                   },
+                  "securityContext": {
+                    "allowPrivilegeEscalation": true,
+                    "capabilities": [ "NET_ADMIN", "SYS_TIME" ],
+                    "runAsUser": 1000,
+                    "fsGroup": 1000
+                  },
                   "volumeMounts": [
                     {
                       "mountPath": "/etc/create-cert",

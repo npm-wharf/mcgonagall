@@ -430,12 +430,17 @@ The security section exists to address the new and growing feature set around ac
 
 The properties of `account` and `role` allow you to specify the account and role requirements for the service so that ServiceAccount, Role and RoleBinding resources will be created on your behalf where necessary.
 
+It also allows you to assign a `runAsUser`, `fsGroup` via the `context` property. `capabilities` can be listed out as well as turning on privilege escalation via the `escalation` flag when required. Use these behaviors with caution and make sure you understand the implications.
+
 The example below demonstrates how to create a `heapster` account and assign it to the `ClusterRole` feature:
 
 ```toml
 [security]
   account = "heapster"
   role = "ClusterRole;system:heapster"
+  context = "user=1000;group=1000"
+  capabilities = [ "NET_ADMIN", "SYS_TIME" ]
+  escalation = true
 ```
 
 ### [deployment]

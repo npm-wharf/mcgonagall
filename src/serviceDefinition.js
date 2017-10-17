@@ -58,10 +58,14 @@ function buildService (config) {
   }
 
   if (config.security) {
-    const account = getAccount(config)
-    const roleBinding = getRoleBinding(config)
-    Object.assign(definition, account)
-    Object.assign(definition, roleBinding)
+    if (config.security.account) {
+      const account = getAccount(config)
+      Object.assign(definition, account)
+    }
+    if (config.security.role) {
+      const roleBinding = getRoleBinding(config)
+      Object.assign(definition, roleBinding)
+    }
   }
 
   return definition
@@ -139,6 +143,7 @@ function getApiVersion (config, type) {
 function getContainer (config) {
   const resources = { resources: {} }
   let command = null
+  let args = null
   let env = []
   let ports = []
 
@@ -178,6 +183,29 @@ function getContainer (config) {
   if (config.command) {
     command = expressionParser.parseCommand(config.command)
     Object.assign(container, command)
+  }
+
+  if (config.args) {
+    args = expressionParser.parseArgs(config.args)
+    Object.assign(container, args)
+  }
+
+  if (config.security) {
+    const security = {
+      securityContext: {}
+    }
+    if (config.security.escalation) {
+      security.securityContext.allowPrivilegeEscalation = true
+    }
+    if (config.security.capabilities) {
+      security.securityContext.capabilities = config.security.capabilities
+    }
+    if (config.security.context) {
+      Object.assign(security.securityContext, expressionParser.parseContext(config.security.context))
+    }
+    if (Object.keys(security.securityContext).length > 0) {
+      Object.assign(container, security)
+    }
   }
 
   if (config.pull) {
