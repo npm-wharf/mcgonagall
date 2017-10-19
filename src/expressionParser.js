@@ -106,7 +106,7 @@ function parseCLIProbe (expression) {
 
 function parseCommand (expression) {
   if (/\n/.test(expression)) {
-    return {command: expression}
+    return {command: [ expression.replace(/\t/g, '  ') ]}
   } else {
     return {command: expression.split(' ')}
   }
