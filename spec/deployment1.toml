@@ -3,8 +3,6 @@ image = "pretend/mydb:1.0.0"
 command = 'bash -exc export HOST="$(hostname).datums" admin'
 metadata = "owner=npm;branch=master"
 labels = "task=admin"
-serviceLabels = "task=admin;kubernetes.io/cluster-service=false"
-subdomain = "dbadmin"
 
 [scale]
   containers = 2
@@ -32,3 +30,7 @@ subdomain = "dbadmin"
 [security]
   account = "dbowner"
   role = "ClusterRole;system:dbowner"
+
+[service]
+  labels = "task=admin;kubernetes.io/cluster-service=false"
+  subdomain = "dbadmin"

@@ -2,7 +2,6 @@ name = "mydb.data"
 stateful = true
 image = "pretend/mydb:1.0.0"
 command = 'bash -exc export HOST="$(hostname).datums" mydb'
-serviceAlias = "datums"
 metadata = "owner=npm;branch=master"
 
 [scale]
@@ -33,3 +32,6 @@ metadata = "owner=npm;branch=master"
 [probes]
   ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"
   live = "mydb test,initial=5,period=30"
+
+[service]
+  alias = "datums"

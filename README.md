@@ -212,12 +212,9 @@ name = "app-name.namespace"
 stateful = true
 daemon = false
 job = false
-serviceAlias = "my-app"
 image = "docker-repo/docker-image:latest"
 command = "ash -exc node index.js"
 metadata = "owner=npm;branch=master"
-subdomain = "app-name"
-port = 8080
 
 [scale]
   containers = 2
@@ -235,7 +232,6 @@ port = 8080
 
 [env]
   ONE = "http://test:8080"
-
   [env.config-map]
     TWO = "a_key"
 
@@ -257,6 +253,13 @@ port = 8080
 [probes]
   ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"
   live = "mydb test,initial=5,period=30"
+
+[service]
+  subdomain = "app-name"
+  alias = "my-app"
+  labels = "example=true"
+  annotations = "service.alpha.kubernetes.io/tolerate-unready-endpoints=true"
+  loadBalance = false
 ```
 
 ### top-level properties
@@ -266,18 +269,13 @@ Top level properties describe the name, type of service and Docker image that wi
  * `image` - the full Docker image specification
  * `stateful` - defaults to `false`; controls whether or not persistent storage will be assigned to the container
  * `command|arguments` - optionally provide the command or arguments to the Docker container
- * `serviceAlias` - optionally changes the default DNS registration for the service
- * `subdomain` - controls if and how the service will be exposed via an nginx container (by convention)
  * `metadata` - optional metadata to tag the service with, important for CD
  * `labels` - optional, nested label metadata for the specification (part of Kubernetes convention)
- * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress.
  
 
 #### name
 
 This will affect how the service's implementing artifacts in Kubernetes gets named and labeled as well as the default DNS registration. Since getting clever and making these things different values is a "Bad Idea"(tm), having them set in one place is helpful and keeps us out of trouble.
-
-> Note: the `serviceAlias` is primarily intended for use with StatefulSets to serve as the secondary namespace given to each named pod instance in DNS. If this is gibberish to you now, don't worry, after you learn about Kubernetes it will start to make sense.
 
 #### stateful
 
@@ -426,6 +424,19 @@ Each check can also support the following, optional, comma delimited, arguments 
   ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"
   live = "mydb test,initial=5,period=30"
 ```
+
+### [service]
+
+This section controls how the service is exposed via Kubernetes internal DNS and, potentially, via ingress points.
+
+ * `subdomain` - controls if and how the service will be exposed via an nginx container (by convention)
+ * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress.
+ * `alias` - optionally changes the default DNS registration for the service
+ * `labels` - optionally add metadata.labels to the service definition (a Kubernetes convention)
+ * `annotations` optionally add annotations to the service which can change certain behaviors (uncommon)
+
+
+> Note: the `serviceAlias` is intended for use with StatefulSets to serve as the secondary namespace given to each named pod instance in DNS. If this is gibberish to you now, don't worry, as you learn about Kubernetes it will start to make sense.
 
 ### [security]
 

@@ -25,6 +25,7 @@ function buildService (config) {
   const [name, namespace] = config.name.split('.')
   config.name = name
   config.namespace = namespace
+  config.service = config.service || {}
 
   const definition = {
     fqn: [name, namespace].join('.'),
@@ -52,7 +53,7 @@ function buildService (config) {
     Object.assign(definition, deployment)
   }
 
-  if (config.subdomain && !config.daemon) {
+  if (config.service.subdomain && !config.daemon) {
     const nginx = buildNginxBlock(config)
     Object.assign(definition, nginx)
   }
@@ -90,7 +91,7 @@ function buildNginxBlock (config) {
       ssl_ciphers HIGH:SEED:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!RSAPSK:!aDH:!aECDH:!EDH-DSS-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA:!SRP;
       ssl_prefer_server_ciphers on;
 
-      server_name   ~^${config.subdomain}[.].*$;
+      server_name   ~^${config.service.subdomain}[.].*$;
 
       location / {
         resolver            kube-dns.kube-system valid=1s;
@@ -485,9 +486,9 @@ function getService (config) {
     kind: 'Service',
     metadata: {
       namespace: config.namespace,
-      name: config.serviceAlias || config.name,
+      name: config.service.alias || config.name,
       labels: {
-        app: config.serviceAlias || config.name
+        app: config.service.alias || config.name
       }
     },
     spec: {
@@ -499,16 +500,21 @@ function getService (config) {
     }
   }
 
-  if (config.serviceLabels) {
-    const metadata = expressionParser.parseMetadata(config.serviceLabels)
+  if (config.service.labels) {
+    const metadata = expressionParser.parseMetadata(config.service.labels)
     Object.assign(service.metadata.labels, metadata)
+  }
+
+  if (config.service.annotations) {
+    const metadata = expressionParser.parseMetadata(config.service.annotations)
+    service.metadata.annotations = metadata
   }
 
   const ports = expressionParser.parsePorts(config.ports, true)
   service.spec.ports = ports
 
   if (config.stateful) {
-    if (config.serviceAlias && config.serviceAlias !== config.name) {
+    if (config.service.alias && config.service.alias !== config.name) {
       const statefulService = clone(service)
       statefulService.spec.clusterIP = 'None'
       service.metadata.name = config.name
@@ -519,7 +525,7 @@ function getService (config) {
     }
   }
 
-  if (config.loadbalance) {
+  if (config.service.loadbalance || config.service.loadBalance) {
     service.spec.type = 'LoadBalancer'
   }
 
@@ -542,7 +548,7 @@ function getStatefulSet (config) {
         name: config.name
       },
       spec: {
-        serviceName: config.serviceAlias,
+        serviceName: config.service.alias,
         replicas: config.scale.containers,
         revisionHistoryLimit: config.deployment.history || 1,
         upgradeStrategy: {

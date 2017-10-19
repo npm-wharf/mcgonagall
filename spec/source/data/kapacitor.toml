@@ -1,7 +1,5 @@
 name = "kapacitor.data"
 stateful = true
-serviceAlias = "kapacitor"
-subdomain = "kapacitor"
 image = "kapacitor:1.3-alpine"
 
 [scale]
@@ -20,3 +18,7 @@ image = "kapacitor:1.3-alpine"
 
 [storage]
   kapacitor-data = "10Gi:exclusive"
+
+[service]
+  alias = "kapacitor"
+  subdomain = "kapacitor"

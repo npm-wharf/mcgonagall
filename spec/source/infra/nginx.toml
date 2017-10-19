@@ -1,6 +1,5 @@
 name = "proxy.infra"
 image = "nginx:1.13-alpine"
-loadbalance = true
 
 [scale]
   containers = 2
@@ -25,3 +24,6 @@ loadbalance = true
   deadline = 30
   ready = 10
   history = 2
+
+[service]
+  loadBalance = true

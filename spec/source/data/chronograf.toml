@@ -1,7 +1,5 @@
 name = "chronograf.data"
 stateful = true
-serviceAlias = "chrono"
-subdomain = "chronograf"
 image = "quay.io/influxdb/chronograf:1.3.5.0"
 
 [scale]
@@ -21,3 +19,7 @@ image = "quay.io/influxdb/chronograf:1.3.5.0"
 
 [storage]
   chronograf-data = "2Gi:exclusive"
+
+[service]
+  alias = "chrono"
+  subdomain = "chronograf"
