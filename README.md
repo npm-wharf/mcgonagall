@@ -269,7 +269,7 @@ Top level properties describe the name, type of service and Docker image that wi
  * `serviceAlias` - optionally changes the default DNS registration for the service
  * `subdomain` - controls if and how the service will be exposed via an nginx container (by convention)
  * `metadata` - optional metadata to tag the service with, important for CD
- * `labelMetadata` - optional, nested label metadata for the specification (part of Kubernetes convention)
+ * `labels` - optional, nested label metadata for the specification (part of Kubernetes convention)
  * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress.
  
 
