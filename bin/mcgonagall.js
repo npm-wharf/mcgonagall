@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const mcgonagall = require('../src/index')
 
-require('yargs')
+require('yargs') // eslint-disable-line no-unused-expressions
   .usage('$0 <command> [options]')
   .command({
     command: 'transfigure <source> [target]',

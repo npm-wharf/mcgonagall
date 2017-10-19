@@ -11,7 +11,7 @@ module.exports = {
       kind: 'ConfigMap',
       metadata: {
         name: 'nginx-files',
-        namespace: 'infra',
+        namespace: 'infra'
       },
       data: {
         'mime.types': MIME_TYPES,
@@ -19,47 +19,47 @@ module.exports = {
       }
     },
     {
-      "apiVersion": "v1",
-      "kind": "ConfigMap",
-      "metadata": {
-        "name": "self-sign-files",
-        "namespace": "infra"
+      'apiVersion': 'v1',
+      'kind': 'ConfigMap',
+      'metadata': {
+        'name': 'self-sign-files',
+        'namespace': 'infra'
       },
-      "data": {
-        "create-cert.sh": "#!/bin/ash\n\nopenssl req -x509 \\\n  -nodes \\\n  -days 365 \\\n  -newkey rsa:2048 \\\n  -keyout ./self-signed.key \\\n  -out ./self-signed.crt \\\n  -subj \"/C=$COUNTRY/ST=$STATE/L=$LOCAL/O=$ORGANIZATION/OU=$UNIT/CN=$FQN/emailAddress=$EMAIL\"\n\ncat ./self-signed.crt ./self-signed.key > ./self-signed.pem\n\ncat ./secret-template.json | \\\n\tsed \"s/NAMESPACE/${NAMESPACE}/\" | \\\n\tsed \"s/NAME/${SECRET}/\" | \\\n\tsed \"s/TLSCERT/$(cat ./self-signed.crt | base64 | tr -d '\\n')/\" | \\\n\tsed \"s/TLSKEY/$(cat ./self-signed.key |  base64 | tr -d '\\n')/\" | \\\n\tsed \"s/TLSPEM/$(cat ./self-signed.pem |  base64 | tr -d '\\n')/\" \\\n\t> ./secret.json\n\n# /var/run/secrets/kubernetes.io/serviceaccount/token\ncurl -v --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \\\n  -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\" \\\n  -H \"Accept: application/json, */*\" \\\n  -H \"Content-Type: application/json\" \\\n  -k -v -X POST \\\n  -d @./secret.json \\\n  https://kubernetes/api/v1/namespaces/${NAMESPACE}/secrets/${SECRET}\n",
-        "secret-template.json": "{\n    \"kind\": \"Secret\",\n    \"apiVersion\": \"v1\",\n    \"metadata\": {\n        \"name\": \"NAME\",\n        \"namespace\": \"NAMESPACE\"\n    },\n    \"data\": {\n       \"cert.crt\": \"TLSCERT\",\n       \"cert.key\": \"TLSKEY\",\n       \"cert.pem\": \"TLSPEM\"\n    },\n    \"type\": \"Opaque\"\n}\n"
+      'data': {
+        'create-cert.sh': "#!/bin/ash\n\nopenssl req -x509 \\\n  -nodes \\\n  -days 365 \\\n  -newkey rsa:2048 \\\n  -keyout ./self-signed.key \\\n  -out ./self-signed.crt \\\n  -subj \"/C=$COUNTRY/ST=$STATE/L=$LOCAL/O=$ORGANIZATION/OU=$UNIT/CN=$FQN/emailAddress=$EMAIL\"\n\ncat ./self-signed.crt ./self-signed.key > ./self-signed.pem\n\ncat ./secret-template.json | \\\n\tsed \"s/NAMESPACE/${NAMESPACE}/\" | \\\n\tsed \"s/NAME/${SECRET}/\" | \\\n\tsed \"s/TLSCERT/$(cat ./self-signed.crt | base64 | tr -d '\\n')/\" | \\\n\tsed \"s/TLSKEY/$(cat ./self-signed.key |  base64 | tr -d '\\n')/\" | \\\n\tsed \"s/TLSPEM/$(cat ./self-signed.pem |  base64 | tr -d '\\n')/\" \\\n\t> ./secret.json\n\n# /var/run/secrets/kubernetes.io/serviceaccount/token\ncurl -v --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \\\n  -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\" \\\n  -H \"Accept: application/json, */*\" \\\n  -H \"Content-Type: application/json\" \\\n  -k -v -X POST \\\n  -d @./secret.json \\\n  https://kubernetes/api/v1/namespaces/${NAMESPACE}/secrets/${SECRET}\n", // eslint-disable-line
+        'secret-template.json': '{\n    "kind": "Secret",\n    "apiVersion": "v1",\n    "metadata": {\n        "name": "NAME",\n        "namespace": "NAMESPACE"\n    },\n    "data": {\n       "cert.crt": "TLSCERT",\n       "cert.key": "TLSKEY",\n       "cert.pem": "TLSPEM"\n    },\n    "type": "Opaque"\n}\n'
       }
     }
   ],
   apiVersion: '1.7',
   levels: [0, 1, 2],
   namespaces: [
-    "kube-system",
-    "infra",
-    "data"
+    'kube-system',
+    'infra',
+    'data'
   ],
   order: {
     0: [
-      "heapster.kube-system",
-      "create-cert.infra"
+      'heapster.kube-system',
+      'create-cert.infra'
     ],
     1: [
-      "chronograf.data",
-      "influxdb.data",
-      "kapacitor.data",
+      'chronograf.data',
+      'influxdb.data',
+      'kapacitor.data'
     ],
     2: [
-      "proxy.infra"
+      'proxy.infra'
     ]
   },
   services: {
-    "chronograf.data": {
+    'chronograf.data': {
       statefulSet: {
-        apiVersion: "apps/v1beta1",
-        kind: "StatefulSet",
+        apiVersion: 'apps/v1beta1',
+        kind: 'StatefulSet',
         metadata: {
-          name: "chronograf",
-          namespace: "data",
+          name: 'chronograf',
+          namespace: 'data'
         },
         spec: {
           replicas: 1,
@@ -70,11 +70,11 @@ module.exports = {
               maxSurge: 1
             }
           },
-          serviceName: "chrono",
+          serviceName: 'chrono',
           template: {
             metadata: {
               labels: {
-                app: "chronograf"
+                app: 'chronograf'
               }
             },
             spec: {
@@ -82,37 +82,37 @@ module.exports = {
                 {
                   env: [
                     {
-                      name: "INFLUXDB_URL",
-                      value: "http://influxdb:8086"
+                      name: 'INFLUXDB_URL',
+                      value: 'http://influxdb:8086'
                     },
                     {
-                      name: "KAPACITOR_URL",
-                      value: "http://kapacitor:9092"
+                      name: 'KAPACITOR_URL',
+                      value: 'http://kapacitor:9092'
                     }
                   ],
-                  image: "quay.io/influxdb/chronograf:1.3.5.0",
-                  name: "chronograf",
+                  image: 'quay.io/influxdb/chronograf:1.3.5.0',
+                  name: 'chronograf',
                   ports: [
                     {
                       containerPort: 8888,
-                      name: "http",
-                      protocol: "TCP"
+                      name: 'http',
+                      protocol: 'TCP'
                     }
                   ],
                   resources: {
                     limits: {
                       cpu: 0.2,
-                      memory: "200Mi"
+                      memory: '200Mi'
                     },
                     requests: {
                       cpu: 0.1,
-                      memory: "50Mi"
+                      memory: '50Mi'
                     }
                   },
                   volumeMounts: [
                     {
-                      mountPath: "/var/lib/chronograf",
-                      name: "chronograf-data"
+                      mountPath: '/var/lib/chronograf',
+                      name: 'chronograf-data'
                     }
                   ]
                 }
@@ -122,16 +122,16 @@ module.exports = {
           volumeClaimTemplates: [
             {
               metadata: {
-                name: "chronograf-data",
-                namespace: "data"
+                name: 'chronograf-data',
+                namespace: 'data'
               },
               spec: {
                 accessModes: [
-                  "ReadWriteOnce"
+                  'ReadWriteOnce'
                 ],
                 resources: {
                   requests: {
-                    storage: "2Gi"
+                    storage: '2Gi'
                   }
                 }
               }
@@ -139,80 +139,80 @@ module.exports = {
           ]
         }
       },
-      fqn: "chronograf.data",
-      name: "chronograf",
-      namespace: "data",
+      fqn: 'chronograf.data',
+      name: 'chronograf',
+      namespace: 'data',
       order: 1,
       scale: {
-        small: "+0"
+        small: '+0'
       },
       services: [
         {
-          apiVersion: "v1",
-          kind: "Service",
+          apiVersion: 'v1',
+          kind: 'Service',
           metadata: {
             labels: {
-              app: "chrono"
+              app: 'chrono'
             },
-            name: "chrono",
-            namespace: "data"
+            name: 'chrono',
+            namespace: 'data'
           },
           spec: {
             ports: [
               {
-                name: "http",
+                name: 'http',
                 port: 8888,
-                protocol: "TCP",
+                protocol: 'TCP',
                 targetPort: 8888
               }
             ],
             selector: {
-              app: "chronograf"
+              app: 'chronograf'
             },
-            clusterIP: "None"
+            clusterIP: 'None'
           }
         },
         {
-          apiVersion: "v1",
-          kind: "Service",
+          apiVersion: 'v1',
+          kind: 'Service',
           metadata: {
             labels: {
-              app: "chronograf"
+              app: 'chronograf'
             },
-            name: "chronograf",
-            namespace: "data"
+            name: 'chronograf',
+            namespace: 'data'
           },
           spec: {
             ports: [
               {
-                name: "http",
+                name: 'http',
                 port: 8888,
-                protocol: "TCP",
+                protocol: 'TCP',
                 targetPort: 8888
               }
             ],
             selector: {
-              app: "chronograf"
+              app: 'chronograf'
             }
           }
         }
       ]
     },
-    "heapster.kube-system": {
+    'heapster.kube-system': {
       account: {
-        apiVersion: "v1",
-        kind: "ServiceAccount",
+        apiVersion: 'v1',
+        kind: 'ServiceAccount',
         metadata: {
-          name: "heapster",
-          namespace: "kube-system"
+          name: 'heapster',
+          namespace: 'kube-system'
         }
       },
       deployment: {
-        apiVersion: "apps/v1beta1",
-        kind: "Deployment",
+        apiVersion: 'apps/v1beta1',
+        kind: 'Deployment',
         metadata: {
-          name: "heapster",
-          namespace: "kube-system"
+          name: 'heapster',
+          namespace: 'kube-system'
         },
         spec: {
           replicas: 1,
@@ -226,31 +226,31 @@ module.exports = {
           template: {
             metadata: {
               labels: {
-                app: "heapster",
-                "k8s-app": "heapster",
-                task: "monitoring"
+                app: 'heapster',
+                'k8s-app': 'heapster',
+                task: 'monitoring'
               }
             },
-            "spec": {
-              "containers": [
+            'spec': {
+              'containers': [
                 {
-                  "command": [
-                    "/heapster",
-                    "--source=kubernetes:https://kubernetes.default",
-                    "--sink=influxdb:http://influxdb.data:8086"
+                  'command': [
+                    '/heapster',
+                    '--source=kubernetes:https://kubernetes.default',
+                    '--sink=influxdb:http://influxdb.data:8086'
                   ],
                   env: [],
-                  image: "gcr.io/google_containers/heapster-amd64:v1.3.0",
-                  name: "heapster",
+                  image: 'gcr.io/google_containers/heapster-amd64:v1.3.0',
+                  name: 'heapster',
                   ports: [],
                   resources: {
                     limits: {
                       cpu: 0.2,
-                      memory: "200Mi"
+                      memory: '200Mi'
                     },
                     requests: {
                       cpu: 0.1,
-                      memory: "50Mi"
+                      memory: '50Mi'
                     }
                   }
                 }
@@ -259,42 +259,42 @@ module.exports = {
           }
         }
       },
-      fqn: "heapster.kube-system",
-      name: "heapster",
-      namespace: "kube-system",
+      fqn: 'heapster.kube-system',
+      name: 'heapster',
+      namespace: 'kube-system',
       order: 0,
       roleBinding: {
-        apiVersion: "rbac.authorization.k8s.io/v1beta1",
-        kind: "ClusterRoleBinding",
+        apiVersion: 'rbac.authorization.k8s.io/v1beta1',
+        kind: 'ClusterRoleBinding',
         metadata: {
-          name: "heapster",
+          name: 'heapster'
         },
         roleRef: {
-          apiGroup: "rbac.authorization.k8s.io",
-          kind: "ClusterRole",
-          name: "system:heapster"
+          apiGroup: 'rbac.authorization.k8s.io',
+          kind: 'ClusterRole',
+          name: 'system:heapster'
         },
         subjects: [
           {
-            kind: "ServiceAccount",
-            name: "heapster",
-            namespace: "kube-system"
+            kind: 'ServiceAccount',
+            name: 'heapster',
+            namespace: 'kube-system'
           }
         ]
       },
       scale: {
-        large: "+2",
-        medium: "+1",
-        small: "+0"
+        large: '+2',
+        medium: '+1',
+        small: '+0'
       }
     },
-    "influxdb.data": {
+    'influxdb.data': {
       statefulSet: {
-        apiVersion: "apps/v1beta1",
-        kind: "StatefulSet",
+        apiVersion: 'apps/v1beta1',
+        kind: 'StatefulSet',
         metadata: {
-          name: "influxdb",
-          namespace: "data",
+          name: 'influxdb',
+          namespace: 'data'
         },
         spec: {
           replicas: 1,
@@ -305,11 +305,11 @@ module.exports = {
               maxSurge: 1
             }
           },
-          serviceName: "influx",
+          serviceName: 'influx',
           template: {
             metadata: {
               labels: {
-                app: "influxdb"
+                app: 'influxdb'
               }
             },
             spec: {
@@ -317,33 +317,33 @@ module.exports = {
                 {
                   env: [
                     {
-                      name: "INFLUXDB_GRAPHITE_ENABLED",
-                      value: "false"
+                      name: 'INFLUXDB_GRAPHITE_ENABLED',
+                      value: 'false'
                     }
                   ],
-                  image: "influxdb:1.3-alpine",
-                  name: "influxdb",
+                  image: 'influxdb:1.3-alpine',
+                  name: 'influxdb',
                   ports: [
                     {
                       containerPort: 8086,
-                      name: "http",
-                      protocol: "TCP"
+                      name: 'http',
+                      protocol: 'TCP'
                     }
                   ],
                   resources: {
                     limits: {
                       cpu: 0.2,
-                      memory: "200Mi"
+                      memory: '200Mi'
                     },
                     requests: {
                       cpu: 0.1,
-                      memory: "50Mi"
+                      memory: '50Mi'
                     }
                   },
                   volumeMounts: [
                     {
-                      mountPath: "/var/lib/influxdb",
-                      name: "influx-data"
+                      mountPath: '/var/lib/influxdb',
+                      name: 'influx-data'
                     }
                   ]
                 }
@@ -353,16 +353,16 @@ module.exports = {
           volumeClaimTemplates: [
             {
               metadata: {
-                name: "influx-data",
-                namespace: "data"
+                name: 'influx-data',
+                namespace: 'data'
               },
               spec: {
                 accessModes: [
-                  "ReadWriteOnce"
+                  'ReadWriteOnce'
                 ],
                 resources: {
                   requests: {
-                    storage: "20Gi"
+                    storage: '20Gi'
                   }
                 }
               }
@@ -370,72 +370,72 @@ module.exports = {
           ]
         }
       },
-      fqn: "influxdb.data",
-      name: "influxdb",
-      namespace: "data",
+      fqn: 'influxdb.data',
+      name: 'influxdb',
+      namespace: 'data',
       order: 1,
       scale: {
-        small: "+0"
+        small: '+0'
       },
       services: [
         {
-          apiVersion: "v1",
-          kind: "Service",
+          apiVersion: 'v1',
+          kind: 'Service',
           metadata: {
             labels: {
-              app: "influx"
+              app: 'influx'
             },
-            name: "influx",
-            namespace: "data"
+            name: 'influx',
+            namespace: 'data'
           },
           spec: {
             ports: [
               {
-                name: "http",
+                name: 'http',
                 port: 8086,
-                protocol: "TCP",
+                protocol: 'TCP',
                 targetPort: 8086
               }
             ],
             selector: {
-              app: "influxdb",
+              app: 'influxdb'
             },
-            clusterIP: "None"
+            clusterIP: 'None'
           }
         },
         {
-          apiVersion: "v1",
-          kind: "Service",
+          apiVersion: 'v1',
+          kind: 'Service',
           metadata: {
             labels: {
-              app: "influxdb"
+              app: 'influxdb'
             },
-            name: "influxdb",
-            namespace: "data"
+            name: 'influxdb',
+            namespace: 'data'
           },
           spec: {
             ports: [
               {
-                name: "http",
+                name: 'http',
                 port: 8086,
-                protocol: "TCP",
+                protocol: 'TCP',
                 targetPort: 8086
               }
             ],
             selector: {
-              app: "influxdb",
+              app: 'influxdb'
             }
           }
         }
       ]
     },
-    "kapacitor.data": {
+    'kapacitor.data': {
       statefulSet: {
-        apiVersion: "apps/v1beta1",
-        kind: "StatefulSet",
+        apiVersion: 'apps/v1beta1',
+        kind: 'StatefulSet',
         metadata: {
-          name: "kapacitor",
-          namespace: "data"
+          name: 'kapacitor',
+          namespace: 'data'
         },
         spec: {
           replicas: 1,
@@ -446,11 +446,11 @@ module.exports = {
               maxSurge: 1
             }
           },
-          serviceName: "kapacitor",
+          serviceName: 'kapacitor',
           template: {
             metadata: {
               labels: {
-                app: "kapacitor"
+                app: 'kapacitor'
               }
             },
             spec: {
@@ -458,33 +458,33 @@ module.exports = {
                 {
                   env: [
                     {
-                      name: "KAPACITOR_INFLUXDB_0_URLS_0",
-                      value: "http://influxdb:8086"
+                      name: 'KAPACITOR_INFLUXDB_0_URLS_0',
+                      value: 'http://influxdb:8086'
                     }
                   ],
-                  image: "kapacitor:1.3-alpine",
-                  name: "kapacitor",
+                  image: 'kapacitor:1.3-alpine',
+                  name: 'kapacitor',
                   ports: [
                     {
                       containerPort: 9092,
-                      name: "http",
-                      protocol: "TCP"
+                      name: 'http',
+                      protocol: 'TCP'
                     }
                   ],
                   resources: {
                     limits: {
                       cpu: 0.2,
-                      memory: "200Mi"
+                      memory: '200Mi'
                     },
                     requests: {
                       cpu: 0.1,
-                      memory: "50Mi"
+                      memory: '50Mi'
                     }
                   },
                   volumeMounts: [
                     {
-                      mountPath: "/var/lib/kapacitor",
-                      name: "kapacitor-data"
+                      mountPath: '/var/lib/kapacitor',
+                      name: 'kapacitor-data'
                     }
                   ]
                 }
@@ -494,16 +494,16 @@ module.exports = {
           volumeClaimTemplates: [
             {
               metadata: {
-                name: "kapacitor-data",
-                namespace: "data"
+                name: 'kapacitor-data',
+                namespace: 'data'
               },
               spec: {
                 accessModes: [
-                  "ReadWriteOnce"
+                  'ReadWriteOnce'
                 ],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: '10Gi'
                   }
                 }
               }
@@ -511,156 +511,156 @@ module.exports = {
           ]
         }
       },
-      fqn: "kapacitor.data",
-      name: "kapacitor",
-      namespace: "data",
+      fqn: 'kapacitor.data',
+      name: 'kapacitor',
+      namespace: 'data',
       order: 1,
       scale: {
-        small: "+0"
+        small: '+0'
       },
       services: [
         {
-          apiVersion: "v1",
-          kind: "Service",
+          apiVersion: 'v1',
+          kind: 'Service',
           metadata: {
             labels: {
-              app: "kapacitor"
+              app: 'kapacitor'
             },
-            name: "kapacitor",
-            namespace: "data"
+            name: 'kapacitor',
+            namespace: 'data'
           },
           spec: {
             ports: [
               {
-                name: "http",
+                name: 'http',
                 port: 9092,
-                protocol: "TCP",
+                protocol: 'TCP',
                 targetPort: 9092
               }
             ],
             selector: {
-              app: "kapacitor"
+              app: 'kapacitor'
             },
-            clusterIP: "None"
+            clusterIP: 'None'
           }
         }
       ]
     },
-    "create-cert.infra": {
-      "name": "create-cert",
-      "namespace": "infra",
-      "fqn": "create-cert.infra",
-      "order": 0,
-      "job": {
-        "apiVersion": "batch/v1",
-        "kind": "Job",
-        "metadata": {
-          "name": "create-cert",
-          "namespace": "infra"
+    'create-cert.infra': {
+      'name': 'create-cert',
+      'namespace': 'infra',
+      'fqn': 'create-cert.infra',
+      'order': 0,
+      'job': {
+        'apiVersion': 'batch/v1',
+        'kind': 'Job',
+        'metadata': {
+          'name': 'create-cert',
+          'namespace': 'infra'
         },
-        "spec": {
-          "autoSelector": true,
-          "completions": 1,
-          "failedJobsHistoryLimit": 2,
-          "parallelism": 1,
-          "successfulJobsHistoryLimit": 2,
-          "template": {
-            "metadata": {
-              "labels": {
-                "app": "create-cert"
+        'spec': {
+          'autoSelector': true,
+          'completions': 1,
+          'failedJobsHistoryLimit': 2,
+          'parallelism': 1,
+          'successfulJobsHistoryLimit': 2,
+          'template': {
+            'metadata': {
+              'labels': {
+                'app': 'create-cert'
               }
             },
-            "spec": {
-              "backoffLimit": 4,
-              "containers": [
+            'spec': {
+              'backoffLimit': 4,
+              'containers': [
                 {
-                  "command": [ "/etc/create-cert/create-cert.sh" ],
-                  "env": [
+                  'command': [ '/etc/create-cert/create-cert.sh' ],
+                  'env': [
                     {
-                      "name": "DOMAINS",
-                      "value": "*.test.com"
+                      'name': 'DOMAINS',
+                      'value': '*.test.com'
                     },
                     {
-                      "name": "EMAIL",
-                      "value": "me@test.com"
+                      'name': 'EMAIL',
+                      'value': 'me@test.com'
                     },
                     {
-                      "name": "NAMESPACE",
-                      "value": "infra"
+                      'name': 'NAMESPACE',
+                      'value': 'infra'
                     },
                     {
-                      "name": "SECRET",
-                      "value": "ssl"
+                      'name': 'SECRET',
+                      'value': 'ssl'
                     },
                     {
-                      "name": "COUNTRY",
-                      "value": "US"
+                      'name': 'COUNTRY',
+                      'value': 'US'
                     },
                     {
-                      "name": "STATE",
-                      "value": "Tennessee"
+                      'name': 'STATE',
+                      'value': 'Tennessee'
                     },
                     {
-                      "name": "LOCAL",
-                      "value": "Murfreesboro"
+                      'name': 'LOCAL',
+                      'value': 'Murfreesboro'
                     },
                     {
-                      "name": "ORGANIZATION",
-                      "value": "OSS"
+                      'name': 'ORGANIZATION',
+                      'value': 'OSS'
                     },
                     {
-                      "name": "UNIT",
-                      "value": "Software"
+                      'name': 'UNIT',
+                      'value': 'Software'
                     },
                     {
-                      "name": "FQN",
-                      "value": "*.test.com"
+                      'name': 'FQN',
+                      'value': '*.test.com'
                     }
                   ],
-                  "image": "arobson/alpine-util:latest",
-                  "name": "create-cert",
-                  "ports": [],
-                  "resources": {
-                    "limits": {
-                      "cpu": 0.2,
-                      "memory": "200Mi"
+                  'image': 'arobson/alpine-util:latest',
+                  'name': 'create-cert',
+                  'ports': [],
+                  'resources': {
+                    'limits': {
+                      'cpu': 0.2,
+                      'memory': '200Mi'
                     },
-                    "requests": {
-                      "cpu": 0.1,
-                      "memory": "50Mi"
+                    'requests': {
+                      'cpu': 0.1,
+                      'memory': '50Mi'
                     }
                   },
-                  "securityContext": {
-                    "allowPrivilegeEscalation": true,
-                    "capabilities": [ "NET_ADMIN", "SYS_TIME" ],
-                    "runAsUser": 1000,
-                    "fsGroup": 1000
+                  'securityContext': {
+                    'allowPrivilegeEscalation': true,
+                    'capabilities': [ 'NET_ADMIN', 'SYS_TIME' ],
+                    'runAsUser': 1000,
+                    'fsGroup': 1000
                   },
-                  "volumeMounts": [
+                  'volumeMounts': [
                     {
-                      "mountPath": "/etc/create-cert",
-                      "name": "files"
+                      'mountPath': '/etc/create-cert',
+                      'name': 'files'
                     }
                   ]
                 }
               ],
-              "restartPolicy": "Never",
-              "volumes": [
+              'restartPolicy': 'Never',
+              'volumes': [
                 {
-                  "configMap": {
-                    "items": [
+                  'configMap': {
+                    'items': [
                       {
-                        "key": "create-cert.sh",
-                        "path": "create-cert.sh"
+                        'key': 'create-cert.sh',
+                        'path': 'create-cert.sh'
                       },
                       {
-                        "key": "secret-template.json",
-                        "path": "secret-template.json"
+                        'key': 'secret-template.json',
+                        'path': 'secret-template.json'
                       }
                     ],
-                    "name": "self-sign-files"
+                    'name': 'self-sign-files'
                   },
-                  "name": "files"
+                  'name': 'files'
                 }
               ]
             }
@@ -668,22 +668,22 @@ module.exports = {
         }
       }
     },
-    "proxy.infra": {
-      fqn: "proxy.infra",
-      name: "proxy",
-      namespace: "infra",
+    'proxy.infra': {
+      fqn: 'proxy.infra',
+      name: 'proxy',
+      namespace: 'infra',
       order: 2,
       scale: {
-        large: "+2",
-        medium: "+1",
-        small: "+0"
+        large: '+2',
+        medium: '+1',
+        small: '+0'
       },
       deployment: {
-        apiVersion: "apps/v1beta1",
-        kind: "Deployment",
+        apiVersion: 'apps/v1beta1',
+        kind: 'Deployment',
         metadata: {
-          name: "proxy",
-          namespace: "infra"
+          name: 'proxy',
+          namespace: 'infra'
         },
         spec: {
           replicas: 2,
@@ -693,76 +693,76 @@ module.exports = {
           strategy: {
             rollingUpdate: {
               maxUnavailable: 1,
-              maxSurge: "100%"
+              maxSurge: '100%'
             }
           },
           template: {
             metadata: {
               labels: {
-                app: "proxy"
+                app: 'proxy'
               }
             },
             spec: {
               containers: [
                 {
                   env: [],
-                  image: "nginx:1.13-alpine",
-                  name: "proxy",
+                  image: 'nginx:1.13-alpine',
+                  name: 'proxy',
                   ports: [
                     {
                       containerPort: 80,
-                      name: "http",
-                      protocol: "TCP"
+                      name: 'http',
+                      protocol: 'TCP'
                     },
                     {
                       containerPort: 443,
-                      name: "https",
-                      protocol: "TCP"
+                      name: 'https',
+                      protocol: 'TCP'
                     }
                   ],
                   resources: {
                     limits: {
                       cpu: 0.2,
-                      memory: "200Mi"
+                      memory: '200Mi'
                     },
                     requests: {
                       cpu: 0.1,
-                      memory: "50Mi"
+                      memory: '50Mi'
                     }
                   },
                   volumeMounts: [
                     {
-                      mountPath: "/etc/nginx",
-                      name: "config-files"
+                      mountPath: '/etc/nginx',
+                      name: 'config-files'
                     },
                     {
-                      mountPath: "/etc/nginx/cert",
-                      name: "cert-files"
+                      mountPath: '/etc/nginx/cert',
+                      name: 'cert-files'
                     }
                   ]
                 }
               ],
               volumes: [
                 {
-                  name: "config-files",
+                  name: 'config-files',
                   configMap: {
-                    name: "nginx-files",
+                    name: 'nginx-files',
                     items: [
                       {
-                        key: "nginx.conf",
-                        path: "nginx.conf"
+                        key: 'nginx.conf',
+                        path: 'nginx.conf'
                       },
                       {
-                        key: "mime.types",
-                        path: "mime.types"
+                        key: 'mime.types',
+                        path: 'mime.types'
                       }
                     ]
                   }
                 },
                 {
-                  name: "cert-files",
+                  name: 'cert-files',
                   secret: {
-                    secretName: "ssl"
+                    secretName: 'ssl'
                   }
                 }
               ]
@@ -772,34 +772,34 @@ module.exports = {
       },
       services: [
         {
-          apiVersion: "v1",
-          kind: "Service",
+          apiVersion: 'v1',
+          kind: 'Service',
           metadata: {
             labels: {
-              app: "proxy"
+              app: 'proxy'
             },
-            name: "proxy",
-            namespace: "infra"
+            name: 'proxy',
+            namespace: 'infra'
           },
           spec: {
             ports: [
               {
-                name: "http",
+                name: 'http',
                 port: 80,
                 targetPort: 80,
-                protocol: "TCP"
+                protocol: 'TCP'
               },
               {
-                name: "https",
+                name: 'https',
                 port: 443,
                 targetPort: 443,
-                protocol: "TCP"
+                protocol: 'TCP'
               }
             ],
             selector: {
-              app: "proxy"
+              app: 'proxy'
             },
-            type: "LoadBalancer"
+            type: 'LoadBalancer'
           }
         }
       ]

@@ -2,7 +2,7 @@ const CONTAINER_REGEX = /([+*])\s*([0-9]+)/
 const REQUIREMENT_REGEX = /[>]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
 const STORAGE_REGEX = /([a-zA-Z0-9]+)\s*[+]\s*([0-9]+)Gi/
 const LIMIT_REGEX = /[<]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
-const HTTP_PROBE_REGEX = /^[:]([0-9]+)([\/a-zA-Z_\-0-9]+)/
+const HTTP_PROBE_REGEX = /^[:]([0-9]+)([/a-zA-Z_\-0-9]+)/
 
 const accessModes = {
   exclusive: 'ReadWriteOnce',
@@ -21,13 +21,13 @@ const resourceType = {
   ram: 'memory',
   cpu: 'cpu',
   storage: '',
-  containers: '',
+  containers: ''
 }
 
 const unitConverters = {
   memory: {
-    Gi: [ 1024, 'Mi'],
-    Mi: [ 1, 'Mi'],
+    Gi: [ 1024, 'Mi' ],
+    Mi: [ 1, 'Mi' ],
     Ki: [ 0.0009765625, 'Mi' ]
   },
   cpu: {
@@ -97,7 +97,7 @@ function parseCLIProbe (expression) {
   list
     .slice(1)
     .map(assignment => {
-      [abbrev,value] = assignment.split('=')
+      const [abbrev, value] = assignment.split('=')
       const setting = probeArguments[abbrev]
       probe.exec[setting] = parseInt(value)
     })
@@ -105,7 +105,7 @@ function parseCLIProbe (expression) {
 }
 
 function parseCommand (expression) {
-  return { command: expression.split(' ')}
+  return {command: expression.split(' ')}
 }
 
 function parseConfigBlock (name, block) {
@@ -125,7 +125,7 @@ function parseConfigBlock (name, block) {
 }
 
 function parseContainer (expression) {
-  const [_, op, value] = CONTAINER_REGEX.exec(expression)
+  const [_, op, value] = CONTAINER_REGEX.exec(expression) // eslint-disable-line no-unused-vars
   return { replicas: [ op, value ] }
 }
 
@@ -141,7 +141,7 @@ function parseContainerPort (name, expression) {
 
 function parseContext (expression) {
   const sets = expression.split(';')
-  return sets.reduce((acc,set) => {
+  return sets.reduce((acc, set) => {
     if (set) {
       const [name, val] = set.split('=')
       acc[contextMap[name.trim()]] = parseInt(val.trim())
@@ -185,7 +185,7 @@ function parseHTTPProbe (expression) {
     .split(',')
     .slice(1)
     .map(assignment => {
-      [abbrev,value] = assignment.split('=')
+      const [abbrev, value] = assignment.split('=')
       const setting = probeArguments[abbrev]
       probe.httpGet[setting] = parseInt(value)
     })
@@ -194,7 +194,7 @@ function parseHTTPProbe (expression) {
 
 function parseMetadata (expression) {
   const sets = expression.split(';')
-  return sets.reduce((acc,set) => {
+  return sets.reduce((acc, set) => {
     if (set) {
       const [name, val] = set.split('=')
       acc[name.trim()] = val.trim()
@@ -203,7 +203,7 @@ function parseMetadata (expression) {
   }, {})
 }
 
-function parsePorts (ports, service=false) {
+function parsePorts (ports, service = false) {
   const keys = Object.keys(ports)
   const portFn = service ? parseServicePort : parseContainerPort
   return keys.map(key => {
@@ -258,7 +258,7 @@ function parseStore (name, expression, namespace) {
       namespace: namespace
     },
     spec: {
-      accessModes: [ accessModes[ access ]],
+      accessModes: [ accessModes[ access ] ],
       resources: {
         requests: { storage: size }
       }
@@ -270,7 +270,7 @@ function parseStorage (expression) {
   const storage = { storage: {} }
   const sets = expression.split('=')[1].split(',')
   sets.map(set => {
-    const [_, mount, value] = STORAGE_REGEX.exec(set)
+    const [_, mount, value] = STORAGE_REGEX.exec(set)  // eslint-disable-line no-unused-vars
     storage.storage[mount] = value
   })
   return storage
@@ -278,7 +278,7 @@ function parseStorage (expression) {
 
 function parseVolume (name, expression) {
   if (/::/.test(expression)) {
-    const [mapName,mappings] = expression.split('::')
+    const [mapName, mappings] = expression.split('::')
     if (mapName === 'secret') {
       const set = {
         name: name,
@@ -305,7 +305,7 @@ function parseVolume (name, expression) {
             let octal
             [set.path, octal] = set.path.split(':')
             set.defaultMode = parseInt(octal, 8)
-            if(set.defaultMode > mode) {
+            if (set.defaultMode > mode) {
               mode = set.defaultMode
             }
           }
@@ -314,7 +314,7 @@ function parseVolume (name, expression) {
           [set.key, octal] = set.key.split(':')
           set.path = set.key
           set.defaultMode = parseInt(octal, 8)
-          if(set.defaultMode > mode) {
+          if (set.defaultMode > mode) {
             mode = set.defaultMode
           }
         }

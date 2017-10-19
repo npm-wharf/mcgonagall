@@ -20,7 +20,7 @@ const serviceDefinition = {
     Joi.string().uri({allowRelative: true})
   ),
   volumes: {
-    config: Joi.string().regex(/^[a-z\-]+[::]((\S)+([=]\S+)?[,]?)+$/, 'config map format')
+    config: Joi.string().regex(/^[a-z-]+[::]((\S)+([=]\S+)?[,]?)+$/, 'config map format')
   },
   storage: Joi.object().pattern(
     /^.*$/,

@@ -6,9 +6,9 @@ const cluster = require('./cluster')
 
 const CLUSTER_FILE = 'cluster.json'
 
-function ensurePath(fullPath) {
-  const directoryPath = path.extname(fullPath) ?
-    path.dirname(fullPath) : fullPath
+function ensurePath (fullPath) {
+  const directoryPath = path.extname(fullPath)
+    ? path.dirname(fullPath) : fullPath
   if (!fs.existsSync(directoryPath)) {
     mkdirp.sync(directoryPath)
   }
@@ -17,7 +17,7 @@ function ensurePath(fullPath) {
 function transfigure (source, options = {}) {
   return cluster.getClusterConfig(source, options)
     .then(config => {
-      if(options.output) {
+      if (options.output) {
         return write(options.output, config)
       } else {
         return config
@@ -25,11 +25,14 @@ function transfigure (source, options = {}) {
     })
 }
 
-function write(target, config) {
+function write (target, config) {
   const services = config.services
+  const configMaps = config.configuration
   delete config.services
+  delete config.configuration
   ensurePath(target)
   writeCluster(target, config)
+  writeConfigFiles(target, configMaps)
   const keys = Object.keys(services)
   keys.forEach(key => {
     const definition = services[key]
@@ -37,34 +40,34 @@ function write(target, config) {
     const namespace = definition.namespace
     const types = Object.keys(definition)
     types.forEach(type => {
-      switch(type) {
+      switch (type) {
         case 'account':
           writeAccount(target, namespace, name, definition[type])
-          break;
+          break
         case 'cronJob':
           writeCronJob(target, namespace, name, definition[type])
-          break;
+          break
         case 'daemonSet':
           writeDaemonSet(target, namespace, name, definition[type])
-          break;
+          break
         case 'deployment':
           writeDeployment(target, namespace, name, definition[type])
-          break;
+          break
         case 'job':
           writeJob(target, namespace, name, definition[type])
-          break;
+          break
         case 'nginxBlock':
           writeNginx(target, namespace, name, definition[type])
-          break;
+          break
         case 'roleBinding':
           writeRoleBinding(target, namespace, name, definition[type])
-          break;
+          break
         case 'services':
           writeService(target, namespace, name, definition[type])
-          break;
+          break
         case 'statefulSet':
           writeStatefulSet(target, namespace, name, definition[type])
-          break;
+          break
       }
     })
   })
@@ -92,11 +95,20 @@ function writeCluster (target, definition) {
   }
 }
 
-function writeConfigFile (taget, namespace, fileName, file) {
-  const fullPath = path.join(target, namespace, name, fileName)
+function writeConfigFiles (target, maps) {
+  maps.forEach(map => {
+    const namespace = map.metadata.namespace
+    const name = map.metadata.name
+    writeConfigFile(target, namespace, name, map)
+  })
+}
+
+function writeConfigFile (target, namespace, fileName, map) {
+  const fullPath = path.join(target, namespace, 'config', fileName + '.yml')
+  const yml = yaml.safeDump(map)
   try {
     ensurePath(fullPath)
-    fs.writeFileSync(fullPath, file, 'utf8')
+    fs.writeFileSync(fullPath, yml, 'utf8')
   } catch (e) {
     throw new Error(`Failed to write configuration file to ${fullPath} because: ${e.message}`)
   }

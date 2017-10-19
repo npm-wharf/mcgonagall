@@ -7,6 +7,7 @@
     "mcgonagall": "./bin/mcgonagall.js"
   },
   "scripts": {
+    "pretest": "standard",
     "test": "./node_modules/mocha/bin/mocha ./spec/*.spec.js",
     "coverage": "nyc npm test",
     "continuous": "./node_modules/mocha/bin/mocha spec/*.spec.js -w",
@@ -52,5 +53,10 @@
     "sinon-chai": "^2.13.0",
     "standard": "^10.0.3",
     "standard-version": "^4.2.0"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
   }
 }

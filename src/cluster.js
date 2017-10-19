@@ -12,7 +12,7 @@ function addConfigFile (cluster, parentFilePath, key, relativePath, filePath) {
   let map
   const [namespace, name] = key.split('.')
   cluster.configuration.forEach(m => {
-    if(namespace === m.metadata.namespace &&
+    if (namespace === m.metadata.namespace &&
        name === m.metadata.name) {
       map = m
     }
@@ -23,7 +23,7 @@ function addConfigFile (cluster, parentFilePath, key, relativePath, filePath) {
       kind: 'ConfigMap',
       metadata: {
         name: name,
-        namespace: namespace,
+        namespace: namespace
       },
       data: {}
     }
@@ -32,11 +32,11 @@ function addConfigFile (cluster, parentFilePath, key, relativePath, filePath) {
   const fullPath = path.resolve(parentFilePath, relativePath)
   map.data[relativePath] = fs.readFileSync(fullPath, 'utf8')
   if (relativePath === 'nginx.conf' && SERVER_DEFINITION_REGEX.test(map.data[relativePath])) {
-    cluster.replaceNginxToken = function() {
+    cluster.replaceNginxToken = function () {
       let content = getNginxServerConfig(cluster)
       map.data[relativePath] = map.data[relativePath]
         .replace(SERVER_DEFINITION_REGEX, content)
-        .replace(/[\\]"/g,'"')
+        .replace(/[\\]"/g, '"')
         .replace(/\\n/g, '\n')
       delete cluster.replaceNginxToken
     }
@@ -68,8 +68,8 @@ function getClusterConfig (fullPath, options) {
     wait = expandTarball(fullPath)
   }
   return wait
-    .then( () => loadClusterFile(fullPath) )
-    .then( config => {
+    .then(() => loadClusterFile(fullPath))
+    .then(config => {
       const cluster = processConfig(config, options)
       return processDefinitions(fullPath, cluster)
         .then(services => {
@@ -84,7 +84,7 @@ function getClusterConfig (fullPath, options) {
           cluster.replaceNginxToken()
           return cluster
         })
-    } )
+    })
 }
 
 function getNginxServerConfig (cluster) {
@@ -93,7 +93,7 @@ function getNginxServerConfig (cluster) {
     const service = cluster.services[serviceName]
     if (service.nginxBlock) {
       acc.push(service.nginxBlock
-        .replace(/[\\]"/g,'"')
+        .replace(/[\\]"/g, '"')
         .replace(/\\n/g, '\n'))
       delete service.nginxBlock
     }
@@ -139,7 +139,7 @@ function processConfigMap (data, key) {
     kind: 'ConfigMap',
     metadata: {
       name: name,
-      namespace: namespace,
+      namespace: namespace
     },
     data: data
   }
@@ -158,7 +158,7 @@ function processDefinitions (fullPath, cluster) {
     })
 }
 
-function processNamespace(config, cluster, namespace, definition) {
+function processNamespace (config, cluster, namespace, definition) {
   cluster.namespaces.push(namespace)
   const keys = Object.keys(definition)
   keys.forEach(serviceName => {
@@ -170,7 +170,7 @@ function processNamespace(config, cluster, namespace, definition) {
   })
 }
 
-function processService(cluster, serviceName, service) {
+function processService (cluster, serviceName, service) {
   service.order = service.order || 0
   cluster.services[service.fqn] = service
   cluster.levels.add(service.order)

@@ -176,8 +176,7 @@ module.exports = {
             targetPort: 8080,
             protocol: 'TCP'
           }
-        ],
-        clusterIP: "None"
+        ]
       }
     },
     {

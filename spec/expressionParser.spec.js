@@ -3,11 +3,9 @@ require('./setup')
 const expressionParser = require('../src/expressionParser')
 
 describe('Expression Parser', function () {
-
-
   it('should parse metadata correctly', function () {
     expressionParser.parseMetadata(
-      "owner=npm;branch=master"
+      'owner=npm;branch=master'
     )
     .should.eql({
       owner: 'npm',
@@ -169,7 +167,7 @@ describe('Expression Parser', function () {
 
     it('should create correct set of scale factors', function () {
       expressionParser.parseScaleFactor(
-        "container + 2; cpu > .75 < 1.5; ram > 750Mi < 1.5Gi; storage = data + 5Gi, logs + 2Gi"
+        'container + 2; cpu > .75 < 1.5; ram > 750Mi < 1.5Gi; storage = data + 5Gi, logs + 2Gi'
       ).should.eql(
         {
           replicas: ['+', '2'],
@@ -185,13 +183,13 @@ describe('Expression Parser', function () {
           },
           storage: {
             data: '5',
-            logs: '2',
+            logs: '2'
           }
         }
       )
 
       expressionParser.parseScaleFactor(
-        "cpu > .75; ram > 750Mi; storage = data + 5Gi"
+        'cpu > .75; ram > 750Mi; storage = data + 5Gi'
       ).should.eql(
         {
           resources: {
@@ -201,13 +199,13 @@ describe('Expression Parser', function () {
             }
           },
           storage: {
-            data: '5',
+            data: '5'
           }
         }
       )
 
       expressionParser.parseScaleFactor(
-        "container*2;cpu<1.5;ram<1.5Gi"
+        'container*2;cpu<1.5;ram<1.5Gi'
       ).should.eql(
         {
           replicas: ['*', '2'],

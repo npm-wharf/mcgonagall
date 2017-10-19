@@ -54,11 +54,14 @@ Providing a destination folder via the options hash will write the output to a s
 ```shell
 --[./]
   |- cluster.json
-  |- {namespace}
-  |  |- {deployment|statefulSet|daemonSet}.yml
-  |  |- ? service.yml
-  |  |- ? account.yml
-  |  |- ? roleBinding.yml
+  |- {namespace}/
+     |- {deployment|statefulSet|daemonSet}.yml
+     |- ? service.yml
+     |- ? account.yml
+     |- ? roleBinding.yml
+     |- config/
+        |- ? {config-file}.yml
+        |- ? ...
   ...
 ```
 

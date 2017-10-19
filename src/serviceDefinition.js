@@ -22,12 +22,12 @@ function buildService (config) {
   if (result.error) {
     return result
   }
-  const [name,namespace] = config.name.split('.')
+  const [name, namespace] = config.name.split('.')
   config.name = name
   config.namespace = namespace
 
   const definition = {
-    fqn: [name,namespace].join('.'),
+    fqn: [name, namespace].join('.'),
     name: name,
     namespace: namespace
   }
@@ -38,14 +38,14 @@ function buildService (config) {
   }
 
   if (config.job) {
-    let job = config.deployment.schedule ?
-      getCronJob(config) : getJob(config)
+    let job = config.deployment.schedule
+      ? getCronJob(config) : getJob(config)
     Object.assign(definition, job)
   } else if (config.stateful) {
     const set = getStatefulSet(config)
     Object.assign(definition, set)
   } else if (config.daemon) {
-    const daemon = getDaemon(config)
+    const daemon = getDaemonSet(config)
     Object.assign(definition, daemon)
   } else {
     const deployment = getDeployment(config)
@@ -243,7 +243,7 @@ function getCronJob (config) {
   let concurrency
   if (config.scale && config.scale.containers) {
     concurrency = 'Allow'
-  } else if (completions === 1) {
+  } else if (config.completions === 1) {
     concurrency = 'Forbid'
   } else {
     concurrency = 'Replace'
@@ -455,7 +455,7 @@ function getRoleBinding (config) {
         apiVersion: getApiVersion(config, 'roleBinding'),
         kind: 'ClusterRoleBinding',
         metadata: {
-          name: config.security.account,
+          name: config.security.account
         },
         roleRef: {
           apiGroup: 'rbac.authorization.k8s.io',
@@ -509,7 +509,7 @@ function getService (config) {
 
   if (config.stateful) {
     if (config.serviceAlias && config.serviceAlias !== config.name) {
-      statefulService = clone(service)
+      const statefulService = clone(service)
       statefulService.spec.clusterIP = 'None'
       service.metadata.name = config.name
       service.metadata.labels.app = config.name
