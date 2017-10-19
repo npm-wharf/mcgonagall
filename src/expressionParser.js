@@ -105,7 +105,11 @@ function parseCLIProbe (expression) {
 }
 
 function parseCommand (expression) {
-  return {command: expression.split(' ')}
+  if (/\n/.test(expression)) {
+    return {command: expression}
+  } else {
+    return {command: expression.split(' ')}
+  }
 }
 
 function parseConfigBlock (name, block) {
