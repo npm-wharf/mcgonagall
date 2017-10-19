@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const MIME_TYPES = fs.readFileSync(path.resolve('./spec/source', 'mime.types'), 'utf8')
+const MIME_TYPES = fs.readFileSync(path.resolve('./spec/source/infra', 'mime.types'), 'utf8')
 const NGINX_CONF = fs.readFileSync(path.resolve('./spec/', 'full-nginx.conf'), 'utf8')
 
 module.exports = {

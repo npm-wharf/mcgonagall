@@ -146,7 +146,7 @@ function processConfigMap (data, key) {
 }
 
 function processDefinitions (fullPath, cluster) {
-  return glob(fullPath, ['*.toml'])
+  return glob(fullPath, ['**/*.toml'])
     .then(files => {
       return files.reduce((acc, file) => {
         if (!/cluster[.]toml/.test(file)) {
