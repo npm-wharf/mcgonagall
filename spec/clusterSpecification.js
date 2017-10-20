@@ -98,11 +98,11 @@ module.exports = {
                   ],
                   resources: {
                     limits: {
-                      cpu: 0.2,
+                      cpu: '200m',
                       memory: '200Mi'
                     },
                     requests: {
-                      cpu: 0.1,
+                      cpu: '100m',
                       memory: '50Mi'
                     }
                   },
@@ -236,17 +236,15 @@ module.exports = {
                     '--source=kubernetes:https://kubernetes.default',
                     '--sink=influxdb:http://influxdb.data:8086'
                   ],
-                  env: [],
                   image: 'gcr.io/google_containers/heapster-amd64:v1.3.0',
                   name: 'heapster',
-                  ports: [],
                   resources: {
                     limits: {
-                      cpu: 0.2,
+                      cpu: '200m',
                       memory: '200Mi'
                     },
                     requests: {
-                      cpu: 0.1,
+                      cpu: '100m',
                       memory: '50Mi'
                     }
                   }
@@ -326,11 +324,11 @@ module.exports = {
                   ],
                   resources: {
                     limits: {
-                      cpu: 0.2,
+                      cpu: '200m',
                       memory: '200Mi'
                     },
                     requests: {
-                      cpu: 0.1,
+                      cpu: '100m',
                       memory: '50Mi'
                     }
                   },
@@ -464,11 +462,11 @@ module.exports = {
                   ],
                   resources: {
                     limits: {
-                      cpu: 0.2,
+                      cpu: '200m',
                       memory: '200Mi'
                     },
                     requests: {
-                      cpu: 0.1,
+                      cpu: '100m',
                       memory: '50Mi'
                     }
                   },
@@ -607,14 +605,13 @@ module.exports = {
                   ],
                   'image': 'arobson/alpine-util:latest',
                   'name': 'create-cert',
-                  'ports': [],
                   'resources': {
                     'limits': {
-                      'cpu': 0.2,
+                      'cpu': '200m',
                       'memory': '200Mi'
                     },
                     'requests': {
-                      'cpu': 0.1,
+                      'cpu': '100m',
                       'memory': '50Mi'
                     }
                   },
@@ -693,7 +690,6 @@ module.exports = {
             spec: {
               containers: [
                 {
-                  env: [],
                   image: 'nginx:1.13-alpine',
                   name: 'proxy',
                   ports: [
@@ -710,11 +706,11 @@ module.exports = {
                   ],
                   resources: {
                     limits: {
-                      cpu: 0.2,
+                      cpu: '200m',
                       memory: '200Mi'
                     },
                     requests: {
-                      cpu: 0.1,
+                      cpu: '100m',
                       memory: '50Mi'
                     }
                   },

@@ -32,11 +32,11 @@ module.exports = {
               resources: {
                 requests: {
                   memory: '500Mi',
-                  cpu: 0.5
+                  cpu: '500m'
                 },
                 limits: {
                   memory: '1024Mi',
-                  cpu: 1
+                  cpu: '1000m'
                 }
               },
               command: [

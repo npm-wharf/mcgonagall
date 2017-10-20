@@ -175,10 +175,17 @@ function getContainer (config) {
 
   const container = {
     name: config.name,
-    image: config.image,
-    env: env,
-    ports: ports
+    image: config.image
   }
+
+  if (env.length) {
+    container.env = env
+  }
+
+  if (ports.length) {
+    container.ports = ports
+  }
+
   Object.assign(container, resources)
 
   if (config.command) {

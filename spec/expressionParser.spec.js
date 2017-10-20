@@ -155,11 +155,11 @@ describe('Expression Parser', function () {
         resources: {
           requests: {
             memory: '500Mi',
-            cpu: 0.50
+            cpu: '500m'
           },
           limits: {
             memory: '1024Mi',
-            cpu: 1.25
+            cpu: '1250m'
           }
         }
       })
@@ -174,11 +174,11 @@ describe('Expression Parser', function () {
           resources: {
             requests: {
               memory: '750Mi',
-              cpu: 0.75
+              cpu: '750m'
             },
             limits: {
               memory: '1536Mi',
-              cpu: 1.5
+              cpu: '1500m'
             }
           },
           storage: {
@@ -195,7 +195,7 @@ describe('Expression Parser', function () {
           resources: {
             requests: {
               memory: '750Mi',
-              cpu: 0.75
+              cpu: '750m'
             }
           },
           storage: {
@@ -212,7 +212,7 @@ describe('Expression Parser', function () {
           resources: {
             limits: {
               memory: '1536Mi',
-              cpu: 1.5
+              cpu: '1500m'
             }
           }
         }

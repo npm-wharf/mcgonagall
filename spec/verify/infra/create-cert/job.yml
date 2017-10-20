@@ -35,14 +35,13 @@ spec:
               value: Software
             - name: FQN
               value: '*.test.com'
-          ports: []
           resources:
             requests:
               memory: 50Mi
-              cpu: 0.1
+              cpu: 100m
             limits:
               memory: 200Mi
-              cpu: 0.2
+              cpu: 200m
           command:
             - /etc/create-cert/create-cert.sh
           securityContext:

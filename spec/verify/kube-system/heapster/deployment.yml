@@ -20,15 +20,13 @@ spec:
       containers:
         - name: heapster
           image: 'gcr.io/google_containers/heapster-amd64:v1.3.0'
-          env: []
-          ports: []
           resources:
             requests:
               memory: 50Mi
-              cpu: 0.1
+              cpu: 100m
             limits:
               memory: 200Mi
-              cpu: 0.2
+              cpu: 200m
           command:
             - /heapster
             - '--source=kubernetes:https://kubernetes.default'
