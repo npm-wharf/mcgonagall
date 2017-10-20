@@ -550,11 +550,8 @@ module.exports = {
           'namespace': 'infra'
         },
         'spec': {
-          'autoSelector': true,
           'completions': 1,
-          'failedJobsHistoryLimit': 2,
           'parallelism': 1,
-          'successfulJobsHistoryLimit': 2,
           'template': {
             'metadata': {
               'labels': {

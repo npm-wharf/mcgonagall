@@ -397,9 +397,6 @@ function getJob (config) {
         name: config.name
       },
       spec: {
-        autoSelector: true,
-        successfulJobsHistoryLimit: config.deployment.history || 1,
-        failedJobsHistoryLimit: config.deployment.history || 1,
         parallelism: config.scale.containers,
         completions: config.deployment.completions || config.scale.containers,
         template: {
