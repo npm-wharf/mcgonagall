@@ -64,7 +64,7 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
-          upgradeStrategy: {
+          updateStrategy: {
             type: 'RollingUpdate'
           },
           serviceName: 'chrono',
@@ -294,7 +294,7 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
-          upgradeStrategy: {
+          updateStrategy: {
             type: 'RollingUpdate'
           },
           serviceName: 'influx',
@@ -432,7 +432,7 @@ module.exports = {
         spec: {
           replicas: 1,
           revisionHistoryLimit: 1,
-          upgradeStrategy: {
+          updateStrategy: {
             type: 'RollingUpdate'
           },
           serviceName: 'kapacitor',

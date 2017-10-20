@@ -15,7 +15,7 @@ module.exports = {
       serviceName: 'datums',
       replicas: 2,
       revisionHistoryLimit: 1,
-      upgradeStrategy: {
+      updateStrategy: {
         type: 'RollingUpdate'
       },
       template: {

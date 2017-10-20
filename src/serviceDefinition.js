@@ -555,7 +555,7 @@ function getStatefulSet (config) {
         serviceName: config.service.alias,
         replicas: config.scale.containers,
         revisionHistoryLimit: config.deployment.history || 1,
-        upgradeStrategy: {
+        updateStrategy: {
           type: 'RollingUpdate'
         },
         template: {
