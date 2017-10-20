@@ -16,10 +16,7 @@ module.exports = {
       replicas: 2,
       revisionHistoryLimit: 1,
       upgradeStrategy: {
-        rollingUpdate: {
-          maxUnavailable: 1,
-          maxSurge: 1
-        }
+        type: 'RollingUpdate'
       },
       template: {
         metadata: {

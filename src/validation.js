@@ -5,7 +5,7 @@ const serviceDefinition = {
   metadata: Joi.string(),
   stateful: Joi.boolean(),
   image: Joi.string().required(),
-  command: Joi.string(),
+  command: Joi.alternatives().try([ Joi.string(), Joi.array().items(Joi.string()) ]),
   scale: {
     containers: Joi.number().integer().required(),
     ram: Joi.string().regex(/^(\s*[<>]\s*[.0-9]+([ ]?Ki|[ ]?Mi|[ ]?Gi))+$/, 'ram scale factors'),

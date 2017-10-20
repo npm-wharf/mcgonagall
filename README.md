@@ -496,8 +496,8 @@ The following table provides a reference for which properties are valid for whic
 |   | Deployment  | StatefulSet | DaemonSet | Job/Cron Job |
 |--:|:-:|:-:|:-:|:-:|
 | `pull` | √ | √ | √ | √ |
-| `unavailable` | √ | √ |   |   |
-| `surge` | √ | √ |   |   |
+| `unavailable` | √ |   |   |   |
+| `surge` | √ |   |   |   |
 | `deadline` | √ | √ |   | √ |
 | `ready` | √ | √ |   |   |
 | `history` | √ | √ | √ |   |

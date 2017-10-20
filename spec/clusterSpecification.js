@@ -65,10 +65,7 @@ module.exports = {
           replicas: 1,
           revisionHistoryLimit: 1,
           upgradeStrategy: {
-            rollingUpdate: {
-              maxUnavailable: 1,
-              maxSurge: 1
-            }
+            type: 'RollingUpdate'
           },
           serviceName: 'chrono',
           template: {
@@ -300,10 +297,7 @@ module.exports = {
           replicas: 1,
           revisionHistoryLimit: 1,
           upgradeStrategy: {
-            rollingUpdate: {
-              maxUnavailable: 1,
-              maxSurge: 1
-            }
+            type: 'RollingUpdate'
           },
           serviceName: 'influx',
           template: {
@@ -441,10 +435,7 @@ module.exports = {
           replicas: 1,
           revisionHistoryLimit: 1,
           upgradeStrategy: {
-            rollingUpdate: {
-              maxUnavailable: 1,
-              maxSurge: 1
-            }
+            type: 'RollingUpdate'
           },
           serviceName: 'kapacitor',
           template: {

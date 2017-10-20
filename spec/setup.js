@@ -13,7 +13,6 @@ function deepCompare (a, b, k) {
   if (b === undefined) {
     diffs.push('expected ' + k + ' to equal ' + a + ' but was undefined ')
   } else if (isObject(a) || Array.isArray(a)) {
-    // _.each(a, function (v, c) {
     for (let c in a) {
       var key = k ? [ k, c ].join('.') : c
       diffs = diffs.concat(deepCompare(a[ c ], b[ c ], key))

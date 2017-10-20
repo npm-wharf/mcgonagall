@@ -20,12 +20,12 @@ const DEPLOYMENT_DEFAULTS = {
 function buildService (config) {
   const result = validation.validateConfig(config)
   if (result.error) {
-    return result
+    console.log(result.error)
+    throw new Error(`Error building specification for '${config.name}' due to validation errors:\n\t${result.error}`)
   }
   const [name, namespace] = config.name.split('.')
   config.name = name
   config.namespace = namespace
-  config.service = config.service || {}
 
   const definition = {
     fqn: [name, namespace].join('.'),
@@ -552,10 +552,7 @@ function getStatefulSet (config) {
         replicas: config.scale.containers,
         revisionHistoryLimit: config.deployment.history || 1,
         upgradeStrategy: {
-          rollingUpdate: {
-            maxUnavailable: config.deployment.unavailable,
-            maxSurge: config.deployment.surge
-          }
+          type: 'RollingUpdate'
         },
         template: {
           metadata: {
@@ -644,9 +641,8 @@ function parseTOMLContent (apiVersion, raw, addConfigFile) {
   if (addConfigFile) {
     config.addConfigFile = addConfigFile
   }
-  if (!config.deployment) {
-    config.deployment = {}
-  }
+  config.deployment = config.deployment || {}
+  config.service = config.service || {}
   config.deployment = Object.assign({}, DEPLOYMENT_DEFAULTS, config.deployment)
   return omitEmptyKeys(buildService(config))
 }

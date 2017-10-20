@@ -84,7 +84,7 @@ function getResourceAmount (resource, regex, set) {
 }
 
 function parseArgs (expression) {
-  return { args: expression.split(' ') }
+  return { args: Array.isArray(expression) ? expression : expression.split(' ') }
 }
 
 function parseCLIProbe (expression) {
@@ -105,7 +105,9 @@ function parseCLIProbe (expression) {
 }
 
 function parseCommand (expression) {
-  if (/\n/.test(expression)) {
+  if (Array.isArray(expression)) {
+    return {command: expression}
+  } else if (/\n/.test(expression)) {
     return {command: [ expression.replace(/\t/g, '  ') ]}
   } else {
     return {command: expression.split(' ')}
