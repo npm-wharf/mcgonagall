@@ -4,6 +4,7 @@ const path = require('path')
 const service = require('./serviceDefinition')
 const tar = require('tar')
 const toml = require('toml-j0.4')
+const git = require('simple-git/promise')
 
 const CLUSTER_FILE = 'cluster.toml'
 const SERVER_DEFINITION_REGEX = /[$]SERVER_DEFINITIONS[$]/
@@ -49,6 +50,48 @@ function expandTarball (fullPath) {
     file: fullPath,
     C: extractTo
   })
+  .then(
+    () => extractTo,
+    err => {
+      throw new Error(`Could not extract the tarball at '${fullPath}':\n\t${err.message}`)
+    }
+  )
+}
+
+function fetchGitRepo (fullPath, options) {
+  const gitBasePath = path.resolve(
+    options.gitBasePath || process.env.GIT_BASE_PATH || path.join(process.cwd(), 'git')
+  )
+  const gitPath = [gitBasePath].concat(fullPath.split('/').slice(-2)).join('/')
+  if (!fs.existSync(gitBasePath)) {
+    fs.mkdirSync(gitBasePath)
+  }
+
+  if (options.branch) {
+    return git
+      .clone(fullPath, gitPath)
+      .checkout(options.branch)
+      .then(
+        () => gitPath,
+        err => {
+          throw new Error(`Could not clone git repository ${fullPath} and branch ${options.branch}:\n\t${err.message}`)
+        }
+      )
+  } else {
+    return git
+      .clone(fullPath, gitPath)
+      .then(
+        () => gitPath,
+        err => {
+          throw new Error(`Could not clone git repository ${fullPath}:\n\t${err.message}`)
+        }
+      )
+  }
+}
+
+function isGitUrl (fullPath) {
+  // uh yeah ... this is probably too simple ...
+  return /^git[:@]|^https?[:]/.test(fullPath)
 }
 
 function loadClusterFile (fullPath) {
@@ -62,16 +105,22 @@ function loadClusterFile (fullPath) {
 }
 
 function getClusterConfig (fullPath, options) {
-  let wait = Promise.resolve(true)
+  let wait = Promise.resolve(fullPath)
   if (path.extname(fullPath) === '.tgz') {
     fullPath = path.dirname(fullPath)
     wait = expandTarball(fullPath)
+  } else if (isGitUrl(fullPath)) {
+    wait = fetchGitRepo(fullPath, options)
   }
+  let clusterPath
   return wait
-    .then(() => loadClusterFile(fullPath))
+    .then(x => {
+      clusterPath = x
+      return loadClusterFile(clusterPath)
+    })
     .then(config => {
       const cluster = processConfig(config, options)
-      return processDefinitions(fullPath, cluster)
+      return processDefinitions(clusterPath, cluster)
         .then(services => {
           const keys = Object.keys(services)
           keys.forEach(key => {
@@ -182,6 +231,8 @@ function processService (cluster, serviceName, service) {
 
 module.exports = {
   expandTarball: expandTarball,
+  fetchGitRepo: fetchGitRepo,
+  isGitUrl: isGitUrl,
   loadClusterFile: loadClusterFile,
   getClusterConfig: getClusterConfig,
   processConfig: processConfig,

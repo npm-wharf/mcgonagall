@@ -14,6 +14,11 @@ require('yargs') // eslint-disable-line no-unused-expressions
         alias: 'v',
         describe: 'the Kubernetes API to build manifests for',
         default: '1.7'
+      },
+      gitBasePath: {
+        alias: 'g',
+        describe: 'the base path to clone git repos into',
+        default: path.join(process.cwd(), 'git')
       }
     },
     handler: (argv) => {
@@ -22,7 +27,11 @@ require('yargs') // eslint-disable-line no-unused-expressions
         process.exit(100)
       }
       mcgonagall
-        .transfigure(argv.source, { version: argv.apiVersion, output: argv.target })
+        .transfigure(argv.source, {
+          version: argv.apiVersion,
+          output: argv.target,
+          gitBasePath: argv.gitBasePath
+        })
         .then(
           result => {
             if (argv.target) {
