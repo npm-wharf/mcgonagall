@@ -30,7 +30,9 @@
   },
   "homepage": "https://github.com/npm/mcgonagall#readme",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "globulesce": "^1.0.0",
+    "inquirer": "^3.3.0",
     "joi": "^10.6.0",
     "js-yaml": "^3.10.0",
     "mkdirp": "^0.5.1",

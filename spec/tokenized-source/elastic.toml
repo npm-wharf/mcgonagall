@@ -1,0 +1,18 @@
+name = "elasticsearch.<%= namespace %>"
+image = "elasticsearch:5.5.1-alpine"
+
+[env]
+  NETWORK_HOST = "0.0.0.0"
+
+[ports]
+  primary = "9200"
+  secondary = "9200"
+
+[mount]
+  es-data = "/usr/share/elasticsearch/data"
+
+[volume]
+  es-data = "20Gi"
+
+[service]
+  alias = "es"

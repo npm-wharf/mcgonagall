@@ -118,15 +118,26 @@ function parseCommand (expression) {
 function parseConfigBlock (name, block) {
   const keys = Object.keys(block)
   return keys.reduce((acc, key) => {
-    acc.push({
-      name: key,
-      valueFrom: {
-        configMapKeyRef: {
-          name: name,
-          key: block[key]
+    if (name === 'fieldRef') {
+      acc.push({
+        name: key,
+        valueFrom: {
+          fieldRef: {
+            fieldPath: block[key]
+          }
         }
-      }
-    })
+      })
+    } else {
+      acc.push({
+        name: key,
+        valueFrom: {
+          configMapKeyRef: {
+            name: name,
+            key: block[key]
+          }
+        }
+      })
+    }
     return acc
   }, [])
 }

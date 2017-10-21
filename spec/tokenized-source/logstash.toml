@@ -1,0 +1,16 @@
+name = "logstash.<%=namespace%>"
+image = "docker.elastic.co/logstash/logstash:5.5.1"
+command = "logstash -f /usr/share/logstash/pipeline/elasticsearch-pipeline.conf"
+
+[env]
+  SERVER_NAME = "logs.<%=domain%>"
+  ELASTICSEARCH_URL = "http://elasticsearch.<%=namespace%>:9200"
+
+[ports]
+  logstash = "5044"
+
+[mounts]
+  config = "/usr/share/logstash/pipeline/"
+
+[volumes]
+  config = "logstash-config::elasticsearch-pipeline.conf"

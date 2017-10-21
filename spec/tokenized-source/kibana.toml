@@ -1,0 +1,9 @@
+name = "kibana.<%=namespace%>"
+image = "kibana:5.5.1"
+
+[env]
+  SERVER_NAME = "logs.<%=domain%>"
+  ELASTICSEARCH_URL = "http://elasticsearch.<%=namespace%>:9200"
+
+[ports]
+  kibana = "5601"

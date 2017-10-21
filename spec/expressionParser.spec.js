@@ -140,6 +140,39 @@ describe('Expression Parser', function () {
         ]
       )
     })
+
+    it('should differentiate between config map and fieldRef variables', function () {
+      expressionParser.parseEnvironmentBlock({
+        ONE: 'http://test:8080',
+        'fieldRef': {
+          TWO: 'spec.nodeName',
+          THREE: 'spec.otherThing'
+        }
+      }).should.eql(
+        [
+          {
+            name: 'ONE',
+            value: 'http://test:8080'
+          },
+          {
+            name: 'TWO',
+            valueFrom: {
+              fieldRef: {
+                fieldPath: 'spec.nodeName'
+              }
+            }
+          },
+          {
+            name: 'THREE',
+            valueFrom: {
+              fieldRef: {
+                fieldPath: 'spec.otherThing'
+              }
+            }
+          }
+        ]
+      )
+    })
   })
 
   describe('scale parsers', function () {

@@ -1,0 +1,20 @@
+{
+  "namespaces": [
+    "infra"
+  ],
+  "order": {
+    "0": [
+      "elasticsearch.infra"
+    ],
+    "1": [
+      "kibana.infra",
+      "logstash.infra",
+      "filebeat.infra"
+    ]
+  },
+  "levels": [
+    0,
+    1
+  ],
+  "apiVersion": "1.7"
+}

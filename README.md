@@ -21,7 +21,15 @@ npm i mcgonagall
 
 ### `mcgonagall.transfigure(source)`
 
-With only the path to the specification (either files or a tarball containing them), mcgonagall returns the full cluster specification as JSON:
+The source can be a:
+
+ * path to a folder
+ * path to a tarball
+ * URL to a git repository
+
+Files can be nested to arbitrary folder levels (to help with organizing large specifications).
+
+With only the path to the specification mcgonagall returns the full cluster specification as JSON:
 
 ```js
 {
@@ -96,6 +104,31 @@ mcgonagall
   )
 ```
 
+### Tokenized Specifications
+
+mcgonagall also support tokenized specifications that use the LoDash style tokens (`<%= %>`). To provide data for the tokens, use the `data` property on the `options` argument:
+
+```js
+const mcgonagall = require('mcgonagall')
+
+mcgonagall
+  .transfigure('./path/to/source', { 
+    output: './path/to/output', 
+    version: '1.6',
+    data: {
+      token1: 'value',
+      token2: 100
+    }
+  })
+  .then(
+    done => {}
+    err => {
+      // if any tokens do not have a value provided, an error containing the
+      // missing tokens under `tokens` property will be returned
+    }
+  )
+```
+
 ## CLI
 
 The CLI allows you to get immediate output without having to write any code so you can test your specifications on the command line.
@@ -112,6 +145,12 @@ mcgonagall transfigure ./input << ./cluster.json
 ```shell
 mcgonagall transfigure ./input ./output
 ```
+
+### Tokenized Specifications
+
+mcgonagall's tokenized specifications support for the CLI will prompt you to supply a value for each of the tokens found in the specification. 
+
+To avoid the prompts, you can use the `--tokenFile` argument and supply an input file with key/values to supply the tokens. As with the API call, if any tokens are missing, the call will fail but in this case the CLI will attempt to get any additional tokens via interactive prompts.
 
 ## Specifications
 

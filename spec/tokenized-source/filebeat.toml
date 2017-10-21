@@ -1,0 +1,21 @@
+name = "filebeat.<%=namespace%>"
+image = "prima/filebeat:5.5.1"
+command = "filebeat -e -c /etc/filebeat/filebeat.yml"
+
+[env]
+  LOGSTASH_HOSTS = "logstash:5044"
+  LOG_LEVEL = "info"
+  [env.fieldRef]
+    FILEBEAT_HOST = "spec.nodeName"
+
+[mounts]
+  config = "/etc/filebeat"
+  varlog = "/var/log/containers"
+  varlogpods = "/var/log/pods"
+  varlibdocker = "/var/lib/docker/containers"
+
+[volumes]
+  config = "filebeat-config::filebeat.yml"
+  varlog = "/var/log/containers"
+  varlogpods = "/var/log/pods"
+  varlibdocker = "/var/lib/docker/containers"

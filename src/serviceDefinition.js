@@ -1,8 +1,10 @@
+const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
 const expressionParser = require('./expressionParser')
 const toml = require('toml-j0.4')
 const validation = require('./validation')
+const tokenizer = require('./tokenizer')
 
 /** `Object#toString` result references. */
 const BOOL_TAG = '[object Boolean]'
@@ -20,7 +22,6 @@ const DEPLOYMENT_DEFAULTS = {
 function buildService (config) {
   const result = validation.validateConfig(config)
   if (result.error) {
-    console.log(result.error)
     throw new Error(`Error building specification for '${config.name}' due to validation errors:\n\t${result.error}`)
   }
   const [name, namespace] = config.name.split('.')
@@ -148,11 +149,13 @@ function getContainer (config) {
   let env = []
   let ports = []
 
-  if (config.scale.ram) {
-    expressionParser.addResource(resources, 'ram', config.scale.ram)
-  }
-  if (config.scale.cpu) {
-    expressionParser.addResource(resources, 'cpu', config.scale.cpu)
+  if (config.scale) {
+    if (config.scale.ram) {
+      expressionParser.addResource(resources, 'ram', config.scale.ram)
+    }
+    if (config.scale.cpu) {
+      expressionParser.addResource(resources, 'cpu', config.scale.cpu)
+    }
   }
   if (config.env) {
     env = expressionParser.parseEnvironmentBlock(config.env)
@@ -311,7 +314,7 @@ function getDaemonSet (config) {
         name: config.name
       },
       spec: {
-        replicas: config.scale.containers,
+        replicas: config.scale ? config.scale.containers : 1,
         revisionHistoryLimit: config.deployment.history,
         template: {
           metadata: {
@@ -351,7 +354,7 @@ function getDeployment (config) {
         name: config.name
       },
       spec: {
-        replicas: config.scale.containers,
+        replicas: config.scale ? config.scale.containers : 1,
         revisionHistoryLimit: config.deployment.history,
         strategy: {
           rollingUpdate: {
@@ -628,19 +631,29 @@ function isObject (value) {
   return value != null && (type === 'object' || type === 'function')
 }
 
-function parseTOMLFile (apiVersion, filePath, addConfigFile) {
+function parseTOMLFile (filePath, options = {}) {
+  const addConfigFile = options.addConfigFile
   const fullPath = path.resolve(filePath)
   try {
     const raw = fs.readFileSync(fullPath, 'utf8')
     const addFile = addConfigFile ? addConfigFile.bind(null, path.dirname(fullPath)) : null
-    return parseTOMLContent(apiVersion, raw, addFile)
+    options.addConfigFile = addFile
+    options.file = fullPath
+    return parseTOMLContent(raw, options)
   } catch (ex) {
     throw new Error(`Failed to parse TOML file ${fullPath}: ${ex.message}, ${ex.stack}`)
   }
 }
 
-function parseTOMLContent (apiVersion, raw, addConfigFile) {
-  const config = toml.parse(raw)
+function parseTOMLContent (raw, options = {}) {
+  const apiVersion = options.apiVersion || '1.7'
+  const addConfigFile = options.addConfigFile
+  let config
+  if (tokenizer.hasTokens(raw)) {
+    config = toml.parse(_.template(raw)(options.data))
+  } else {
+    config = toml.parse(raw)
+  }
   config.apiVersion = apiVersion
   if (addConfigFile) {
     config.addConfigFile = addConfigFile

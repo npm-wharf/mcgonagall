@@ -10,12 +10,12 @@ const deploymentManifest = require('./deployment-manifest')
 
 describe('Kube Definition', function () {
   it('should create kubernetes manifests from definition', function () {
-    serviceDefinition.parseTOMLContent('1.7', definition1)
+    serviceDefinition.parseTOMLContent(definition1, {apiVersion: '1.7'})
       .should.eql(statefulManifest)
   })
 
   it('should create kubernetes manifests from definition', function () {
-    serviceDefinition.parseTOMLFile('1.7', './spec/deployment1.toml')
+    serviceDefinition.parseTOMLFile('./spec/deployment1.toml', {apiVersion: '1.7'})
       .should.eql(deploymentManifest)
   })
 })

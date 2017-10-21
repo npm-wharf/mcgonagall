@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const fs = require('fs')
 const glob = require('globulesce')
 const path = require('path')
@@ -5,11 +6,12 @@ const service = require('./serviceDefinition')
 const tar = require('tar')
 const toml = require('toml-j0.4')
 const git = require('simple-git/promise')
+const tokenizer = require('./tokenizer')
 
 const CLUSTER_FILE = 'cluster.toml'
 const SERVER_DEFINITION_REGEX = /[$]SERVER_DEFINITIONS[$]/
 
-function addConfigFile (cluster, parentFilePath, key, relativePath, filePath) {
+function addConfigFile (cluster, options, parentFilePath, key, relativePath, filePath) {
   let map
   const [namespace, name] = key.split('.')
   cluster.configuration.forEach(m => {
@@ -31,7 +33,11 @@ function addConfigFile (cluster, parentFilePath, key, relativePath, filePath) {
     cluster.configuration.push(map)
   }
   const fullPath = path.resolve(parentFilePath, relativePath)
-  map.data[relativePath] = fs.readFileSync(fullPath, 'utf8')
+  let content = fs.readFileSync(fullPath, 'utf8')
+  if (tokenizer.hasTokens(content)) {
+    content = _.template(content)(options.data)
+  }
+  map.data[relativePath] = content
   if (relativePath === 'nginx.conf' && SERVER_DEFINITION_REGEX.test(map.data[relativePath])) {
     cluster.replaceNginxToken = function () {
       let content = getNginxServerConfig(cluster)
@@ -63,29 +69,52 @@ function fetchGitRepo (fullPath, options) {
     options.gitBasePath || process.env.GIT_BASE_PATH || path.join(process.cwd(), 'git')
   )
   const gitPath = [gitBasePath].concat(fullPath.split('/').slice(-2)).join('/')
-  if (!fs.existSync(gitBasePath)) {
+  if (!fs.existsSync(gitBasePath)) {
     fs.mkdirSync(gitBasePath)
   }
 
-  if (options.branch) {
-    return git
-      .clone(fullPath, gitPath)
-      .checkout(options.branch)
-      .then(
-        () => gitPath,
-        err => {
-          throw new Error(`Could not clone git repository ${fullPath} and branch ${options.branch}:\n\t${err.message}`)
-        }
-      )
+  if (fs.existsSync(gitPath)) {
+    if (options.branch) {
+      return git()
+        .pull('origin', options.branch)
+        .checkout(options.branch)
+        .then(
+          () => gitPath,
+          err => {
+            throw new Error(`Could not pull latest from git repository ${fullPath} and branch ${options.branch}:\n\t${err.message}`)
+          }
+        )
+    } else {
+      return git()
+        .pull('origin', 'master')
+        .then(
+          () => gitPath,
+          err => {
+            throw new Error(`Could not pull latest from git repository ${fullPath}:\n\t${err.message}`)
+          }
+        )
+    }
   } else {
-    return git
-      .clone(fullPath, gitPath)
-      .then(
-        () => gitPath,
-        err => {
-          throw new Error(`Could not clone git repository ${fullPath}:\n\t${err.message}`)
-        }
-      )
+    if (options.branch) {
+      return git()
+        .clone(fullPath, gitPath)
+        .checkout(options.branch)
+        .then(
+          () => gitPath,
+          err => {
+            throw new Error(`Could not clone git repository ${fullPath} and branch ${options.branch}:\n\t${err.message}`)
+          }
+        )
+    } else {
+      return git()
+        .clone(fullPath, gitPath)
+        .then(
+          () => gitPath,
+          err => {
+            throw new Error(`Could not clone git repository ${fullPath}:\n\t${err.message}`)
+          }
+        )
+    }
   }
 }
 
@@ -94,11 +123,15 @@ function isGitUrl (fullPath) {
   return /^git[:@]|^https?[:]/.test(fullPath)
 }
 
-function loadClusterFile (fullPath) {
+function loadClusterFile (options, fullPath) {
   const clusterFile = path.join(fullPath, CLUSTER_FILE)
   try {
     const txt = fs.readFileSync(clusterFile, 'utf8')
-    return toml.parse(txt)
+    if (tokenizer.hasTokens(txt)) {
+      return toml.parse(_.template(txt)(options.data))
+    } else {
+      return toml.parse(txt)
+    }
   } catch (e) {
     throw new Error(`Could not load the cluster configuration file, '${clusterFile}' due to error: ${e.message}`)
   }
@@ -112,28 +145,14 @@ function getClusterConfig (fullPath, options) {
   } else if (isGitUrl(fullPath)) {
     wait = fetchGitRepo(fullPath, options)
   }
-  let clusterPath
   return wait
     .then(x => {
-      clusterPath = x
-      return loadClusterFile(clusterPath)
+      options.clusterPath = x
+      return getTokenList(x)
     })
-    .then(config => {
-      const cluster = processConfig(config, options)
-      return processDefinitions(clusterPath, cluster)
-        .then(services => {
-          const keys = Object.keys(services)
-          keys.forEach(key => {
-            if (cluster.services[key]) {
-              Object.assign(cluster.services[key], services[key])
-            } else {
-              cluster.services[key] = services[key]
-            }
-          })
-          cluster.replaceNginxToken()
-          return cluster
-        })
-    })
+    .then(onTokens.bind(null, options))
+    .then(loadClusterFile.bind(null, options))
+    .then(onConfig.bind(null, options))
 }
 
 function getNginxServerConfig (cluster) {
@@ -148,6 +167,52 @@ function getNginxServerConfig (cluster) {
     }
     return acc
   }, []).join('\n\n')
+}
+
+function getTokenList (fullPath) {
+  return glob(fullPath, ['**/*.toml'])
+    .then(files => {
+      return _.uniq(_.flatten(
+        files.map(file => {
+          const content = fs.readFileSync(file, 'utf8')
+          return tokenizer.getTokens(content)
+        })))
+    })
+}
+
+function onConfig (options, config) {
+  const cluster = processConfig(config, options)
+  return processDefinitions(options.clusterPath, cluster, options)
+    .then(services => {
+      const keys = Object.keys(services)
+      keys.forEach(key => {
+        if (cluster.services[key]) {
+          Object.assign(cluster.services[key], services[key])
+        } else {
+          cluster.services[key] = services[key]
+        }
+      })
+      if (cluster.replaceNginxToken) {
+        cluster.replaceNginxToken()
+      }
+      return cluster
+    })
+}
+
+function onTokens (options, tokens) {
+  const missing = tokens.reduce((acc, token) => {
+    if (tokens.length && (!options.data || !options.data[token])) {
+      acc.push(token)
+    }
+    return acc
+  }, [])
+  if (missing.length) {
+    const err = new Error(`Cluster specification at '${options.clusterPath}' contains tokens which were not provided`)
+    err.tokens = missing
+    err.specPath = path.resolve(options.clusterPath)
+    throw err
+  }
+  return options.clusterPath
 }
 
 function processConfig (config, options = {}) {
@@ -194,12 +259,16 @@ function processConfigMap (data, key) {
   }
 }
 
-function processDefinitions (fullPath, cluster) {
+function processDefinitions (fullPath, cluster, options) {
   return glob(fullPath, ['**/*.toml'])
     .then(files => {
       return files.reduce((acc, file) => {
         if (!/cluster[.]toml/.test(file)) {
-          const definition = service.parseTOMLFile(cluster.apiVersion, file, addConfigFile.bind(null, cluster))
+          const definition = service.parseTOMLFile(file, {
+            apiVersion: cluster.apiVersion,
+            addConfigFile: addConfigFile.bind(null, cluster, options),
+            data: options.data
+          })
           acc[definition.fqn] = definition
         }
         return acc
@@ -235,6 +304,7 @@ module.exports = {
   isGitUrl: isGitUrl,
   loadClusterFile: loadClusterFile,
   getClusterConfig: getClusterConfig,
+  getTokenList: getTokenList,
   processConfig: processConfig,
   processDefinitions: processDefinitions,
   processNamespace: processNamespace,

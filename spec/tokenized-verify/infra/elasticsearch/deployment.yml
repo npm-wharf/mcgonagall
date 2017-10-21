@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: infra
+  name: elasticsearch
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: 'elasticsearch:5.5.1-alpine'
+          env:
+            - name: NETWORK_HOST
+              value: 0.0.0.0
+          ports:
+            - name: primary
+              containerPort: 9200
+              protocol: TCP
+            - name: secondary
+              containerPort: 9200
+              protocol: TCP
+          resources: {}

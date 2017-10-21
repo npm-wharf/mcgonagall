@@ -1,0 +1,8 @@
+[<%= namespace %>.elasticsearch]
+  order = 0
+[<%= namespace %>.kibana]
+  order = 1
+[<%= namespace %>.logstash]
+  order = 1
+[<%= namespace %>.filebeat]
+  order = 1
