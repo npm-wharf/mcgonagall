@@ -140,7 +140,6 @@ function loadClusterFile (options, fullPath) {
 function getClusterConfig (fullPath, options) {
   let wait = Promise.resolve(fullPath)
   if (/([.]tgz|[.]tar)/.test(path.extname(fullPath))) {
-    fullPath = path.dirname(fullPath)
     wait = expandTarball(fullPath)
   } else if (isGitUrl(fullPath)) {
     wait = fetchGitRepo(fullPath, options)
