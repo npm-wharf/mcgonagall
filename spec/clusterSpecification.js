@@ -10,6 +10,17 @@ module.exports = {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
+        name: 'config',
+        namespace: 'infra'
+      },
+      data: {
+        test: 'hello'
+      }
+    },
+    {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
         name: 'nginx-files',
         namespace: 'infra'
       },

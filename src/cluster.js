@@ -246,15 +246,15 @@ function processConfigMaps (config) {
 }
 
 function processConfigMap (data, key) {
-  const [namespace, name] = key.split('.')
+  const name = Object.keys(data)[0]
   return {
     apiVersion: 'v1',
     kind: 'ConfigMap',
     metadata: {
       name: name,
-      namespace: namespace
+      namespace: key
     },
-    data: data
+    data: data[name]
   }
 }
 
