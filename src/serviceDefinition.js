@@ -532,8 +532,24 @@ function getService (config) {
     }
   }
 
+  if (_.some(service.spec.ports, port => port.nodePort)) {
+    service.spec.type = 'NodePort'
+  }
+
   if (config.service.loadbalance || config.service.loadBalance) {
+    const policy = (config.service.loadbalance || config.service.loadBalance)
     service.spec.type = 'LoadBalancer'
+    if (_.isString(policy)) {
+      service.spec.externalTrafficPolicy = policy
+    }
+  }
+
+  if (config.service.affinity) {
+    service.spec.sessionAffinity = 'ClientIP'
+  }
+
+  if (config.service.externalName || config.service.externalname) {
+    service.spec.type = 'ExternalName'
   }
 
   definition.services.push(service)

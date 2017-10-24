@@ -1,3 +1,4 @@
+
 # mcgonagall
 
 Transfigures terse cluster and service specifications in TOML into Kubernetes manifests.
@@ -357,14 +358,21 @@ Configuration map references should fall under a block that includes the configu
 
 ### [ports]
 
-The ports block controls which ports will be exposed by the container and registered with DNS. TCP is the assumed protocol unless `.udp` is postfixed to the port.
+The ports block controls which ports will be exposed by the container, how they will be exposed, and how they will be registered with DNS. TCP is the assumed protocol unless `.udp` is postfixed to the port.
+
+ * a port number by itself creates a container and target port
+ * adding a number to the left of an `<=` changes the target port
+ * adding a number to the right of an `=>` adds a node port
+ * a `.tcp` or `.udp` postfix is always added to the container port (the "center" number)
 
 #### example
 
 ```toml
 [ports]
-  http = "80"
-  https = "443"
+  http = "80" # creates a containerPort 80 targeting port 80
+  https = "80<=443" # creates a containerPort 443 targeting port 80
+  node = "8000=>8081" creates a container and targer port at 8000 with a node port at 8081
+  all = "80<=8080=>8080" creates a container port 8080 targeting port 80 and a nodePort on 8080
   idk = "5050.udp"
 ```
 
@@ -469,10 +477,12 @@ Each check can also support the following, optional, comma delimited, arguments 
 This section controls how the service is exposed via Kubernetes internal DNS and, potentially, via ingress points.
 
  * `subdomain` - controls if and how the service will be exposed via an nginx container (by convention)
- * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress.
+ * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress. It can be set to a string to change the `externalTrafficPolicy`
  * `alias` - optionally changes the default DNS registration for the service
  * `labels` - optionally add metadata.labels to the service definition (a Kubernetes convention)
  * `annotations` optionally add annotations to the service which can change certain behaviors (uncommon)
+ * `affinity` - `false` by default. Setting it to `true` currently makes load balancing use client IP for "sticky" session style behaviors.
+ * `externalName` - Used to change the service to an `ExternalName` type and return a CNAME from the `kube-dns`.
 
 
 > Note: the `serviceAlias` is intended for use with StatefulSets to serve as the secondary namespace given to each named pod instance in DNS. If this is gibberish to you now, don't worry, as you learn about Kubernetes it will start to make sense.

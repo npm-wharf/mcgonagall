@@ -3,6 +3,7 @@ const REQUIREMENT_REGEX = /[>]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
 const STORAGE_REGEX = /([a-zA-Z0-9]+)\s*[+]\s*([0-9]+)Gi/
 const LIMIT_REGEX = /[<]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
 const HTTP_PROBE_REGEX = /^[:]([0-9]+)([/a-zA-Z_\-0-9]+)/
+const SERVICE_PORTS = /(([0-9]+)<=)?(([0-9]+)[.]?(tcp|udp)?)(=>([0-9]+))?$/
 
 const accessModes = {
   exclusive: 'ReadWriteOnce',
@@ -148,11 +149,10 @@ function parseContainer (expression) {
 }
 
 function parseContainerPort (name, expression) {
-  const [portString, protocol] = expression.split('.')
-  const port = parseInt(portString)
+  const [ , , target, , container, protocol, , ] = SERVICE_PORTS.exec(expression)
   return {
     name: name,
-    containerPort: port,
+    containerPort: parseInt(target || container),
     protocol: (protocol || 'tcp').toUpperCase()
   }
 }
@@ -258,14 +258,17 @@ function parseScaleFactor (expression) {
 }
 
 function parseServicePort (name, expression) {
-  const [portString, protocol] = expression.split('.')
-  const port = parseInt(portString)
-  return {
+  const [, , target, , container, protocol, , node] = SERVICE_PORTS.exec(expression)
+  const ports = {
     name: name,
-    port: port,
-    targetPort: port,
+    port: parseInt(container),
+    targetPort: parseInt(target || container),
     protocol: (protocol || 'tcp').toUpperCase()
   }
+  if (node) {
+    ports.nodePort = parseInt(node)
+  }
+  return ports
 }
 
 function parseStore (name, expression, namespace) {

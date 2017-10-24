@@ -252,4 +252,100 @@ describe('Expression Parser', function () {
       )
     })
   })
+
+  describe('port parsers', function () {
+    it('should parse service container port', function () {
+      expressionParser.parsePorts({http: '8080'}, true)
+        .should.eql([
+          {
+            name: 'http',
+            port: 8080,
+            targetPort: 8080,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse service container and target port', function () {
+      expressionParser.parsePorts({http: '8000<=8080'}, true)
+        .should.eql([
+          {
+            name: 'http',
+            port: 8080,
+            targetPort: 8000,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse service container and node port', function () {
+      expressionParser.parsePorts({http: '8080=>80'}, true)
+        .should.eql([
+          {
+            name: 'http',
+            port: 8080,
+            targetPort: 8080,
+            nodePort: 80,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse service container, target and node port', function () {
+      expressionParser.parsePorts({http: '8000<=8080=>80'}, true)
+        .should.eql([
+          {
+            name: 'http',
+            port: 8080,
+            targetPort: 8000,
+            nodePort: 80,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse container port', function () {
+      expressionParser.parsePorts({http: '8080'})
+        .should.eql([
+          {
+            name: 'http',
+            containerPort: 8080,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse container and target port', function () {
+      expressionParser.parsePorts({http: '8000<=8080'})
+        .should.eql([
+          {
+            name: 'http',
+            containerPort: 8000,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse container and node port', function () {
+      expressionParser.parsePorts({http: '8080=>80'})
+        .should.eql([
+          {
+            name: 'http',
+            containerPort: 8080,
+            protocol: 'TCP'
+          }
+        ])
+    })
+
+    it('should parse container, target and node port', function () {
+      expressionParser.parsePorts({http: '8000<=8080=>80'})
+        .should.eql([
+          {
+            name: 'http',
+            containerPort: 8000,
+            protocol: 'TCP'
+          }
+        ])
+    })
+  })
 })
