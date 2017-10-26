@@ -1,8 +1,8 @@
 [<%= namespace %>.elasticsearch]
-  order = <%= elkStart %>
+  order = <%= elk-start %>
 [<%= namespace %>.kibana]
-  order = <%= elkStart + 1 %>
+  order = <%= elk-start + 1 %>
 [<%= namespace %>.logstash]
-  order = <%= elkStart + 1 %>
+  order = <%= elk-start + 1 %>
 [<%= namespace %>.filebeat]
-  order = <%= elkStart + 1 %>
+  order = <%= elk-start + 1 %>
