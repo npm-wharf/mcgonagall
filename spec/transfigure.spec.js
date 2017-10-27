@@ -42,7 +42,9 @@ describe('Transfiguration', function () {
       return index.transfigure('./spec/tokenized-source', {
         data: {
           domain: 'test.com',
-          namespace: 'infra'
+          namespace: 'infra',
+          username: 'admin',
+          password: 'pass'
         }
       })
       .then(cluster => {
@@ -119,7 +121,9 @@ describe('Transfiguration', function () {
         output: './spec/tokenized-target',
         data: {
           namespace: 'infra',
-          domain: 'test.com'
+          domain: 'test.com',
+          username: 'admin',
+          password: 'pass'
         }
       })
         .then(cluster => {
@@ -170,7 +174,7 @@ describe('Transfiguration', function () {
   describe('from a tokenized git repo with a target directory', function () {
     let verifyHash
     before(function () {
-      return hasher.hashElement('./spec/tokenized-verify')
+      return hasher.hashElement('./spec/git-verify')
         .then(hash => {
           verifyHash = hash
         })

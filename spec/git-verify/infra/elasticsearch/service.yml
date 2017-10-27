@@ -1,0 +1,19 @@
+- apiVersion: v1
+  kind: Service
+  metadata:
+    namespace: infra
+    name: es
+    labels:
+      app: es
+  spec:
+    selector:
+      app: elasticsearch
+    ports:
+      - name: primary
+        port: 9200
+        targetPort: 9200
+        protocol: TCP
+      - name: secondary
+        port: 9200
+        targetPort: 9200
+        protocol: TCP

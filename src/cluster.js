@@ -7,9 +7,13 @@ const tar = require('tar')
 const toml = require('toml-j0.4')
 const git = require('simple-git/promise')
 const tokenizer = require('./tokenizer')
+const hasher = require('./hasher')
 
 const CLUSTER_FILE = 'cluster.toml'
+const GIT_URL_REGEX = /(https[:][/]{2}|git[:][/]{2}|git[@])([^/]+)(([/]|[:])([^/]+))([/]([^/:]+))([:]([a-z0-9_.-]+))?/i
 const SERVER_DEFINITION_REGEX = /[$]SERVER_DEFINITIONS[$]/
+
+_.templateSettings.imports.hash = hasher.hash
 
 function addConfigFile (cluster, options, parentFilePath, key, relativePath, filePath) {
   let map
@@ -68,16 +72,18 @@ function fetchGitRepo (fullPath, options) {
   const gitBasePath = path.resolve(
     options.gitBasePath || process.env.GIT_BASE_PATH || path.join(process.cwd(), 'git')
   )
-  const gitPath = [gitBasePath].concat(fullPath.split('/').slice(-2)).join('/')
+  const gitInfo = parseGitUrl(fullPath)
+  const branch = gitInfo.tag || options.branch
+  const gitPath = [gitBasePath].concat(gitInfo.owner, gitInfo.repo).join('/')
   if (!fs.existsSync(gitBasePath)) {
     fs.mkdirSync(gitBasePath)
   }
 
   if (fs.existsSync(gitPath)) {
-    if (options.branch) {
+    if (branch) {
       return git()
-        .pull('origin', options.branch)
-        .checkout(options.branch)
+        .pull('origin', branch)
+        .checkout(branch)
         .then(
           () => gitPath,
           err => {
@@ -95,10 +101,10 @@ function fetchGitRepo (fullPath, options) {
         )
     }
   } else {
-    if (options.branch) {
+    if (branch) {
       return git()
         .clone(fullPath, gitPath)
-        .checkout(options.branch)
+        .checkout(branch)
         .then(
           () => gitPath,
           err => {
@@ -212,6 +218,17 @@ function onTokens (options, tokens) {
     throw err
   }
   return options.clusterPath
+}
+
+function parseGitUrl (url) {
+  const [ , protocol, server, , , owner, , repo, , tag ] = GIT_URL_REGEX.exec(url)
+  return {
+    protocol,
+    server,
+    owner,
+    repo,
+    tag
+  }
 }
 
 function processConfig (config, options = {}) {

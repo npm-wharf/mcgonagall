@@ -1,0 +1,44 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: infra
+  name: logstash
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: 'docker.elastic.co/logstash/logstash:5.5.1'
+          env:
+            - name: SERVER_NAME
+              value: logs.test.com
+            - name: ELASTICSEARCH_URL
+              value: 'http://elasticsearch.infra:9200'
+          ports:
+            - name: logstash
+              containerPort: 5044
+              protocol: TCP
+          resources: {}
+          command:
+            - logstash
+            - '-f'
+            - /usr/share/logstash/pipeline/elasticsearch-pipeline.conf
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/logstash/pipeline/
+      volumes:
+        - name: config
+          configMap:
+            name: logstash-config
+            items:
+              - key: elasticsearch-pipeline.conf
+                path: elasticsearch-pipeline.conf

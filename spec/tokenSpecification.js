@@ -1,6 +1,6 @@
+const _ = require('lodash')
 const path = require('path')
 const fs = require('fs')
-const _ = require('lodash')
 
 const PIPELINE = fs.readFileSync(path.resolve('./spec/tokenized-source', 'elasticsearch-pipeline.conf'), 'utf8')
 const FILEBEAT = fs.readFileSync(path.resolve('./spec/tokenized-source', 'filebeat.yml'), 'utf8')
@@ -407,6 +407,147 @@ module.exports = {
           }
         }
       }
+    },
+    'proxy.infra': {
+      'fqn': 'proxy.infra',
+      'name': 'proxy',
+      'namespace': 'infra',
+      'services': [
+        {
+          'apiVersion': 'v1',
+          'kind': 'Service',
+          'metadata': {
+            'namespace': 'infra',
+            'name': 'proxy',
+            'labels': {
+              'app': 'proxy'
+            }
+          },
+          'spec': {
+            'selector': {
+              'app': 'proxy'
+            },
+            'ports': [
+              {
+                'name': 'http',
+                'port': 80,
+                'targetPort': 80,
+                'protocol': 'TCP'
+              },
+              {
+                'name': 'https',
+                'port': 443,
+                'targetPort': 443,
+                'protocol': 'TCP'
+              }
+            ],
+            'type': 'LoadBalancer'
+          }
+        }
+      ],
+      'deployment': {
+        'apiVersion': 'apps/v1beta1',
+        'kind': 'Deployment',
+        'metadata': {
+          'namespace': 'infra',
+          'name': 'proxy'
+        },
+        'spec': {
+          'replicas': 2,
+          'revisionHistoryLimit': 2,
+          'strategy': {
+            'rollingUpdate': {
+              'maxUnavailable': 1,
+              'maxSurge': '100%'
+            }
+          },
+          'template': {
+            'metadata': {
+              'labels': {
+                'app': 'proxy'
+              }
+            },
+            'spec': {
+              'containers': [
+                {
+                  'name': 'proxy',
+                  'image': 'nginx:1.13-alpine',
+                  'ports': [
+                    {
+                      'name': 'http',
+                      'containerPort': 80,
+                      'protocol': 'TCP'
+                    },
+                    {
+                      'name': 'https',
+                      'containerPort': 443,
+                      'protocol': 'TCP'
+                    }
+                  ],
+                  'resources': {
+                    'requests': {
+                      'memory': '50Mi',
+                      'cpu': '100m'
+                    },
+                    'limits': {
+                      'memory': '200Mi',
+                      'cpu': '200m'
+                    }
+                  },
+                  'volumeMounts': [
+                    {
+                      'name': 'config-files',
+                      'mountPath': '/etc/nginx'
+                    },
+                    {
+                      'name': 'cert-files',
+                      'mountPath': '/etc/nginx/cert'
+                    },
+                    {
+                      'name': 'auth-files',
+                      'mountPath': '/etc/nginx/auth'
+                    }
+                  ]
+                }
+              ],
+              'volumes': [
+                {
+                  'name': 'config-files',
+                  'configMap': {
+                    'name': 'nginx-files',
+                    'items': [
+                      {
+                        'key': 'nginx.conf',
+                        'path': 'nginx.conf'
+                      }
+                    ]
+                  }
+                },
+                {
+                  'name': 'cert-files',
+                  'secret': {
+                    'secretName': 'ssl'
+                  }
+                },
+                {
+                  'name': 'auth-files',
+                  'configMap': {
+                    'name': 'auth-file',
+                    'items': [
+                      {
+                        'key': 'htpasswd',
+                        'path': 'htpasswd'
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          'progressDeadlineSeconds': 30,
+          'minReadySeconds': 10
+        }
+      }
     }
   },
   'order': {
@@ -445,6 +586,28 @@ module.exports = {
       },
       'data': {
         'elasticsearch-pipeline.conf': _.template(PIPELINE)({namespace: 'infra'})
+      }
+    },
+    {
+      'apiVersion': 'v1',
+      'kind': 'ConfigMap',
+      'metadata': {
+        'name': 'nginx-files',
+        'namespace': 'infra'
+      },
+      'data': {
+        'nginx.conf': 'events {\n  worker_connections  1024;\n}\n\nhttp {\n  sendfile    on;\n  tcp_nopush  on;\n  tcp_nodelay on;\n\n  keepalive_timeout     60;\n  types_hash_max_size   2048;\n  client_max_body_size  100m;\n\n  include       mime.types;\n  default_type  application/octet-stream;\n  access_log    /var/log/nginx/access.log;\n  error_log     /var/log/nginx/error.log;\n\n  gzip                on;\n  gzip_vary           on;\n  gzip_proxied        any;\n  gzip_comp_level     6;\n  gzip_buffers 16     8k;\n  gzip_http_version   1.1;\n  gzip_types          text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;\n\n  upstream k8s {\n    server kubernetes-dashboard.kube-system:80;\n  }\n\n    server {\n      listen    443 ssl;\n      listen    [::]:443 ssl;\n      root      /usr/share/nginx/html;\n\n      ssl on;\n      ssl_certificate       "/etc/nginx/cert/cert.pem";\n      ssl_certificate_key   "/etc/nginx/cert/cert.pem";\n\n      ssl_session_cache shared:SSL:1m;\n      ssl_session_timeout 10m;\n      ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\n      ssl_ciphers HIGH:SEED:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!RSAPSK:!aDH:!aECDH:!EDH-DSS-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA:!SRP;\n      ssl_prefer_server_ciphers on;\n\n      auth_basic           "authorization required";\n      auth_basic_user_file /etc/nginx/auth/htpasswd;\n\n      server_name   ~^logs[.].*$;\n\n      location / {\n        resolver            kube-dns.kube-system valid=1s;\n        set $server         kibana.infra.svc.cluster.local:5601;\n        rewrite             ^/(.*) /$1 break;\n        proxy_pass          http://$server;\n        proxy_set_header    Host $host;\n        proxy_set_header    X-Real-IP $remote_addr;\n        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header    X-Forwarded-Proto $scheme;\n      }\n    }\n\n}\n'
+      }
+    },
+    {
+      'apiVersion': 'v1',
+      'kind': 'ConfigMap',
+      'metadata': {
+        'name': 'auth-file',
+        'namespace': 'infra'
+      },
+      'data': {
+        'htpasswd': 'admin:$2a$10$Gc0JyHlN.yqqdHw8.yhUZu.6WSpyV0uoT5sMMEt8HSynupsDO6tbe\n'
       }
     }
   ]

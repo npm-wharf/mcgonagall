@@ -7,3 +7,6 @@ image = "kibana:5.5.1"
 
 [ports]
   kibana = "5601"
+
+[service]
+  subdomain = "logs"

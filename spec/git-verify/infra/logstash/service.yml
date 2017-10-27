@@ -1,0 +1,15 @@
+- apiVersion: v1
+  kind: Service
+  metadata:
+    namespace: infra
+    name: logstash
+    labels:
+      app: logstash
+  spec:
+    selector:
+      app: logstash
+    ports:
+      - name: logstash
+        port: 5044
+        targetPort: 5044
+        protocol: TCP

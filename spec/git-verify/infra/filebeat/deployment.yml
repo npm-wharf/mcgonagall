@@ -1,0 +1,63 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: infra
+  name: filebeat
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+        - name: filebeat
+          image: 'prima/filebeat:5.5.1'
+          env:
+            - name: LOGSTASH_HOSTS
+              value: 'logstash:5044'
+            - name: LOG_LEVEL
+              value: info
+            - name: FILEBEAT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources: {}
+          command:
+            - filebeat
+            - '-e'
+            - '-c'
+            - /etc/filebeat/filebeat.yml
+          volumeMounts:
+            - name: config
+              mountPath: /etc/filebeat
+            - name: varlog
+              mountPath: /var/log/containers
+            - name: varlogpods
+              mountPath: /var/log/pods
+            - name: varlibdocker
+              mountPath: /var/lib/docker/containers
+      volumes:
+        - name: config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yml
+                path: filebeat.yml
+        - name: varlog
+          hostPath:
+            path: /var/log/containers
+            type: Directory
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+            type: Directory
+        - name: varlibdocker
+          hostPath:
+            path: /var/lib/docker/containers
+            type: Directory

@@ -1,0 +1,59 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: infra
+  name: proxy
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 100%
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      containers:
+        - name: proxy
+          image: 'nginx:1.13-alpine'
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 100m
+            limits:
+              memory: 200Mi
+              cpu: 200m
+          volumeMounts:
+            - name: config-files
+              mountPath: /etc/nginx
+            - name: cert-files
+              mountPath: /etc/nginx/cert
+            - name: auth-files
+              mountPath: /etc/nginx/auth
+      volumes:
+        - name: config-files
+          configMap:
+            name: nginx-files
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+        - name: cert-files
+          secret:
+            secretName: ssl
+        - name: auth-files
+          configMap:
+            name: auth-file
+            items:
+              - key: htpasswd
+                path: htpasswd
+  progressDeadlineSeconds: 30
+  minReadySeconds: 10

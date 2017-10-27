@@ -5,6 +5,7 @@ const expressionParser = require('./expressionParser')
 const toml = require('toml-j0.4')
 const validation = require('./validation')
 const tokenizer = require('./tokenizer')
+const nginxLocation = require('./nginxLocation')
 
 /** `Object#toString` result references. */
 const BOOL_TAG = '[object Boolean]'
@@ -17,6 +18,26 @@ const DEPLOYMENT_DEFAULTS = {
   unavailable: 1,
   surge: 1,
   history: 1
+}
+
+function addNginxBlock (relativePath, fqn) {
+  const fullPath = path.join(relativePath, 'location.conf')
+  const [, namespace] = fqn.split('.')
+  if (fs.existsSync(fullPath)) {
+    nginxLocation.addBlock(fqn, fullPath)
+  } else {
+    fs.readdirSync(relativePath).forEach(f => {
+      if (/.*location.conf$/.test(f)) {
+        const [ n, ns, , ] = f.split('.')
+        if (ns === 'location') {
+          fqn = [n, namespace].join('.')
+        } else {
+          fqn = [n, ns].join('.')
+        }
+        nginxLocation.addBlock(fqn, path.join(relativePath, f))
+      }
+    })
+  }
 }
 
 function buildService (config) {
@@ -76,35 +97,14 @@ function buildService (config) {
 function buildNginxBlock (config) {
   const fqdn = [config.name, config.namespace].join('.')
   const port = config.port
-  return { nginxBlock: `
-    server {
-      listen    443 ssl;
-      listen    [::]:443 ssl;
-      root      /usr/shar/nginx/html;
-
-      ssl on;
-      ssl_certificate       "/etc/nginx/cert/cert.pem";
-      ssl_certificate_key   "/etc/nginx/cert/cert.pem";
-
-      ssl_session_cache shared:SSL:1m;
-      ssl_session_timeout 10m;
-      ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-      ssl_ciphers HIGH:SEED:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!RSAPSK:!aDH:!aECDH:!EDH-DSS-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA:!SRP;
-      ssl_prefer_server_ciphers on;
-
-      server_name   ~^${config.service.subdomain}[.].*$;
-
-      location / {
-        resolver            kube-dns.kube-system valid=1s;
-        set $server         ${fqdn}.svc.cluster.local:${port};
-        rewrite             ^/(.*) /$1 break;
-        proxy_pass          http://$server;
-        proxy_set_header    Host $host;
-        proxy_set_header    X-Real-IP $remote_addr;
-        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Proto $scheme;
-      }
-    }` }
+  const subdomain = config.service.subdomain
+  const data = {
+    port,
+    subdomain,
+    fqdn
+  }
+  const nginxBlock = nginxLocation.getBlock(fqdn, data)
+  return {nginxBlock}
 }
 
 function clone (source, target) {
@@ -652,9 +652,11 @@ function parseTOMLFile (filePath, options = {}) {
   const fullPath = path.resolve(filePath)
   try {
     const raw = fs.readFileSync(fullPath, 'utf8')
-    const addFile = addConfigFile ? addConfigFile.bind(null, path.dirname(fullPath)) : null
+    const relativePath = path.dirname(fullPath)
+    const addFile = addConfigFile ? addConfigFile.bind(null, relativePath) : null
     options.addConfigFile = addFile
     options.file = fullPath
+    options.relativePath = relativePath
     return parseTOMLContent(raw, options)
   } catch (ex) {
     throw new Error(`Failed to parse TOML file ${fullPath}: ${ex.message}, ${ex.stack}`)
@@ -674,7 +676,9 @@ function parseTOMLContent (raw, options = {}) {
   if (addConfigFile) {
     config.addConfigFile = addConfigFile
   }
-  config.deployment = config.deployment || {}
+  if (options.relativePath) {
+    addNginxBlock(options.relativePath, config.name)
+  }
   config.service = config.service || {}
   config.deployment = Object.assign({}, DEPLOYMENT_DEFAULTS, config.deployment)
   return omitEmptyKeys(buildService(config))

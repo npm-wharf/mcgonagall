@@ -130,6 +130,23 @@ mcgonagall
   )
 ```
 
+### Secrets In Tokens
+
+If the token name matches any of the following, then it will be hidden in the CLI:
+
+ * ends in `pass`
+ * contains `password`, `passwd`
+ * contains `secret`, `secrt`, `scrt`, or `secure`
+
+You can also hash tokens passed in so that they don't appear in clear text in your manifests using the `hash` method that looks like this:
+
+```js
+<%= hash('bcrypt', myVar) %> // base64 is the default
+<%= hash('md5', myVar, 'hex') %>
+```
+
+See Use Cases for examples.
+
 ## CLI
 
 The CLI allows you to get immediate output without having to write any code so you can test your specifications on the command line.
@@ -235,9 +252,11 @@ Any configuration files that are mounted via volume mapping will get plugged int
 
 #### NGiNX Conf
 
-A special case for an `nginx.conf` file is made when it contains the tag `$SERVER_DEFINITIONS$`. Any service specification with a `subdomain` provided will have an nginx block generated for it and placed in the `nginx.conf` file in place of the `$SERVER_DEFINITIONS$`
+A special case for an `nginx.conf` file is made when it contains the tag `$SERVER_DEFINITIONS$`. Specifications with a `subdomain` in their `[service]` block will have an nginx location block  generated. All blocks generated this way will replace the `$SERVER_DEFINITIONS$` token in the `nginx.conf` file before it's placed in a ConfigMap manifest and stored in Kubernetes where it can be volume mounted to your NGiNX container.
 
 This provides a simple way to handle dynamic, load-balanced ingress across containers.
+
+You can see examples of this in action in the `/spec` folder under the `plain-source` (specs) and `plain-verify` (output) as well as the `tokenized-source` (specs) and `tokenized-verify` (output) folders.
 
 ## Service Specification
 
@@ -476,7 +495,7 @@ Each check can also support the following, optional, comma delimited, arguments 
 
 This section controls how the service is exposed via Kubernetes internal DNS and, potentially, via ingress points.
 
- * `subdomain` - controls if and how the service will be exposed via an nginx container (by convention)
+ * `subdomain` - controls whether an NGiNX block will be omitted for the service
  * `loadBalance` - `false` by default. Typically this should only be included on the NGiNX container used to handle ingress. It can be set to a string to change the `externalTrafficPolicy`
  * `alias` - optionally changes the default DNS registration for the service
  * `labels` - optionally add metadata.labels to the service definition (a Kubernetes convention)
@@ -585,6 +604,92 @@ Examples:
  * `* 20 * * 1-5` - every weekday at 8 PM
  * `* 1,4 * * * 0,5` - at 1am and 4am on Friday and Sunday
  * `* 0 1,15 * *` - midnight on the 1st and 15th of every month
+
+
+# Use Cases
+
+## Customizing All NGiNX Location Blocks
+
+mcgonagall generates NGiNX location blocks for any resource with a `subdomain` property in its `[service]` block.
+
+**default block**
+```text
+    server {
+      listen    443 ssl;
+      listen    [::]:443 ssl;
+      root      /usr/share/nginx/html;
+
+      ssl on;
+      ssl_certificate       "<%=certPath%>";
+      ssl_certificate_key   "<%=certKey%>";
+
+      ssl_session_cache shared:SSL:1m;
+      ssl_session_timeout 10m;
+      ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+      ssl_ciphers HIGH:SEED:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!RSAPSK:!aDH:!aECDH:!EDH-DSS-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA:!SRP;
+      ssl_prefer_server_ciphers on;
+
+      server_name   ~^<%=subdomain%>[.].*$;
+
+      location / {
+        resolver            kube-dns.kube-system valid=1s;
+        set $server         <%=fqdn%>.svc.cluster.local:<%=port%>;
+        rewrite             ^/(.*) /$1 break;
+        proxy_pass          http://$server;
+        proxy_set_header    Host $host;
+        proxy_set_header    X-Real-IP $remote_addr;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto $scheme;
+      }
+    }
+```
+
+You can change the default block by placing a file named `default.location.conf` at the root of your project, next to the `cluster.toml` and mcgonagall will read it in and use it in place of its own.
+
+mcgonagall will supply all the tokens to the template.
+
+## Customizing Specific NGiNX Location Blocks
+
+You can further override default NGiNX blocks per service by placing a `location.conf` in the folder next to the resource's `toml` spec. If multiple `toml` specs are in the same folder, you can specify which one the location file is for by prefixing it with the fqdn of the resource: `name.namespace.location.conf`
+
+## Securing NGiNX Ingress via htpasswd
+
+To secure your NGiNX endpoints using an htpasswd, you can avoid a pre-generated file and putting the username and password in clear text in your manifests.
+
+Each approach will prompt you for a username and password during deployment and mask the password in the CLI. The bcrypted password would be placed in either a manifest or an output file pulled into a config/secret source.
+
+### 
+An alternative would be to store an `htpasswd` file next to your NGiNX spec itself with the contents:
+
+```bash
+<%= userName %>:<%= hash('bcrypt', password) %>
+```
+
+Then reference the file from your NGiNX `toml` via a config mount:
+
+```toml
+[mount]
+  auth = "/etc/nginx/auth"
+
+[volume]
+  auth = "auth::htpasswd"
+```
+
+The following lines can be added to any NGiNX block to secure it with the password:
+
+```bash
+  auth_basic           "closed site";
+  auth_basic_user_file /etc/nginx/auth/htpasswd;
+```
+
+### Stored As Environment
+```toml
+[env]
+  AUTH = "<%= userName %>:<%= hash('bcrypt', password) %>"
+```
+
+This gives you more flexibility to pick the value up and add it to a file but requires additional work. An upside to this is you can use this to seed a job with the value and have it stored and then build mechanisms to allow you to change it later and roll your NGiNX containers as a result.
+
 
 [travis-url]: https://travis-ci.com/npm/mcgonagall
 [travis-image]: https://travis-ci.com/npm/mcgonagall.svg?token=nx7pjhpjyWEn4WyoMujZ&branch=master

@@ -1,0 +1,30 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: infra
+  name: kibana
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+        - name: kibana
+          image: 'kibana:5.5.1'
+          env:
+            - name: SERVER_NAME
+              value: logs.test.com
+            - name: ELASTICSEARCH_URL
+              value: 'http://elasticsearch.infra:9200'
+          ports:
+            - name: kibana
+              containerPort: 5601
+              protocol: TCP
+          resources: {}

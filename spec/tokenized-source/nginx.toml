@@ -1,0 +1,31 @@
+name = "proxy.infra"
+image = "nginx:1.13-alpine"
+
+[scale]
+  containers = 2
+  ram = "> 50 Mi < 200 Mi"
+  cpu = "> 10% < 20%"
+
+[ports]
+  http = "80"
+  https = "443"
+
+[mounts]
+  config-files = "/etc/nginx"
+  cert-files = "/etc/nginx/cert"
+  auth-files = "/etc/nginx/auth"
+
+[volumes]
+  config-files = "nginx-files::nginx.conf"
+  cert-files = "secret::ssl"
+  auth-files = "auth-file::htpasswd"
+
+[deployment]
+  unavailable = 1
+  surge = "100%"
+  deadline = 30
+  ready = 10
+  history = 2
+
+[service]
+  loadBalance = true

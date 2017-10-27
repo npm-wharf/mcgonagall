@@ -1,35 +1,22 @@
 {
-  "name": "mcgonagall",
-  "version": "1.2.0",
-  "description": "transfigures toml cluster and service specifications into Kubernetes manifests",
-  "main": "src/index.js",
+  "_id": "mcgonagall@1.2.0",
+  "_inBundle": true,
+  "_location": "/@arobson/hikaru/mcgonagall",
+  "_phantomChildren": {},
+  "_requiredBy": [
+    "/@arobson/hikaru"
+  ],
+  "author": {
+    "name": "Alex Robson"
+  },
   "bin": {
     "mcgonagall": "./bin/mcgonagall.js"
   },
-  "scripts": {
-    "pretest": "standard",
-    "test": "./node_modules/mocha/bin/mocha ./spec/*.spec.js",
-    "coverage": "nyc npm test",
-    "continuous": "./node_modules/mocha/bin/mocha spec/*.spec.js -w",
-    "release": "standard-version",
-    "standard": "standard --fix"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/npm/mcgonagall.git"
-  },
-  "keywords": [
-    "kubernetes",
-    "service",
-    "specification"
-  ],
-  "author": "Alex Robson",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/npm/mcgonagall/issues"
   },
-  "homepage": "https://github.com/npm/mcgonagall#readme",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.5.1",
     "globulesce": "^1.0.0",
     "inquirer": "^3.3.0",
@@ -41,6 +28,7 @@
     "toml-j0.4": "^1.1.1",
     "yargs": "^9.0.1"
   },
+  "description": "transfigures toml cluster and service specifications into Kubernetes manifests",
   "devDependencies": {
     "chai": "^4.1.1",
     "chai-as-promised": "^7.1.1",
@@ -57,9 +45,32 @@
     "standard": "^10.0.3",
     "standard-version": "^4.2.0"
   },
+  "gitHead": "b02d01b04cd64d3d86a620f2be41b6160387aa6a",
+  "homepage": "https://github.com/npm/mcgonagall#readme",
+  "keywords": [
+    "kubernetes",
+    "service",
+    "specification"
+  ],
+  "license": "ISC",
+  "main": "src/index.js",
+  "name": "mcgonagall",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/npm/mcgonagall.git"
+  },
+  "scripts": {
+    "continuous": "./node_modules/mocha/bin/mocha spec/*.spec.js -w",
+    "coverage": "nyc npm test",
+    "pretest": "standard",
+    "release": "standard-version",
+    "standard": "standard --fix",
+    "test": "./node_modules/mocha/bin/mocha ./spec/*.spec.js"
+  },
   "standard": {
     "env": [
       "mocha"
     ]
-  }
+  },
+  "version": "1.2.1"
 }
