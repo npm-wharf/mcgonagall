@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/npm/mcgonagall/compare/v1.2.0...v1.3.0) (2017-10-27)
+
+
+### Bug Fixes
+
+* allow dash character in token names ([ab51ae2](https://github.com/npm/mcgonagall/commit/ab51ae2))
+
+
+### Features
+
+* add hash support for tokens and support for secure token collection in the CLI ([695d6ba](https://github.com/npm/mcgonagall/commit/695d6ba))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/npm/mcgonagall/compare/v1.2.0...v1.2.1) (2017-10-27)
 
