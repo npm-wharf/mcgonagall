@@ -407,7 +407,7 @@ function getJob (config) {
         name: config.name
       },
       spec: {
-        parallelism: config.scale.containers,
+        parallelism: config.scale ? config.scale.containers : 1,
         completions: config.deployment.completions || config.scale.containers,
         template: {
           metadata: {
@@ -572,7 +572,7 @@ function getStatefulSet (config) {
       },
       spec: {
         serviceName: config.service.alias,
-        replicas: config.scale.containers,
+        replicas: config.scale ? config.scale.containers : 1,
         revisionHistoryLimit: config.deployment.history || 1,
         updateStrategy: {
           type: 'RollingUpdate'
