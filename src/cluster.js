@@ -248,7 +248,7 @@ function processConfig (config, options = {}) {
       processNamespace(config, cluster, name, namespace)
     }
   })
-  cluster.levels = Array.from(cluster.levels)
+  cluster.levels = Array.from(cluster.levels).map(x => parseInt(x))
   cluster.levels.sort()
   cluster.configuration = processConfigMaps(config.configuration || {})
   return cluster
