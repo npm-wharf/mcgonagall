@@ -249,7 +249,7 @@ function processConfig (config, options = {}) {
     }
   })
   cluster.levels = Array.from(cluster.levels).map(x => parseInt(x))
-  cluster.levels.sort()
+  cluster.levels.sort((x, y) => x - y)
   cluster.configuration = processConfigMaps(config.configuration || {})
   return cluster
 }

@@ -43,7 +43,7 @@ module.exports = {
     }
   ],
   apiVersion: '1.7',
-  levels: [0, 1, 2],
+  levels: [0, 10, 50, 100],
   namespaces: [
     'kube-system',
     'infra',
@@ -51,15 +51,17 @@ module.exports = {
   ],
   order: {
     0: [
-      'heapster.kube-system',
+      'heapster.kube-system'
+    ],
+    10: [
       'create-cert.infra'
     ],
-    1: [
+    50: [
       'chronograf.data',
       'influxdb.data',
       'kapacitor.data'
     ],
-    2: [
+    100: [
       'proxy.infra'
     ]
   },
@@ -150,7 +152,7 @@ module.exports = {
       fqn: 'chronograf.data',
       name: 'chronograf',
       namespace: 'data',
-      order: 1,
+      order: 50,
       scale: {
         small: '+0'
       },
@@ -376,7 +378,7 @@ module.exports = {
       fqn: 'influxdb.data',
       name: 'influxdb',
       namespace: 'data',
-      order: 1,
+      order: 50,
       scale: {
         small: '+0'
       },
@@ -514,7 +516,7 @@ module.exports = {
       fqn: 'kapacitor.data',
       name: 'kapacitor',
       namespace: 'data',
-      order: 1,
+      order: 50,
       scale: {
         small: '+0'
       },
@@ -550,7 +552,7 @@ module.exports = {
       'name': 'create-cert',
       'namespace': 'infra',
       'fqn': 'create-cert.infra',
-      'order': 0,
+      'order': 10,
       'job': {
         'apiVersion': 'batch/v1',
         'kind': 'Job',
@@ -668,7 +670,7 @@ module.exports = {
       fqn: 'proxy.infra',
       name: 'proxy',
       namespace: 'infra',
-      order: 2,
+      order: 100,
       scale: {
         large: '+2',
         medium: '+1',
