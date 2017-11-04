@@ -8,7 +8,7 @@ Transfigures terse cluster and service specifications in TOML into Kubernetes ma
 
 ## Goal
 
-mcgonagall provides TOML specifications that focus on the desired end state in high level terms, separate from technical implementation detail. mcgonagall does not provide implementation of Kubernetes API calls, its focus is solely the "transfiguration" of one specification to another.
+mcgonagall provides TOML specifications that focus on the desired end state in high level terms, separate from technical implementation detail. mcgonagall does not provide implementation of Kubernetes API calls or of the entire manifest surface area. Its focus is solely the "transfiguration" of an opinionated specification to compatible Kubernetes manifests.
 
 ## Installation
 
@@ -690,6 +690,13 @@ The following lines can be added to any NGiNX block to secure it with the passwo
 
 This gives you more flexibility to pick the value up and add it to a file but requires additional work. An upside to this is you can use this to seed a job with the value and have it stored and then build mechanisms to allow you to change it later and roll your NGiNX containers as a result.
 
+## Unsupported Manifest Types
+
+mcgonagall is an opinionated specification and so it doesn't (and can't really) support every possible manifest permutation available (nor do we really want it to).
+
+Sometimes there will be custom manifests (like the etcd operator cluster manifests) that you may want to use in order to take advantage of really nice features. Rather than trying to build support for every possible Kubernetes extension into mcgonagall, there is support for including raw Kubernetes manifests in the cluster output.
+
+To do this, change the extension of the manifest to `.raw.yml` and mcgonagall will read the manifest into the cluster data structure directly. Tokenization is still supported for these, but no other transformations will take place. It is important to understand that the namespace and name of the manifest should still be included in the cluster so that tools like hikaru will know how and when to deploy these manifests.
 
 [travis-url]: https://travis-ci.com/npm/mcgonagall
 [travis-image]: https://travis-ci.com/npm/mcgonagall.svg?token=nx7pjhpjyWEn4WyoMujZ&branch=master

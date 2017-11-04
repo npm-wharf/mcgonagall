@@ -68,6 +68,11 @@ function write (target, config) {
         case 'statefulSet':
           writeStatefulSet(target, namespace, name, definition[type])
           break
+        default:
+          if (type && definition[type].kind) {
+            writeOther(target, namespace, name, definition[type], type)
+          }
+          break
       }
     })
   })
@@ -165,6 +170,17 @@ function writeNginx (target, namespace, name, definition) {
     fs.writeFileSync(fullPath, definition, 'utf8')
   } catch (e) {
     throw new Error(`Failed to write nginx configuration to ${fullPath} because: ${e.message}`)
+  }
+}
+
+function writeOther (target, namespace, name, definition, type) {
+  const fullPath = path.join(target, namespace, name, `${type}.yml`)
+  const yml = yaml.safeDump(definition)
+  try {
+    ensurePath(fullPath)
+    fs.writeFileSync(fullPath, yml, 'utf8')
+  } catch (e) {
+    throw new Error(`Failed to write '${type}' file type to ${fullPath} because: ${e.message}`)
   }
 }
 

@@ -1,0 +1,12 @@
+name = "etcd-operator.data"
+image = "quay.io/coreos/etcd-operator:v0.2.1"
+
+[scale]
+  containers = 1
+  ram = "> 50 Mi < 200 Mi"
+  cpu = "> 10% < 20%"
+
+[env]
+  [env.fieldRef]
+    MY_POD_NAMESPACE = "metadata.namespace"
+    MY_POD_NAME = "metadata.name"

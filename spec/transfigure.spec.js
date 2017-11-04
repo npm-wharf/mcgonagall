@@ -68,7 +68,6 @@ describe('Transfiguration', function () {
           const json2 = fs.readFileSync('./spec/plain-target/cluster.json', 'utf8')
           const c1 = JSON.parse(json1)
           const c2 = JSON.parse(json2)
-
           try {
             assert.deepStrictEqual(c1, c2)
             assert.equal(json1, json2)

@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const expressionParser = require('./expressionParser')
 const toml = require('toml-j0.4')
+const yaml = require('js-yaml')
 const validation = require('./validation')
 const tokenizer = require('./tokenizer')
 const nginxLocation = require('./nginxLocation')
@@ -647,19 +648,34 @@ function isObject (value) {
   return value != null && (type === 'object' || type === 'function')
 }
 
-function parseTOMLFile (filePath, options = {}) {
-  const addConfigFile = options.addConfigFile
+function parseRawContent (raw, options = {}) {
+  let config
+  if (tokenizer.hasTokens(raw)) {
+    config = yaml.safeLoad(_.template(raw)(options.data))
+  } else {
+    config = yaml.safeLoad(raw)
+  }
+  const set = {
+  }
+  const metadata = config.metadata
+  set.name = metadata.name
+  set.namespace = metadata.namespace || 'default'
+  set.fqn = `${set.name}.${set.namespace}`
+  const key = config.kind.slice(0, 1).toLowerCase() + config.kind.slice(1)
+  set[key] = config
+  return set
+}
+
+function parseRawFile (filePath, options = {}) {
   const fullPath = path.resolve(filePath)
   try {
     const raw = fs.readFileSync(fullPath, 'utf8')
     const relativePath = path.dirname(fullPath)
-    const addFile = addConfigFile ? addConfigFile.bind(null, relativePath) : null
-    options.addConfigFile = addFile
     options.file = fullPath
     options.relativePath = relativePath
-    return parseTOMLContent(raw, options)
+    return parseRawContent(raw, options)
   } catch (ex) {
-    throw new Error(`Failed to parse TOML file ${fullPath}: ${ex.message}, ${ex.stack}`)
+    throw new Error(`Failed to parse raw YAML file ${fullPath}: ${ex.message}, ${ex.stack}`)
   }
 }
 
@@ -684,6 +700,22 @@ function parseTOMLContent (raw, options = {}) {
   return omitEmptyKeys(buildService(config))
 }
 
+function parseTOMLFile (filePath, options = {}) {
+  const addConfigFile = options.addConfigFile
+  const fullPath = path.resolve(filePath)
+  try {
+    const raw = fs.readFileSync(fullPath, 'utf8')
+    const relativePath = path.dirname(fullPath)
+    const addFile = addConfigFile ? addConfigFile.bind(null, relativePath) : null
+    options.addConfigFile = addFile
+    options.file = fullPath
+    options.relativePath = relativePath
+    return parseTOMLContent(raw, options)
+  } catch (ex) {
+    throw new Error(`Failed to parse TOML file ${fullPath}: ${ex.message}, ${ex.stack}`)
+  }
+}
+
 function omitEmptyKeys (obj) {
   const keys = Object.keys(obj)
   keys.forEach(k => {
@@ -699,6 +731,8 @@ function omitEmptyKeys (obj) {
 
 module.exports = {
   buildService: buildService,
+  parseRawContent: parseRawContent,
+  parseRawFile: parseRawFile,
   parseTOMLFile: parseTOMLFile,
   parseTOMLContent: parseTOMLContent
 }

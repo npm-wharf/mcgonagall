@@ -175,7 +175,7 @@ function getNginxServerConfig (cluster) {
 }
 
 function getTokenList (fullPath) {
-  return glob(fullPath, ['**/*.toml'])
+  return glob(fullPath, ['**/*.+(toml|raw.yml)'])
     .then(files => {
       return _.uniq(_.flatten(
         files.map(file => {
@@ -276,13 +276,18 @@ function processConfigMap (data, key) {
 }
 
 function processDefinitions (fullPath, cluster, options) {
-  return glob(fullPath, ['**/*.toml'])
+  return glob(fullPath, ['**/*.+(toml|raw.yml)'])
     .then(files => {
       return files.reduce((acc, file) => {
-        if (!/cluster[.]toml/.test(file)) {
+        if (!/(cluster[.]toml|raw.yml)/.test(file)) {
           const definition = service.parseTOMLFile(file, {
             apiVersion: cluster.apiVersion,
             addConfigFile: addConfigFile.bind(null, cluster, options),
+            data: options.data
+          })
+          acc[definition.fqn] = definition
+        } else if (/raw.ya?ml$/.test(file)) {
+          const definition = service.parseRawFile(file, {
             data: options.data
           })
           acc[definition.fqn] = definition

@@ -1,0 +1,8 @@
+apiVersion: etcd.coreos.com/v1beta1
+kind: Cluster
+metadata:
+  name: etcd-cluster
+  namespace: data
+spec:
+  size: 2
+  version: 3.1.0

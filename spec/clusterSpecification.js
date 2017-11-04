@@ -800,6 +800,89 @@ module.exports = {
           }
         }
       ]
+    },
+    'etcd-cluster.data': {
+      'name': 'etcd-cluster',
+      'namespace': 'data',
+      'fqn': 'etcd-cluster.data',
+      'cluster': {
+        'apiVersion': 'etcd.coreos.com/v1beta1',
+        'kind': 'Cluster',
+        'metadata': {
+          'name': 'etcd-cluster',
+          'namespace': 'data'
+        },
+        'spec': {
+          'size': 2,
+          'version': '3.1.0'
+        }
+      }
+    },
+    'etcd-operator.data': {
+      'fqn': 'etcd-operator.data',
+      'name': 'etcd-operator',
+      'namespace': 'data',
+      'deployment': {
+        'apiVersion': 'apps/v1beta1',
+        'kind': 'Deployment',
+        'metadata': {
+          'namespace': 'data',
+          'name': 'etcd-operator'
+        },
+        'spec': {
+          'replicas': 1,
+          'revisionHistoryLimit': 1,
+          'strategy': {
+            'rollingUpdate': {
+              'maxUnavailable': 1,
+              'maxSurge': 1
+            }
+          },
+          'template': {
+            'metadata': {
+              'labels': {
+                'app': 'etcd-operator'
+              }
+            },
+            'spec': {
+              'containers': [
+                {
+                  'name': 'etcd-operator',
+                  'image': 'quay.io/coreos/etcd-operator:v0.2.1',
+                  'env': [
+                    {
+                      'name': 'MY_POD_NAMESPACE',
+                      'valueFrom': {
+                        'fieldRef': {
+                          'fieldPath': 'metadata.namespace'
+                        }
+                      }
+                    },
+                    {
+                      'name': 'MY_POD_NAME',
+                      'valueFrom': {
+                        'fieldRef': {
+                          'fieldPath': 'metadata.name'
+                        }
+                      }
+                    }
+                  ],
+                  'resources': {
+                    'requests': {
+                      'memory': '50Mi',
+                      'cpu': '100m'
+                    },
+                    'limits': {
+                      'memory': '200Mi',
+                      'cpu': '200m'
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   }
 }
