@@ -1,11 +1,4 @@
 {
-  "_id": "mcgonagall@1.2.0",
-  "_inBundle": true,
-  "_location": "/@arobson/hikaru/mcgonagall",
-  "_phantomChildren": {},
-  "_requiredBy": [
-    "/@arobson/hikaru"
-  ],
   "author": {
     "name": "Alex Robson"
   },
@@ -13,7 +6,7 @@
     "mcgonagall": "./bin/mcgonagall.js"
   },
   "bugs": {
-    "url": "https://github.com/npm/mcgonagall/issues"
+    "url": "https://github.com/npm-wharf/mcgonagall/issues"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
@@ -46,7 +39,7 @@
     "standard-version": "^4.2.0"
   },
   "gitHead": "b02d01b04cd64d3d86a620f2be41b6160387aa6a",
-  "homepage": "https://github.com/npm/mcgonagall#readme",
+  "homepage": "https://github.com/npm-wharf/mcgonagall#readme",
   "keywords": [
     "kubernetes",
     "service",
@@ -57,7 +50,7 @@
   "name": "mcgonagall",
   "repository": {
     "type": "git",
-    "url": "git://github.com/npm/mcgonagall.git"
+    "url": "git://github.com/npm-wharf/mcgonagall.git"
   },
   "scripts": {
     "continuous": "./node_modules/mocha/bin/mocha spec/*.spec.js -w",
