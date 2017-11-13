@@ -4,5 +4,5 @@
   order = <%= elk-start + 1 %>
 [<%= namespace %>.logstash]
   order = <%= elk-start + 1 %>
-[<%= namespace %>.filebeat]
-  order = <%= elk-start + 1 %>
+[<%= namespace %>.<%= filebeat %>]
+  order = <%= elk-start % 1 %>

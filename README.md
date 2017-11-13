@@ -698,7 +698,7 @@ Sometimes there will be custom manifests (like the etcd operator cluster manifes
 
 To do this, change the extension of the manifest to `.raw.yml` and mcgonagall will read the manifest into the cluster data structure directly. Tokenization is still supported for these, but no other transformations will take place. It is important to understand that the namespace and name of the manifest should still be included in the cluster so that tools like hikaru will know how and when to deploy these manifests.
 
-[travis-url]: https://travis-ci.com/npm/mcgonagall
-[travis-image]: https://travis-ci.com/npm/mcgonagall.svg?token=nx7pjhpjyWEn4WyoMujZ&branch=master
-[coveralls-url]: https://coveralls.io/github/npm/mcgonagall
-[coveralls-image]: https://coveralls.io/repos/github/npm/mcgonagall/badge.svg?t=A7I8EA
+[travis-url]: https://travis-ci.com/npm-wharf/mcgonagall
+[travis-image]: https://travis-ci.com/npm-wharf/mcgonagall.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/npm-wharf/mcgonagall
+[coveralls-image]: https://coveralls.io/repos/github/npm-wharf/mcgonagall/badge.svg?branch=master

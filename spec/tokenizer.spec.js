@@ -17,7 +17,8 @@ describe('Expression Parser', function () {
     tokenizer.getTokens(plain).should.eql([])
     tokenizer.getTokens(template).should.eql([
       'namespace',
-      'elk-start'
+      'elk-start',
+      'filebeat'
     ])
   })
 })

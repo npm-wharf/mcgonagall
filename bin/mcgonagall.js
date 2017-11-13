@@ -79,7 +79,11 @@ function transfigure (argv) {
           acquireTokens(err.tokens)
             .then(
               tokens => {
-                argv.data = tokens
+                if (!argv.data) {
+                  argv.data = tokens
+                } else {
+                  Object.assign(argv.data, tokens)
+                }
                 transfigure(argv)
               },
               () => {
