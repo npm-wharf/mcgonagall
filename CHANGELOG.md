@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.0"></a>
+# [1.5.0](https://github.com/npm-wharf/mcgonagall/compare/v1.4.1...v1.5.0) (2017-11-21)
+
+
+### Bug Fixes
+
+* tokenizer previously overlooked files loaded into configmap volumes during first pass. This would cause mcgonagall to under-report token lists and then fail during transfiguration when tokens had not been supplied. ([5d0ebec](https://github.com/npm-wharf/mcgonagall/commit/5d0ebec))
+
+
+### Features
+
+* support specification of scaling factor during transfiguration ([9f70016](https://github.com/npm-wharf/mcgonagall/commit/9f70016))
+
+
+
 <a name="1.4.1"></a>
 ## [1.4.1](https://github.com/npm-wharf/mcgonagall/compare/v1.4.0...v1.4.1) (2017-11-13)
 
