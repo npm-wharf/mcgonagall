@@ -181,8 +181,26 @@ function getTokenList (fullPath) {
     .then(files => {
       return _.uniq(_.flatten(
         files.map(file => {
-          const content = fs.readFileSync(file, 'utf8')
-          return tokenizer.getTokens(content)
+          let tokens = []
+          let content = fs.readFileSync(file, 'utf8')
+          const fileTokens = tokenizer.getTokens(content)
+          if (/toml$/.test(file)) {
+            if (fileTokens.length > 0) {
+              const filler = fileTokens.reduce((acc, token) => {
+                if (token !== 'hash') {
+                  acc[token] = 'empty'
+                }
+                return acc
+              }, {})
+              content = _.template(content)(filler)
+            }
+            const basePath = path.dirname(file)
+            const spec = toml.parse(content)
+            tokens = tokens.concat(service.getVolumeTokens(basePath, spec))
+          }
+
+          tokens = tokens.concat(fileTokens)
+          return tokens
         })))
     })
 }

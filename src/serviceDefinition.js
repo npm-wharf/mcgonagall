@@ -633,6 +633,27 @@ function getVolumes (config) {
   }
 }
 
+function getVolumeTokens (basePath, config) {
+  if (config.volumes) {
+    const volumeKeys = Object.keys(config.volumes)
+    return volumeKeys.reduce((acc, key) => {
+      const volumeMap = expressionParser.parseVolume(key, config.volumes[key])
+      if (volumeMap.configMap) {
+        volumeMap.configMap.items.forEach(item => {
+          const filePath = path.join(basePath, item.key)
+          if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath, 'utf8')
+            acc = acc.concat(tokenizer.getTokens(content))
+          }
+        })
+      }
+      return acc
+    }, [])
+  } else {
+    return []
+  }
+}
+
 function getVolumeClaims (config) {
   if (config.storage) {
     const storageKeys = Object.keys(config.storage)
@@ -737,6 +758,7 @@ function omitEmptyKeys (obj) {
 
 module.exports = {
   buildService: buildService,
+  getVolumeTokens: getVolumeTokens,
   parseRawContent: parseRawContent,
   parseRawFile: parseRawFile,
   parseTOMLFile: parseTOMLFile,

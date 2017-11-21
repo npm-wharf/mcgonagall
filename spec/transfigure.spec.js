@@ -31,7 +31,9 @@ describe('Transfiguration', function () {
               specPath: path.resolve('./spec/tokenized-source'),
               tokens: [
                 'namespace',
-                'domain'
+                'domain',
+                'username',
+                'password'
               ]
             })
           }
