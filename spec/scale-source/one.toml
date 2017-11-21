@@ -1,0 +1,7 @@
+name = "one.ns"
+image = "repo/one:latest"
+
+[scale]
+  containers = 1
+  ram = "> 100Mi < 250Mi"
+  cpu = "> 1% < 5%"

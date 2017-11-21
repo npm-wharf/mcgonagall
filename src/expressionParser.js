@@ -144,8 +144,8 @@ function parseConfigBlock (name, block) {
 }
 
 function parseContainer (expression) {
-  const [_, op, value] = CONTAINER_REGEX.exec(expression) // eslint-disable-line no-unused-vars
-  return { replicas: [ op, value ] }
+  const [, op, value] = CONTAINER_REGEX.exec(expression) // eslint-disable-line no-unused-vars
+  return { containers: [ op, value ] }
 }
 
 function parseContainerPort (name, expression) {
@@ -248,13 +248,15 @@ function parseScaleFactor (expression) {
     if (/container/.test(factor)) {
       return Object.assign(acc, parseContainer(factor))
     } else if (/cpu/.test(factor)) {
-      return Object.assign(acc, parseCPU(factor, acc))
+      let limits = factor.replace(/^[ ]?cpu[ ]?/, '')
+      return Object.assign(acc, {cpu: limits})
     } else if (/ram/.test(factor)) {
-      return Object.assign(acc, parseRAM(factor, acc))
+      let limits = factor.replace(/^[ ]?ram[ ]?/, '')
+      return Object.assign(acc, {ram: limits})
     } else if (/storage/.test(factor)) {
       return Object.assign(acc, parseStorage(factor))
     }
-  }, { resources: {} })
+  }, {})
 }
 
 function parseServicePort (name, expression) {

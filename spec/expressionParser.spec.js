@@ -203,17 +203,9 @@ describe('Expression Parser', function () {
         'container + 2; cpu > .75 < 1.5; ram > 750Mi < 1.5Gi; storage = data + 5Gi, logs + 2Gi'
       ).should.eql(
         {
-          replicas: ['+', '2'],
-          resources: {
-            requests: {
-              memory: '750Mi',
-              cpu: '750m'
-            },
-            limits: {
-              memory: '1536Mi',
-              cpu: '1500m'
-            }
-          },
+          containers: ['+', '2'],
+          cpu: '> .75 < 1.5',
+          ram: '> 750Mi < 1.5Gi',
           storage: {
             data: '5',
             logs: '2'
@@ -225,12 +217,8 @@ describe('Expression Parser', function () {
         'cpu > .75; ram > 750Mi; storage = data + 5Gi'
       ).should.eql(
         {
-          resources: {
-            requests: {
-              memory: '750Mi',
-              cpu: '750m'
-            }
-          },
+          cpu: '> .75',
+          ram: '> 750Mi',
           storage: {
             data: '5'
           }
@@ -241,13 +229,9 @@ describe('Expression Parser', function () {
         'container*2;cpu<1.5;ram<1.5Gi'
       ).should.eql(
         {
-          replicas: ['*', '2'],
-          resources: {
-            limits: {
-              memory: '1536Mi',
-              cpu: '1500m'
-            }
-          }
+          containers: ['*', '2'],
+          ram: '<1.5Gi',
+          cpu: '<1.5'
         }
       )
     })

@@ -1,0 +1,12 @@
+scaleOrder = "small,medium,large"
+[ns.one]
+    order = 1
+    medium = "containers + 1; ram > 250Mi < 500Mi; cpu > 5% < 10%"
+    large = "containers + 2; ram > 500Mi < 1Gi; cpu > 10% < 20%"
+
+[ns.two]
+    order = 1
+    large = "ram > 512Mi < 1Gi; cpu > 25% < 50%"
+[ns.three]
+    order = 1
+    medium = "containers + 1; storage = data + 5Gi"

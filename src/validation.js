@@ -7,7 +7,7 @@ const serviceDefinition = {
   image: Joi.string().required(),
   command: Joi.alternatives().try([ Joi.string(), Joi.array().items(Joi.string()) ]),
   scale: {
-    containers: Joi.number().integer().required(),
+    containers: Joi.number().integer(),
     ram: Joi.string().regex(/^(\s*[<>]\s*[.0-9]+([ ]?Ki|[ ]?Mi|[ ]?Gi))+$/, 'ram scale factors'),
     cpu: Joi.string().regex(/^(\s*[<>]\s*[.0-9]+([ ]?Mi|[ ]?Gi|%)?)+$/, 'cpu scale factors')
   },

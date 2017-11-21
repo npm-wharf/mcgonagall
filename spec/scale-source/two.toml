@@ -1,0 +1,6 @@
+name = "two.ns"
+image = "repo/two:latest"
+
+[scale]
+  ram = "> 250Mi < 512Mi"
+  cpu = "> 5% < 25%"

@@ -105,6 +105,31 @@ mcgonagall
   )
 ```
 
+### Setting Cluster Scale
+
+mcgonagall lets you provide an arbitrary set of comma delimited scale labels for a cluster in the `scaleOrder` property and then optionally specify scale factors for one or more of these labels per service.
+
+This allows you to define how each label (after the initial label which represents the baseline) changes the baseline set. The intention is to prevent you from needing to have separate cluster specifications in order to have different resource requirements, limits, replica counts or mount storage sizes for clusters where the only change is in the expected utilization/size.
+
+You optionally select which scale label to apply during transfiguration via the options hash:
+
+```js
+const mcgonagall = require('mcgonagall')
+
+mcgonagall
+  .transfigure('./path/to/source', { 
+    output: './path/to/output',
+    scale: 'medium',
+    version: '1.8' 
+  })
+  .then(
+    done => {}
+    err => {}
+  )
+```
+
+If you don't provide a scale for a cluster where they are specified, the lowest scale is assumed and no scale factors are applied.
+
 ### Tokenized Specifications
 
 mcgonagall also support tokenized specifications that use the LoDash style tokens (`<%= %>`). To provide data for the tokens, use the `data` property on the `options` argument:
@@ -185,6 +210,7 @@ The cluster specification identifies the services, the order in which to create 
 ### Example Cluster Specification
 
 ```toml
+scaleOrder = "small, medium, large, enterprise"
 [data.postgres]
   order = 0
   [data.postgres.scale]
@@ -200,9 +226,9 @@ The cluster specification identifies the services, the order in which to create 
 [app.myservice]
   order = 1
   [data.myservice.scale]
-    medium = "container + 2"
-    large = "container + 4"
-    enterprise = "container + 8"
+    medium = "containers + 2"
+    large = "containers + 4"
+    enterprise = "containers + 8"
 
 [configuration.app.shared]
   database_host = "data.postgres"
@@ -220,21 +246,28 @@ The order value specifies what order the service will be created in. This value 
 
 The next ordinal round of services will not be sent to the Kubernetes API until the previous round of services have been created successfully. This would respect interdependencies between services and avoid failure/restart cascades across containers which in turn could lead to growing restart cool-downs and effectively malfunctioning clusters.
 
-### `[namespace.service-name.scale]`
+### `scaleOrder` and `[namespace.service-name.scale]`
 
-The scale table optionally assigns a scaling factors to the container based on the cluster size by a label. The scaling factors are `;` separated and can affect 4 different aspects of the service:
+#### `scaleOrder`
 
- * container count: `container [operator] [#]`
+The `scaleOrder` property defines the ascending order for the scale designations. Because these are arbitrary for a given cluster and because each service may optionally specify any or none of these, mcgonagall requires an ordering to know how 'fill in the blanks'. When the requested scale is unspecified for a particular service, the first defined scale below the requested level will be used to populate it.
+
+This is so that unspecified scales for a service have a "no change" affect rather than jumping up to the highest scale available.
+
+#### Scaling Factors
+
+The scale table optionally assigns scaling factors to the container based on the scale label. The scaling factors are `;` separated and can affect 4 different aspects of the service:
+
+ * container count: `container [operator] [#]` where `operator` can be `=`, `+` or `*`
  * cpu limits: `cpu > [requirement] < [limit]`
  * ram limits: `ram > [requirement] < [limit]`
  * storage provisioned: `storage = [mount] + [increase], ...`
 
-
 As with the service specifications, RAM is expressed in `Mi` or `Gi` units and CPU limits are either fractional CPU cores or as a percentage using a `%` postfix.
 
-When specifying increases to provisioned storage for stateful services, be sure to match the based on the mount name. Multiple mounts can be increased using a `,` to delimit the list.
+When specifying increases to provisioned storage for stateful services, be sure to match based on the mount name. Multiple mounts can be increased using a `,` to delimit the list.
 
-> Note: when possible, it's best to limit scaling by container count alone. The example above includes services like postgres and redis specifically because these might be cases where increasing containers might pose an implementation challenge where just increasing resources is a potential alternative.
+> Note: when possible, try to limit scaling by container count first. The example above includes services like postgres and redis specifically because these might be cases where increasing containers might pose an implementation challenge where just increasing resources is a simpler possible alternative. Changing resource limits and requirements may make it harder to predict how your containers behave between scale levels
 
 ### `[configuration.namespace.configuration-map-name]`
 

@@ -63,7 +63,8 @@ function transfigure (argv) {
       version: argv.apiVersion,
       output: argv.target,
       gitBasePath: argv.gitBasePath,
-      data: argv.data
+      data: argv.data,
+      scale: argv.scale
     })
     .then(
       result => {
@@ -119,6 +120,10 @@ require('yargs') // eslint-disable-line no-unused-expressions
       tokenFile: {
         alias: 'f',
         describe: 'supply a key/value file for any tokens in the specification'
+      },
+      scale: {
+        alias: 's',
+        describe: 'specify the scale level to apply to the cluster (if applicable)'
       }
     },
     handler: (argv) => {

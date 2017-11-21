@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: ns
+  name: one
+spec:
+  replicas: 2
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: one
+    spec:
+      containers:
+        - name: one
+          image: 'repo/one:latest'
+          resources:
+            requests:
+              memory: 250Mi
+              cpu: 50m
+            limits:
+              memory: 500Mi
+              cpu: 100m

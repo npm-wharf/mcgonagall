@@ -190,7 +190,9 @@ function getContainer (config) {
     container.ports = ports
   }
 
-  Object.assign(container, resources)
+  if (Object.keys(resources.resources).length > 0) {
+    Object.assign(container, resources)
+  }
 
   if (config.command) {
     command = expressionParser.parseCommand(config.command)
@@ -682,6 +684,7 @@ function parseRawFile (filePath, options = {}) {
 function parseTOMLContent (raw, options = {}) {
   const apiVersion = options.apiVersion || '1.7'
   const addConfigFile = options.addConfigFile
+  const setScale = options.setScale
   let config
   if (tokenizer.hasTokens(raw)) {
     config = toml.parse(_.template(raw)(options.data))
@@ -694,6 +697,9 @@ function parseTOMLContent (raw, options = {}) {
   }
   if (options.relativePath) {
     addNginxBlock(options.relativePath, config.name)
+  }
+  if (setScale) {
+    setScale(config)
   }
   config.service = config.service || {}
   config.deployment = Object.assign({}, DEPLOYMENT_DEFAULTS, config.deployment)

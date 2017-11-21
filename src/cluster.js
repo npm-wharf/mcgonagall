@@ -2,6 +2,7 @@ const _ = require('lodash')
 const fs = require('fs')
 const glob = require('globulesce')
 const path = require('path')
+const expressionParser = require('./expressionParser')
 const service = require('./serviceDefinition')
 const tar = require('tar')
 const toml = require('toml-j0.4')
@@ -12,6 +13,7 @@ const hasher = require('./hasher')
 const CLUSTER_FILE = 'cluster.toml'
 const GIT_URL_REGEX = /(https[:][/]{2}|git[:][/]{2}|git[@])([^/]+)(([/]|[:])([^/]+))([/]([^/:]+))([:]([a-z0-9_.-]+))?/i
 const SERVER_DEFINITION_REGEX = /[$]SERVER_DEFINITIONS[$]/
+const SCALE_PROPS = ['containers', 'cpu', 'ram', 'storage']
 
 _.templateSettings.imports.hash = hasher.hash
 
@@ -241,14 +243,27 @@ function processConfig (config, options = {}) {
     configuration: []
   }
 
+  if (config.scaleOrder) {
+    cluster.scaleOrder = config.scaleOrder
+      .split(',')
+      .map(x => x.trim())
+  }
+
   const namespaces = Object.keys(config)
   namespaces.forEach(name => {
-    if (name !== 'configuration') {
+    if (name !== 'configuration' && typeof config[name] !== 'string') {
       let namespace = config[name]
       processNamespace(config, cluster, name, namespace)
     }
   })
-  cluster.levels = Array.from(cluster.levels).map(x => parseInt(x))
+  cluster.levels = Array
+    .from(cluster.levels)
+    .reduce((acc, x) => {
+      if (x != null) {
+        acc.push(parseInt(x))
+      }
+      return acc
+    }, [])
   cluster.levels.sort((x, y) => x - y)
   cluster.configuration = processConfigMaps(config.configuration || {})
   return cluster
@@ -282,6 +297,7 @@ function processDefinitions (fullPath, cluster, options) {
         if (!/(cluster[.]toml|raw.yml)/.test(file)) {
           const definition = service.parseTOMLFile(file, {
             apiVersion: cluster.apiVersion,
+            setScale: setScale.bind(null, cluster, options.scale, cluster.scaleOrder),
             addConfigFile: addConfigFile.bind(null, cluster, options),
             data: options.data
           })
@@ -317,6 +333,68 @@ function processService (cluster, serviceName, service) {
     cluster.order[service.order] = []
   }
   cluster.order[service.order].push(service.fqn)
+}
+
+function setScale (cluster, level, order, definition) {
+  if (!level || !order) {
+    return
+  }
+  const key = definition.name
+  const service = cluster.services[key]
+  const baseScale = definition.scale || {}
+  const base = {
+    containers: baseScale.containers || 1,
+    ram: baseScale.ram,
+    cpu: baseScale.cpu
+  }
+  const scales = order.reduce((acc, scale, index) => {
+    let set = service[scale]
+    if (!set) {
+      if (index === 0) {
+        acc[scale] = base
+      } else {
+        acc[scale] = acc[order[index - 1]]
+      }
+    } else {
+      let current = acc[scale] = expressionParser.parseScaleFactor(set)
+      if (index > 0) {
+        for (var i = index - 1; i >= 0; i--) {
+          let previous = acc[order[i]]
+          SCALE_PROPS.map(key => {
+            current[key] = current[key] || previous[key]
+          })
+        }
+      }
+    }
+    return acc
+  }, {})
+  const scale = scales[level]
+  if (scale.storage) {
+    _.each(scale.storage, (size, store) => {
+      let parts = definition.storage[store].split(':')
+      let original = parseInt(parts[0].replace(/[ ]?Gi$/, ''))
+      definition.storage[store] = [`${parseInt(size) + original}Gi`].concat(parts.slice(1)).join(':')
+    })
+    delete scale.storage
+  }
+  if (scale.containers) {
+    if (Array.isArray(scale.containers)) {
+      let count = parseInt(definition.containers || 1)
+      let factor = parseInt(scale.containers[1])
+      switch (scale.containers[0]) {
+        case '=':
+          scale.containers = factor
+          break
+        case '+':
+          scale.containers = count + factor
+          break
+        case '*':
+          scale.containers = count * factor
+          break
+      }
+    }
+  }
+  definition.scale = scale
 }
 
 module.exports = {

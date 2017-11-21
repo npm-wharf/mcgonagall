@@ -27,7 +27,6 @@ spec:
             - name: logstash
               containerPort: 5044
               protocol: TCP
-          resources: {}
           command:
             - logstash
             - '-f'

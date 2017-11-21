@@ -91,8 +91,7 @@ module.exports = {
                       'containerPort': 9200,
                       'protocol': 'TCP'
                     }
-                  ],
-                  'resources': {}
+                  ]
                 }
               ]
             }
@@ -174,8 +173,7 @@ module.exports = {
                       'containerPort': 5601,
                       'protocol': 'TCP'
                     }
-                  ],
-                  'resources': {}
+                  ]
                 }
               ]
             }
@@ -258,7 +256,6 @@ module.exports = {
                       'protocol': 'TCP'
                     }
                   ],
-                  'resources': {},
                   'command': [
                     'logstash',
                     '-f',
@@ -341,7 +338,6 @@ module.exports = {
                       }
                     }
                   ],
-                  'resources': {},
                   'command': [
                     'filebeat',
                     '-e',

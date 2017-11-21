@@ -27,4 +27,3 @@ spec:
             - name: kibana
               containerPort: 5601
               protocol: TCP
-          resources: {}

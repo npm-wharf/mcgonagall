@@ -27,7 +27,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          resources: {}
           command:
             - filebeat
             - '-e'

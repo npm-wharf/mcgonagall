@@ -28,4 +28,3 @@ spec:
             - name: secondary
               containerPort: 9200
               protocol: TCP
-          resources: {}

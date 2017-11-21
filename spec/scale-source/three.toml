@@ -1,0 +1,8 @@
+name = "three.ns"
+image = "repo/three:latest"
+
+[mount]
+  data = "/etc/data"
+
+[storage]
+  data = "5Gi:exclusive"

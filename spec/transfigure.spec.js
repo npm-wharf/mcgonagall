@@ -107,6 +107,170 @@ describe('Transfiguration', function () {
     })
   })
 
+  describe('from a spec with scale levels', function () {
+    describe('when scale is small', function () {
+      let verifyHash
+      before(function () {
+        return hasher.hashElement('./spec/scale-verify/small')
+          .then(hash => {
+            verifyHash = hash
+          })
+      })
+      it('should output files', function () {
+        return index.transfigure('./spec/scale-source', { output: './spec/scale-target/small', scale: 'small' })
+          .then(cluster => {
+            const json1 = fs.readFileSync('./spec/scale-verify/small/cluster.json', 'utf8')
+            const json2 = fs.readFileSync('./spec/scale-target/small/cluster.json', 'utf8')
+            const c1 = JSON.parse(json1)
+            const c2 = JSON.parse(json2)
+            try {
+              assert.deepStrictEqual(c1, c2)
+              assert.equal(json1, json2)
+            } catch (e) {
+              const diff = jsdiff.diffChars(json1, json2)
+              diff.forEach(function (part) {
+                var color = part.added ? 'green'
+                  : part.removed ? 'red' : 'grey'
+                if (part.value !== '\n') {
+                  console.log(chalk[color](part.value))
+                } else {
+                  console.log(chalk[color]('newline'))
+                }
+              })
+            }
+            return hasher.hashElement('./spec/scale-target/small')
+          })
+          .then(hash => {
+            // children are compared because the top level hashes
+            // include the top level folder names which differ
+            // this has been tested to prove that so much as a
+            // white-space character out of place will cause the
+            // hash to fail on the correct file and make the diff
+            // clear in the object tree as to which file is causing
+            // the problem (but not why)
+            return hash.children.should.eql(verifyHash.children)
+          })
+      })
+
+      after(function (done) {
+        rimraf('./spec/scale-target', (ohnoes) => {
+          if (ohnoes) {
+            console.log('McGonagall frowns and offers you a biscuit all the same.', ohnoes)
+          }
+          done()
+        })
+      })
+    })
+
+    describe('when scale is medium', function () {
+      let verifyHash
+      before(function () {
+        return hasher.hashElement('./spec/scale-verify/medium')
+          .then(hash => {
+            verifyHash = hash
+          })
+      })
+      it('should output files', function () {
+        return index.transfigure('./spec/scale-source', { output: './spec/scale-target/medium', scale: 'medium' })
+          .then(cluster => {
+            const json1 = fs.readFileSync('./spec/scale-verify/medium/cluster.json', 'utf8')
+            const json2 = fs.readFileSync('./spec/scale-target/medium/cluster.json', 'utf8')
+            const c1 = JSON.parse(json1)
+            const c2 = JSON.parse(json2)
+            try {
+              assert.deepStrictEqual(c1, c2)
+              assert.equal(json1, json2)
+            } catch (e) {
+              const diff = jsdiff.diffChars(json1, json2)
+              diff.forEach(function (part) {
+                var color = part.added ? 'green'
+                  : part.removed ? 'red' : 'grey'
+                if (part.value !== '\n') {
+                  console.log(chalk[color](part.value))
+                } else {
+                  console.log(chalk[color]('newline'))
+                }
+              })
+            }
+            return hasher.hashElement('./spec/scale-target/medium')
+          })
+          .then(hash => {
+            // children are compared because the top level hashes
+            // include the top level folder names which differ
+            // this has been tested to prove that so much as a
+            // white-space character out of place will cause the
+            // hash to fail on the correct file and make the diff
+            // clear in the object tree as to which file is causing
+            // the problem (but not why)
+            return hash.children.should.eql(verifyHash.children)
+          })
+      })
+
+      after(function (done) {
+        rimraf('./spec/scale-target', (ohnoes) => {
+          if (ohnoes) {
+            console.log('McGonagall frowns and offers you a biscuit all the same.', ohnoes)
+          }
+          done()
+        })
+      })
+    })
+
+    describe('when scale is large', function () {
+      let verifyHash
+      before(function () {
+        return hasher.hashElement('./spec/scale-verify/large')
+          .then(hash => {
+            verifyHash = hash
+          })
+      })
+      it('should output files', function () {
+        return index.transfigure('./spec/scale-source', { output: './spec/scale-target/large', scale: 'large' })
+          .then(cluster => {
+            const json1 = fs.readFileSync('./spec/scale-verify/large/cluster.json', 'utf8')
+            const json2 = fs.readFileSync('./spec/scale-target/large/cluster.json', 'utf8')
+            const c1 = JSON.parse(json1)
+            const c2 = JSON.parse(json2)
+            try {
+              assert.deepStrictEqual(c1, c2)
+              assert.equal(json1, json2)
+            } catch (e) {
+              const diff = jsdiff.diffChars(json1, json2)
+              diff.forEach(function (part) {
+                var color = part.added ? 'green'
+                  : part.removed ? 'red' : 'grey'
+                if (part.value !== '\n') {
+                  console.log(chalk[color](part.value))
+                } else {
+                  console.log(chalk[color]('newline'))
+                }
+              })
+            }
+            return hasher.hashElement('./spec/scale-target/large')
+          })
+          .then(hash => {
+            // children are compared because the top level hashes
+            // include the top level folder names which differ
+            // this has been tested to prove that so much as a
+            // white-space character out of place will cause the
+            // hash to fail on the correct file and make the diff
+            // clear in the object tree as to which file is causing
+            // the problem (but not why)
+            return hash.children.should.eql(verifyHash.children)
+          })
+      })
+
+      after(function (done) {
+        rimraf('./spec/scale-target', (ohnoes) => {
+          if (ohnoes) {
+            console.log('McGonagall frowns and offers you a biscuit all the same.', ohnoes)
+          }
+          done()
+        })
+      })
+    })
+  })
+
   describe('from a tokenized spec with a target directory', function () {
     let verifyHash
     before(function () {
