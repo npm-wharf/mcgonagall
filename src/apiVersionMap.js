@@ -14,10 +14,10 @@ module.exports = {
     '1.8': 'batch/v1beta1'
   },
   daemonSet: {
-    '1.4': 'apps/v1beta1',
-    '1.5': 'apps/v1beta1',
-    '1.6': 'apps/v1beta1',
-    '1.7': 'apps/v1beta1',
+    '1.4': 'extensions/v1beta1',
+    '1.5': 'extensions/v1beta1',
+    '1.6': 'extensions/v1beta1',
+    '1.7': 'extensions/v1beta1',
     '1.8': 'apps/v1beta2'
   },
   deployment: {
