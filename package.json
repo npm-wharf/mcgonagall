@@ -47,7 +47,7 @@
   ],
   "license": "ISC",
   "main": "src/index.js",
-  "name": "mcgonagall",
+  "name": "@npm-wharf/mcgonagall",
   "repository": {
     "type": "git",
     "url": "git://github.com/npm-wharf/mcgonagall.git"

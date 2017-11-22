@@ -13,7 +13,7 @@ mcgonagall provides TOML specifications that focus on the desired end state in h
 ## Installation
 
 ```shell
-npm i mcgonagall
+npm i @npm-wharf/mcgonagall
 ```
 
 ## Use
