@@ -80,6 +80,11 @@ module.exports = {
           updateStrategy: {
             type: 'RollingUpdate'
           },
+          selector: {
+            matchLabels: {
+              app: 'chronograf'
+            }
+          },
           serviceName: 'chrono',
           template: {
             metadata: {
@@ -233,6 +238,11 @@ module.exports = {
               maxSurge: 1
             }
           },
+          selector: {
+            matchLabels: {
+              app: 'heapster'
+            }
+          },
           template: {
             metadata: {
               labels: {
@@ -311,6 +321,11 @@ module.exports = {
             type: 'RollingUpdate'
           },
           serviceName: 'influx',
+          selector: {
+            matchLabels: {
+              app: 'influxdb'
+            }
+          },
           template: {
             metadata: {
               labels: {
@@ -449,6 +464,11 @@ module.exports = {
             type: 'RollingUpdate'
           },
           serviceName: 'kapacitor',
+          selector: {
+            matchLabels: {
+              app: 'kapacitor'
+            }
+          },
           template: {
             metadata: {
               labels: {
@@ -694,6 +714,11 @@ module.exports = {
               maxSurge: '100%'
             }
           },
+          selector: {
+            matchLabels: {
+              app: 'proxy'
+            }
+          },
           template: {
             metadata: {
               labels: {
@@ -836,6 +861,11 @@ module.exports = {
             'rollingUpdate': {
               'maxUnavailable': 1,
               'maxSurge': 1
+            }
+          },
+          selector: {
+            matchLabels: {
+              app: 'etcd-operator'
             }
           },
           'template': {

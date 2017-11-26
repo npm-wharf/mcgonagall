@@ -63,6 +63,11 @@ module.exports = {
               'maxSurge': 1
             }
           },
+          'selector': {
+            'matchLabels': {
+              'app': 'elasticsearch'
+            }
+          },
           'template': {
             'metadata': {
               'labels': {
@@ -144,6 +149,11 @@ module.exports = {
             'rollingUpdate': {
               'maxUnavailable': 1,
               'maxSurge': 1
+            }
+          },
+          'selector': {
+            'matchLabels': {
+              'app': 'kibana'
             }
           },
           'template': {
@@ -228,6 +238,11 @@ module.exports = {
               'maxSurge': 1
             }
           },
+          'selector': {
+            'matchLabels': {
+              'app': 'logstash'
+            }
+          },
           'template': {
             'metadata': {
               'labels': {
@@ -307,6 +322,11 @@ module.exports = {
             'rollingUpdate': {
               'maxUnavailable': 1,
               'maxSurge': 1
+            }
+          },
+          'selector': {
+            'matchLabels': {
+              'app': 'filebeat'
             }
           },
           'template': {
@@ -455,6 +475,11 @@ module.exports = {
             'rollingUpdate': {
               'maxUnavailable': 1,
               'maxSurge': '100%'
+            }
+          },
+          'selector': {
+            'matchLabels': {
+              'app': 'proxy'
             }
           },
           'template': {

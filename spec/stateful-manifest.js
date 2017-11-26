@@ -18,6 +18,11 @@ module.exports = {
       updateStrategy: {
         type: 'RollingUpdate'
       },
+      selector: {
+        matchLabels: {
+          app: 'mydb'
+        }
+      },
       template: {
         metadata: {
           labels: {

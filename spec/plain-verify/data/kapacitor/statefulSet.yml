@@ -9,6 +9,9 @@ spec:
   revisionHistoryLimit: 1
   updateStrategy:
     type: RollingUpdate
+  selector:
+    matchLabels:
+      app: kapacitor
   template:
     metadata:
       labels:

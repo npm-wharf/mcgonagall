@@ -47,6 +47,11 @@ module.exports = {
           maxSurge: 1
         }
       },
+      selector: {
+        matchLabels: {
+          app: 'dbadmin'
+        }
+      },
       template: {
         metadata: {
           labels: {

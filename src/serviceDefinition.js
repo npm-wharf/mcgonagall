@@ -319,6 +319,11 @@ function getDaemonSet (config) {
       spec: {
         replicas: config.scale ? config.scale.containers : 1,
         revisionHistoryLimit: config.deployment.history,
+        selector: {
+          matchLabels: {
+            app: config.name
+          }
+        },
         template: {
           metadata: {
             labels: {
@@ -363,6 +368,11 @@ function getDeployment (config) {
           rollingUpdate: {
             maxUnavailable: config.deployment.unavailable,
             maxSurge: config.deployment.surge
+          }
+        },
+        selector: {
+          matchLabels: {
+            app: config.name
           }
         },
         template: {
@@ -579,6 +589,11 @@ function getStatefulSet (config) {
         revisionHistoryLimit: config.deployment.history || 1,
         updateStrategy: {
           type: 'RollingUpdate'
+        },
+        selector: {
+          matchLabels: {
+            app: config.name
+          }
         },
         template: {
           metadata: {

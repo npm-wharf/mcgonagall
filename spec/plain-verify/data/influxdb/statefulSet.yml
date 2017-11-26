@@ -9,6 +9,9 @@ spec:
   revisionHistoryLimit: 1
   updateStrategy:
     type: RollingUpdate
+  selector:
+    matchLabels:
+      app: influxdb
   template:
     metadata:
       labels:
