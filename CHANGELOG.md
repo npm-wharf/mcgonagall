@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.0"></a>
+# [1.6.0](https://github.com/npm-wharf/mcgonagall/compare/v1.5.2...v1.6.0) (2018-01-31)
+
+
+### Features
+
+* add initial support for RBAC. fix: correct cronjob definition. refactor: break service definition module into resource based modules. ([eb446dc](https://github.com/npm-wharf/mcgonagall/commit/eb446dc))
+
+
+
 <a name="1.5.2"></a>
 ## [1.5.2](https://github.com/npm-wharf/mcgonagall/compare/v1.5.1...v1.5.2) (2017-11-26)
 
