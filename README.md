@@ -541,22 +541,106 @@ This section controls how the service is exposed via Kubernetes internal DNS and
 
 ### [security]
 
-The security section exists to address the new and growing feature set around accounts, roles and role bindings in Kubernetes.
+The security section exists to address Role Based Authentication (RBAC) - the feature set around accounts, roles and role bindings which provide access control to the Kubernetes API.
 
-The properties of `account` and `role` allow you to specify the account and role requirements for the service so that ServiceAccount, Role and RoleBinding resources will be created on your behalf where necessary.
+The properties of `account`, `role` and the sub-heading of `rules` allow you to specify the account and role requirements for the service so that ServiceAccount, Role and RoleBinding resources will be created on your behalf where necessary.
 
-It also allows you to assign a `runAsUser`, `fsGroup` via the `context` property. `capabilities` can be listed out as well as turning on privilege escalation via the `escalation` flag when required. Use these behaviors with caution and make sure you understand the implications.
+Container process privileges can be controlled via `runAsUser`, `fsGroup` via the `context` property. `capabilities` can be listed out as well as turning on privilege escalation via the `escalation` flag when required. Use these behaviors with caution and make sure you understand the implications.
 
-The example below demonstrates how to create a `heapster` account and assign it to the `ClusterRole` feature:
+
+#### Example - heapster ClusterRole
+
+Creates a `heapster` account and assign it to the `ClusterRole` feature:
 
 ```toml
 [security]
   account = "heapster"
   role = "ClusterRole;system:heapster"
+```
+
+#### Example - namespace account assigned to existing role
+
+Creates a viewer account assigned to the `view` Cluster Role
+
+```toml
+[security]
+  account = "viewer"
+  role = "ClusterRole;view"
+```
+
+#### Example - account viewer assigned to view role with explicit settings
+
+In cases where you need to create an account and bind it to a role with access to specific API groups, resources and verbs, set `role` to a `Role` and use the `security.rules` to set specific details for the role itself.
+
+```toml
+[security]
+  account = "viewer"
+  role = "Role;view"
+  [security.rules]
+    groups = []
+    resources = []
+    resourceNames = [] # optionally filter by resource name
+    verbs = []
+```
+
+
+#### Example - 
+
+Escalates the container process's privileges, assigns it to a specific user and group and allows it specific capabilities.
+
+```toml
+[security]
   context = "user=1000;group=1000"
   capabilities = [ "NET_ADMIN", "SYS_TIME" ]
   escalation = true
 ```
+
+#### API Group List
+
+This is a (non-comprehensive) list of common API Groups:
+
+ * "" - indicates core API group
+ * "apps"
+ * "batch"
+ * "extensions"
+ * "rbac.authorization.k8s.io"
+
+#### Resource List
+
+This is a (non-comprehensive) list of common resources
+
+ * "configmaps"
+ * "cronjobs"
+ * "deployments"
+ * "daemonsets"
+ * "endpoints"
+ * "events"
+ * "ingresses"
+ * "jobs"
+ * "namespaces"
+ * "networkpolicies"
+ * "nodes"
+ * "persistentvolumeclaims"
+ * "pods"
+ * "replicationcontrollers"
+ * "secrets"
+ * "services"
+ * "serviceaccounts"
+ * "statefulsets"
+
+#### Verbs
+
+This is a list of API verbs:
+
+ * "bind"
+ * "create"
+ * "delete"
+ * "deletecollection"
+ * "get"
+ * "list"
+ * "patch"
+ * "update"
+ * "watch"
 
 ### [deployment]
 

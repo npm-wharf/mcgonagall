@@ -10,6 +10,13 @@ module.exports = {
       namespace: 'data'
     }
   },
+  role: {
+    apiVersion: 'rbac.authorization.k8s.io/v1beta1',
+    kind: 'ClusterRole',
+    metadata: {
+      name: 'system:dbowner'
+    }
+  },
   roleBinding: {
     apiVersion: 'rbac.authorization.k8s.io/v1beta1',
     kind: 'ClusterRoleBinding',
@@ -59,6 +66,7 @@ module.exports = {
             task: 'admin'
           }
         },
+        serviceAccountName: 'dbowner',
         spec: {
           containers: [
             {

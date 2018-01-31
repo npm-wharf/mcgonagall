@@ -2,59 +2,18 @@ const _ = require('lodash')
 const fs = require('fs')
 const glob = require('globulesce')
 const path = require('path')
-const expressionParser = require('./expressionParser')
-const service = require('./serviceDefinition')
+const definition = require('./definition')
 const tar = require('tar')
 const toml = require('toml-j0.4')
 const git = require('simple-git/promise')
 const tokenizer = require('./tokenizer')
 const hasher = require('./hasher')
+const { getVolumeTokens } = require('./resource')
 
 const CLUSTER_FILE = 'cluster.toml'
 const GIT_URL_REGEX = /(https[:][/]{2}|git[:][/]{2}|git[@])([^/]+)(([/]|[:])([^/]+))([/]([^/:]+))([:]([a-z0-9_.-]+))?/i
-const SERVER_DEFINITION_REGEX = /[$]SERVER_DEFINITIONS[$]/
-const SCALE_PROPS = ['containers', 'cpu', 'ram', 'storage']
 
 _.templateSettings.imports.hash = hasher.hash
-
-function addConfigFile (cluster, options, parentFilePath, key, relativePath, filePath) {
-  let map
-  const [namespace, name] = key.split('.')
-  cluster.configuration.forEach(m => {
-    if (namespace === m.metadata.namespace &&
-       name === m.metadata.name) {
-      map = m
-    }
-  })
-  if (!map) {
-    map = {
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: name,
-        namespace: namespace
-      },
-      data: {}
-    }
-    cluster.configuration.push(map)
-  }
-  const fullPath = path.resolve(parentFilePath, relativePath)
-  let content = fs.readFileSync(fullPath, 'utf8')
-  if (tokenizer.hasTokens(content)) {
-    content = _.template(content)(options.data)
-  }
-  map.data[relativePath] = content
-  if (relativePath === 'nginx.conf' && SERVER_DEFINITION_REGEX.test(map.data[relativePath])) {
-    cluster.replaceNginxToken = function () {
-      let content = getNginxServerConfig(cluster)
-      map.data[relativePath] = map.data[relativePath]
-        .replace(SERVER_DEFINITION_REGEX, content)
-        .replace(/[\\]"/g, '"')
-        .replace(/\\n/g, '\n')
-      delete cluster.replaceNginxToken
-    }
-  }
-}
 
 function expandTarball (fullPath) {
   const extractTo = path.dirname(fullPath)
@@ -162,20 +121,6 @@ function getClusterConfig (fullPath, options) {
     .then(onConfig.bind(null, options))
 }
 
-function getNginxServerConfig (cluster) {
-  const serviceNames = Object.keys(cluster.services)
-  return serviceNames.reduce((acc, serviceName) => {
-    const service = cluster.services[serviceName]
-    if (service.nginxBlock) {
-      acc.push(service.nginxBlock
-        .replace(/[\\]"/g, '"')
-        .replace(/\\n/g, '\n'))
-      delete service.nginxBlock
-    }
-    return acc
-  }, []).join('\n\n')
-}
-
 function getTokenList (fullPath) {
   return glob(fullPath, ['**/*.+(toml|raw.yml)'])
     .then(files => {
@@ -196,7 +141,7 @@ function getTokenList (fullPath) {
             }
             const basePath = path.dirname(file)
             const spec = toml.parse(content)
-            tokens = tokens.concat(service.getVolumeTokens(basePath, spec))
+            tokens = tokens.concat(getVolumeTokens(basePath, spec))
           }
 
           tokens = tokens.concat(fileTokens)
@@ -312,28 +257,18 @@ function processDefinitions (fullPath, cluster, options) {
   return glob(fullPath, ['**/*.+(toml|raw.yml)'])
     .then(files => {
       return files.reduce((acc, file) => {
-        if (!/(cluster[.]toml|raw.yml)/.test(file)) {
-          const definition = service.parseTOMLFile(file, {
-            apiVersion: cluster.apiVersion,
-            setScale: setScale.bind(null, cluster, options.scale, cluster.scaleOrder),
-            addConfigFile: addConfigFile.bind(null, cluster, options),
-            data: options.data
-          })
-          acc[definition.fqn] = definition
-        } else if (/raw.ya?ml$/.test(file)) {
-          const definition = service.parseRawFile(file, {
-            data: options.data
-          })
-          acc[definition.fqn] = definition
+        const resources = definition.createFromFile(cluster, file, options)
+        if (resources) {
+          acc[resources.fqn] = resources
         }
         return acc
       }, {})
     })
 }
 
-function processNamespace (config, cluster, namespace, definition) {
+function processNamespace (config, cluster, namespace, obj) {
   cluster.namespaces.push(namespace)
-  const keys = Object.keys(definition)
+  const keys = Object.keys(obj)
   keys.forEach(serviceName => {
     let service = config[namespace][serviceName]
     service.name = serviceName
@@ -351,68 +286,6 @@ function processService (cluster, serviceName, service) {
     cluster.order[service.order] = []
   }
   cluster.order[service.order].push(service.fqn)
-}
-
-function setScale (cluster, level, order, definition) {
-  if (!level || !order) {
-    return
-  }
-  const key = definition.name
-  const service = cluster.services[key]
-  const baseScale = definition.scale || {}
-  const base = {
-    containers: baseScale.containers || 1,
-    ram: baseScale.ram,
-    cpu: baseScale.cpu
-  }
-  const scales = order.reduce((acc, scale, index) => {
-    let set = service[scale]
-    if (!set) {
-      if (index === 0) {
-        acc[scale] = base
-      } else {
-        acc[scale] = acc[order[index - 1]]
-      }
-    } else {
-      let current = acc[scale] = expressionParser.parseScaleFactor(set)
-      if (index > 0) {
-        for (var i = index - 1; i >= 0; i--) {
-          let previous = acc[order[i]]
-          SCALE_PROPS.map(key => {
-            current[key] = current[key] || previous[key]
-          })
-        }
-      }
-    }
-    return acc
-  }, {})
-  const scale = scales[level]
-  if (scale.storage) {
-    _.each(scale.storage, (size, store) => {
-      let parts = definition.storage[store].split(':')
-      let original = parseInt(parts[0].replace(/[ ]?Gi$/, ''))
-      definition.storage[store] = [`${parseInt(size) + original}Gi`].concat(parts.slice(1)).join(':')
-    })
-    delete scale.storage
-  }
-  if (scale.containers) {
-    if (Array.isArray(scale.containers)) {
-      let count = parseInt(definition.containers || 1)
-      let factor = parseInt(scale.containers[1])
-      switch (scale.containers[0]) {
-        case '=':
-          scale.containers = factor
-          break
-        case '+':
-          scale.containers = count + factor
-          break
-        case '*':
-          scale.containers = count * factor
-          break
-      }
-    }
-  }
-  definition.scale = scale
 }
 
 module.exports = {

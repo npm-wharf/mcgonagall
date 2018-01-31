@@ -222,6 +222,13 @@ module.exports = {
           namespace: 'kube-system'
         }
       },
+      role: {
+        apiVersion: 'rbac.authorization.k8s.io/v1beta1',
+        kind: 'ClusterRole',
+        metadata: {
+          name: 'system:heapster'
+        }
+      },
       deployment: {
         apiVersion: 'apps/v1beta1',
         kind: 'Deployment',
@@ -251,10 +258,11 @@ module.exports = {
                 task: 'monitoring'
               }
             },
-            'spec': {
-              'containers': [
+            serviceAccountName: 'heapster',
+            spec: {
+              containers: [
                 {
-                  'command': [
+                  command: [
                     '/heapster',
                     '--source=kubernetes:https://kubernetes.default',
                     '--sink=influxdb:http://influxdb.data:8086'

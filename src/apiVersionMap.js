@@ -1,4 +1,4 @@
-module.exports = {
+const VERSION_MAP = {
   account: {
     '1.4': 'v1',
     '1.5': 'v1',
@@ -62,4 +62,13 @@ module.exports = {
     '1.7': 'apps/v1beta1',
     '1.8': 'apps/v1beta2'
   }
+}
+
+function getApiVersion (config, type) {
+  return VERSION_MAP[type][config.apiVersion]
+}
+
+module.exports = {
+  map: VERSION_MAP,
+  getApiVersion: getApiVersion
 }
