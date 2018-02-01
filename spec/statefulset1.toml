@@ -24,7 +24,7 @@ metadata = "owner=npm;branch=master"
   config = "/etc/mydb"
 
 [volumes]
-  config = "actual-config::mydb.conf,ssl.cert=cert/ssl.cert"
+  config = "actual-config::conf/mydb.conf=mydb.conf,ssl.cert=cert/ssl.cert"
 
 [storage]
   mydb-data = "10Gi:exclusive"

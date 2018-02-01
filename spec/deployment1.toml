@@ -22,7 +22,7 @@ labels = "task=admin"
   config = "/etc/mydb"
 
 [volumes]
-  config = "actual-config::mydb.conf,ssl.cert=cert/ssl.cert"
+  config = "actual-config::conf/mydb.conf,ssl.cert=cert/ssl.cert"
 
 [probes]
   ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"

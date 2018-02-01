@@ -30,7 +30,7 @@ function addConfigFile (cluster, options, parentFilePath, key, relativePath, fil
     }
     cluster.configuration.push(map)
   }
-  const fullPath = path.join(parentFilePath, filePath)
+  const fullPath = path.join(parentFilePath, relativePath)
   let content = fs.readFileSync(fullPath, 'utf8')
   if (tokenizer.hasTokens(content)) {
     content = _.template(content)(options.data)

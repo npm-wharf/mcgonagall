@@ -137,8 +137,8 @@ module.exports = {
                 name: 'actual-config',
                 items: [
                   {
-                    key: 'mydb.conf',
-                    path: 'mydb.conf'
+                    key: 'conf/mydb.conf',
+                    path: 'conf/mydb.conf'
                   },
                   {
                     key: 'ssl.cert',

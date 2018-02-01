@@ -118,7 +118,7 @@ module.exports = {
                 name: 'actual-config',
                 items: [
                   {
-                    key: 'mydb.conf',
+                    key: 'conf/mydb.conf',
                     path: 'mydb.conf'
                   },
                   {
