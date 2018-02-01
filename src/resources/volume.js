@@ -9,8 +9,8 @@ function createVolumes (config) {
         volumeMap.configMap.items.forEach(item => {
           config.addConfigFile(
             [config.namespace, volumeMap.configMap.name].join('.'),
-            item.path,
-            item.key
+            item.key,
+            item.path
           )
         })
       }
