@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.0"></a>
+# [1.7.0](https://github.com/npm-wharf/mcgonagall/compare/v1.5.2...v1.7.0) (2018-02-01)
+
+
+### Bug Fixes
+
+* correct defect in how config files are mapped to volumes when path is in a nested folder relative to specification ([5ab2bba](https://github.com/npm-wharf/mcgonagall/commit/5ab2bba))
+
+
+### Features
+
+* add initial support for RBAC. fix: correct cronjob definition. refactor: break service definition module into resource based modules. ([5f85215](https://github.com/npm-wharf/mcgonagall/commit/5f85215))
+
+
+
 <a name="1.6.0"></a>
 # [1.6.0](https://github.com/npm-wharf/mcgonagall/compare/v1.5.2...v1.6.0) (2018-01-31)
 
