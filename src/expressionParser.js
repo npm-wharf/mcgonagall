@@ -2,7 +2,8 @@ const CONTAINER_REGEX = /([+*])\s*([0-9]+)/
 const REQUIREMENT_REGEX = /[>]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
 const STORAGE_REGEX = /([a-zA-Z0-9]+)\s*[+]\s*([0-9]+)Gi/
 const LIMIT_REGEX = /[<]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
-const HTTP_PROBE_REGEX = /^[:]([0-9]+)([/a-zA-Z_\-0-9]+)/
+const HTTP_PROBE_REGEX = /^[:]([0-9]+|[a-zA-Z0-9]+)([/a-zA-Z_\-0-9=?&]+)?/
+const TCP_PROBE_REGEX = /^port[:]([0-9]+|[a-zA-Z0-9]+)/
 const SERVICE_PORTS = /(([0-9]+)<=)?(([0-9]+)[.]?(tcp|udp)?)(=>([0-9]+))?$/
 
 const accessModes = {
@@ -101,7 +102,7 @@ function parseCLIProbe (expression) {
     .map(assignment => {
       const [abbrev, value] = assignment.split('=')
       const setting = probeArguments[abbrev]
-      probe.exec[setting] = parseInt(value)
+      probe[setting] = parseInt(value)
     })
   return probe
 }
@@ -191,8 +192,8 @@ function parseEnvironmentBlock (block) {
 
 function parseHTTPProbe (expression) {
   const match = HTTP_PROBE_REGEX.exec(expression)
-  const port = parseInt(match[1])
-  const url = match[2]
+  const port = /^[0-9]+$/.test(match[1]) ? parseInt(match[1]) : match[1]
+  const url = match[2] || '/'
   const probe = {
     httpGet: {
       path: url,
@@ -205,7 +206,7 @@ function parseHTTPProbe (expression) {
     .map(assignment => {
       const [abbrev, value] = assignment.split('=')
       const setting = probeArguments[abbrev]
-      probe.httpGet[setting] = parseInt(value)
+      probe[setting] = parseInt(value)
     })
   return probe
 }
@@ -230,7 +231,9 @@ function parsePorts (ports, service = false) {
 }
 
 function parseProbe (expression) {
-  if (HTTP_PROBE_REGEX.test(expression)) {
+  if (TCP_PROBE_REGEX.test(expression)) {
+    return parseTCPProbe(expression)
+  } else if (HTTP_PROBE_REGEX.test(expression)) {
     return parseHTTPProbe(expression)
   } else {
     return parseCLIProbe(expression)
@@ -297,6 +300,25 @@ function parseStorage (expression) {
     storage.storage[mount] = value
   })
   return storage
+}
+
+function parseTCPProbe (expression) {
+  const match = TCP_PROBE_REGEX.exec(expression)
+  const port = /^[0-9]+$/.test(match[1]) ? parseInt(match[1]) : match[1]
+  const probe = {
+    tcpSocket: {
+      port: port
+    }
+  }
+  expression
+    .split(',')
+    .slice(1)
+    .map(assignment => {
+      const [abbrev, value] = assignment.split('=')
+      const setting = probeArguments[abbrev]
+      probe[setting] = parseInt(value)
+    })
+  return probe
 }
 
 function parseVolume (name, expression) {

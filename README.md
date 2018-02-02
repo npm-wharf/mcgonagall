@@ -504,7 +504,7 @@ where the `size` is the number of Gigabytes required and `access` is either `sha
 
 Probes are an optional (but recommended) addition that allow Kubernetes to determine when the service is ready to accept requests (using a ready probe) as well as determine if a container should be restarted (using a live probe).
 
-Each probe can use either an HTTP check or use a shell command within the container that will rely on the exit code to determine success or failure of the check.
+Each probe can use an HTTP check, a shell command within the container that relies on the exit code to determine success or failure of the check, or a TCP port based check that attempts to connect to the specified port.
 
 The key should either be `ready` or `live` to specify the purpose of the probe and the value should either be the relative URL beginning with the port for an HTTP probe or a command line relative to the container's working directory.
 
@@ -520,7 +520,13 @@ Each check can also support the following, optional, comma delimited, arguments 
 
 ```toml
 [probes]
+  # http probe
   ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"
+  # tcp probe with port number
+  ready = "port:9999"
+  # tcp probe with named port
+  ready = "port:http"
+  # command probe
   live = "mydb test,initial=5,period=30"
 ```
 

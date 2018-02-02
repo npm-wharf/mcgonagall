@@ -332,4 +332,136 @@ describe('Expression Parser', function () {
         ])
     })
   })
+
+  describe.only('probe parsers', function () {
+    it('should parse tcp probes correctly', function () {
+      expressionParser.parseProbe('port:8080')
+        .should.eql({
+          tcpSocket: {
+            port: 8080
+          }
+        })
+
+      expressionParser.parseProbe('port:8080,initial=5,period=5,timeout=1')
+        .should.eql({
+          tcpSocket: {
+            port: 8080
+          },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 1
+        })
+
+      expressionParser.parseProbe('port:tcp')
+        .should.eql({
+          tcpSocket: {
+            port: 'tcp'
+          }
+        })
+
+      expressionParser.parseProbe('port:tcp,initial=5,period=5,timeout=1')
+        .should.eql({
+          tcpSocket: {
+            port: 'tcp'
+          },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 1
+        })
+    })
+
+    it('should parse http probes correctly', function () {
+      expressionParser.parseProbe(':8080')
+        .should.eql({
+          httpGet: {
+            path: '/',
+            port: 8080
+          }
+        })
+
+      expressionParser.parseProbe(':8080,initial=5,period=5,timeout=1')
+        .should.eql({
+          httpGet: {
+            path: '/',
+            port: 8080
+          },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 1
+        })
+
+      expressionParser.parseProbe(':8080/test/url?opt=ping,initial=5,period=5,timeout=1,success=1,failure=3')
+        .should.eql({
+          httpGet: {
+            path: '/test/url?opt=ping',
+            port: 8080
+          },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 1,
+          successThreshold: 1,
+          failureThreshold: 3
+        })
+
+      expressionParser.parseProbe(':http')
+        .should.eql({
+          httpGet: {
+            path: '/',
+            port: 'http'
+          }
+        })
+
+      expressionParser.parseProbe(':http,initial=5,period=5,timeout=1')
+        .should.eql({
+          httpGet: {
+            path: '/',
+            port: 'http'
+          },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 1
+        })
+
+      expressionParser.parseProbe(':http/test/url?opt=ping,initial=5,period=5,timeout=1,success=1,failure=3')
+        .should.eql({
+          httpGet: {
+            path: '/test/url?opt=ping',
+            port: 'http'
+          },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 1,
+          successThreshold: 1,
+          failureThreshold: 3
+        })
+    })
+
+    it('should parse command probes correctly', function () {
+      expressionParser.parseProbe('test command --with /path/args')
+        .should.eql({
+          exec: {
+            command: [
+              'test',
+              'command',
+              '--with',
+              '/path/args'
+            ]
+          }
+        })
+
+      expressionParser.parseProbe('test command --with /path/args,initial=10,period=15')
+        .should.eql({
+          exec: {
+            command: [
+              'test',
+              'command',
+              '--with',
+              '/path/args'
+            ]
+          },
+          initialDelaySeconds: 10,
+          periodSeconds: 15
+        })
+    })
+  })
 })
