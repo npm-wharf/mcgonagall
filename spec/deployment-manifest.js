@@ -92,13 +92,13 @@ module.exports = {
               readinessProbe: {
                 httpGet: {
                   path: '/_monitor/ping',
-                  port: 9999,
-                  initialDelaySeconds: 5,
-                  periodSeconds: 5,
-                  timeoutSeconds: 1,
-                  successThreshold: 1,
-                  failureThreshold: 3
-                }
+                  port: 9999
+                },
+                initialDelaySeconds: 5,
+                periodSeconds: 5,
+                timeoutSeconds: 1,
+                successThreshold: 1,
+                failureThreshold: 3
               },
               env: [
                 {

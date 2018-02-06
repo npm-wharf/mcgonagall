@@ -1,6 +1,7 @@
 require('./setup')
 
 const expressionParser = require('../src/expressionParser')
+const { checkCPUScale, checkProbe, checkRAMScale, checkVolumeMap } = require('../src/validation')
 
 describe('Expression Parser', function () {
   it('should parse metadata correctly', function () {
@@ -40,6 +41,7 @@ describe('Expression Parser', function () {
 
   describe('volume parser', function () {
     it('should parse config maps', function () {
+      checkVolumeMap('test::file1.txt,file2.txt').should.equal(true)
       expressionParser.parseVolume('vol-name', 'test::file1.txt,file2.txt')
         .should.eql({
           name: 'vol-name',
@@ -60,6 +62,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse config maps with permissions', function () {
+      checkVolumeMap('test::file1.txt=subdir/file.txt:0664,file2.txt:0400').should.equal(true)
       expressionParser.parseVolume('vol-name', 'test::file1.txt=subdir/file.txt:0664,file2.txt:0400')
         .should.eql({
           name: 'vol-name',
@@ -83,6 +86,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse secret', function () {
+      checkVolumeMap('secret::my-secret').should.equal(true)
       expressionParser.parseVolume('vol-name', 'secret::my-secret')
         .should.eql({
           name: 'vol-name',
@@ -93,6 +97,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse secret with permissions', function () {
+      checkVolumeMap('secret::my-secret:0400').should.equal(true)
       expressionParser.parseVolume('vol-name', 'secret::my-secret:0400')
         .should.eql({
           name: 'vol-name',
@@ -104,6 +109,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse host path', function () {
+      checkVolumeMap('/a/path/to/thing').should.equal(true)
       expressionParser.parseVolume('vol-name', '/a/path/to/thing')
         .should.eql({
           name: 'vol-name',
@@ -181,6 +187,8 @@ describe('Expression Parser', function () {
         resources: {}
       }
 
+      checkRAMScale('> 500Mi < 1Gi').should.equal(true)
+      checkCPUScale('> 50% < 1.25').should.equal(true)
       expressionParser.addResource(resources, 'ram', '> 500Mi < 1Gi')
       expressionParser.addResource(resources, 'cpu', '> 50% < 1.25')
 
@@ -199,6 +207,8 @@ describe('Expression Parser', function () {
     })
 
     it('should create correct set of scale factors', function () {
+      checkRAMScale('> 750Mi < 1.5Gi').should.equal(true)
+      checkCPUScale('> .75 < 1.5').should.equal(true)
       expressionParser.parseScaleFactor(
         'container + 2; cpu > .75 < 1.5; ram > 750Mi < 1.5Gi; storage = data + 5Gi, logs + 2Gi'
       ).should.eql(
@@ -213,6 +223,8 @@ describe('Expression Parser', function () {
         }
       )
 
+      checkRAMScale('> 750Mi').should.equal(true)
+      checkCPUScale('> .75').should.equal(true)
       expressionParser.parseScaleFactor(
         'cpu > .75; ram > 750Mi; storage = data + 5Gi'
       ).should.eql(
@@ -225,6 +237,8 @@ describe('Expression Parser', function () {
         }
       )
 
+      checkRAMScale('<1.5Gi').should.equal(true)
+      checkCPUScale('<1.5').should.equal(true)
       expressionParser.parseScaleFactor(
         'container*2;cpu<1.5;ram<1.5Gi'
       ).should.eql(
@@ -333,8 +347,9 @@ describe('Expression Parser', function () {
     })
   })
 
-  describe.only('probe parsers', function () {
+  describe('probe parsers', function () {
     it('should parse tcp probes correctly', function () {
+      checkProbe('port:8080').should.equal(true)
       expressionParser.parseProbe('port:8080')
         .should.eql({
           tcpSocket: {
@@ -342,6 +357,7 @@ describe('Expression Parser', function () {
           }
         })
 
+      checkProbe('port:8080,initial=5,period=5,timeout=1').should.equal(true)
       expressionParser.parseProbe('port:8080,initial=5,period=5,timeout=1')
         .should.eql({
           tcpSocket: {
@@ -352,6 +368,7 @@ describe('Expression Parser', function () {
           timeoutSeconds: 1
         })
 
+      checkProbe('port:tcp').should.equal(true)
       expressionParser.parseProbe('port:tcp')
         .should.eql({
           tcpSocket: {
@@ -359,6 +376,7 @@ describe('Expression Parser', function () {
           }
         })
 
+      checkProbe('port:tcp,initial=5,period=5,timeout=1').should.equal(true)
       expressionParser.parseProbe('port:tcp,initial=5,period=5,timeout=1')
         .should.eql({
           tcpSocket: {
@@ -371,6 +389,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse http probes correctly', function () {
+      checkProbe(':8080').should.equal(true)
       expressionParser.parseProbe(':8080')
         .should.eql({
           httpGet: {
@@ -379,6 +398,7 @@ describe('Expression Parser', function () {
           }
         })
 
+      checkProbe(':8080,initial=5,period=5,timeout=1').should.equal(true)
       expressionParser.parseProbe(':8080,initial=5,period=5,timeout=1')
         .should.eql({
           httpGet: {
@@ -390,6 +410,7 @@ describe('Expression Parser', function () {
           timeoutSeconds: 1
         })
 
+      checkProbe(':8080/test/url?opt=ping,initial=5,period=5,timeout=1').should.equal(true)
       expressionParser.parseProbe(':8080/test/url?opt=ping,initial=5,period=5,timeout=1,success=1,failure=3')
         .should.eql({
           httpGet: {
@@ -403,6 +424,7 @@ describe('Expression Parser', function () {
           failureThreshold: 3
         })
 
+      checkProbe(':http').should.equal(true)
       expressionParser.parseProbe(':http')
         .should.eql({
           httpGet: {
@@ -411,6 +433,7 @@ describe('Expression Parser', function () {
           }
         })
 
+      checkProbe(':http,initial=5,period=5,timeout=1').should.equal(true)
       expressionParser.parseProbe(':http,initial=5,period=5,timeout=1')
         .should.eql({
           httpGet: {
@@ -422,6 +445,7 @@ describe('Expression Parser', function () {
           timeoutSeconds: 1
         })
 
+      checkProbe(':http/test/url?opt=ping,initial=5,period=5,timeout=1,success=1,failure=3').should.equal(true)
       expressionParser.parseProbe(':http/test/url?opt=ping,initial=5,period=5,timeout=1,success=1,failure=3')
         .should.eql({
           httpGet: {
@@ -437,6 +461,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse command probes correctly', function () {
+      checkProbe('test command --with /path/args').should.equal(true)
       expressionParser.parseProbe('test command --with /path/args')
         .should.eql({
           exec: {
@@ -449,11 +474,27 @@ describe('Expression Parser', function () {
           }
         })
 
+      checkProbe('test command --with /path/args,initial=10,period=15').should.equal(true)
       expressionParser.parseProbe('test command --with /path/args,initial=10,period=15')
         .should.eql({
           exec: {
             command: [
               'test',
+              'command',
+              '--with',
+              '/path/args'
+            ]
+          },
+          initialDelaySeconds: 10,
+          periodSeconds: 15
+        })
+
+      checkProbe('/bin/path/test command --with /path/args,initial=10,period=15').should.equal(true)
+      expressionParser.parseProbe('/bin/path/test command --with /path/args,initial=10,period=15')
+        .should.eql({
+          exec: {
+            command: [
+              '/bin/path/test',
               'command',
               '--with',
               '/path/args'
