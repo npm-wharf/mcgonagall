@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.4"></a>
+## [1.7.4](https://github.com/npm-wharf/mcgonagall/compare/v1.7.3...v1.7.4) (2018-02-06)
+
+
+### Bug Fixes
+
+* correct probe implementation and validations affecting it ([53c1d60](https://github.com/npm-wharf/mcgonagall/commit/53c1d60))
+
+
+
 <a name="1.7.3"></a>
 ## [1.7.3](https://github.com/npm-wharf/mcgonagall/compare/v1.7.2...v1.7.3) (2018-02-06)
 
