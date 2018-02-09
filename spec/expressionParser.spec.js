@@ -386,6 +386,8 @@ describe('Expression Parser', function () {
           periodSeconds: 5,
           timeoutSeconds: 1
         })
+
+      checkProbe('port:').should.equal(false)
     })
 
     it('should parse http probes correctly', function () {
@@ -458,6 +460,8 @@ describe('Expression Parser', function () {
           successThreshold: 1,
           failureThreshold: 3
         })
+
+      checkProbe(':').should.equal(false)
     })
 
     it('should parse command probes correctly', function () {
@@ -503,6 +507,9 @@ describe('Expression Parser', function () {
           initialDelaySeconds: 10,
           periodSeconds: 15
         })
+
+      checkProbe('/bin/path/test command --with="/path/args"').should.equal(true)
+      checkProbe('/bin/path/test command --with=$ARGS --and=%idek%').should.equal(true)
     })
   })
 })

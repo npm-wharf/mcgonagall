@@ -1,7 +1,7 @@
 const Joi = require('joi')
 
 const CPU_SCALE_REGEX = /^(\s*[<>]\s*[.0-9]+([ ]?Mi|[ ]?Gi|%)?)+$/
-const PROBE_REGEX = /^((port)[:][0-9a-zA-Z]+|[:][0-9a-zA-Z]+([/a-zA-Z0-9_\-?=&]+)?|([a-zA-Z0-9_\-/ ]+\s*)+)(([,]([a-zA-Z]+[=][0-9]+))+)?$/
+const PROBE_REGEX = /^(port[:][0-9a-zA-Z]+|[:][0-9a-zA-Z]+([/a-zA-Z0-9_\-?=&]+)?|((?!port[:])[/a-zA-Z][^,]+\s*)+)(([,]([a-zA-Z]+[=][0-9]+))+)?$/
 const RAM_SCALE_REGEX = /^(\s*[<>]\s*[.0-9]+([ ]?Ki|[ ]?Mi|[ ]?Gi))+$/
 const STORAGE_SPEC_REGEX = /^[0-9]+Gi[:](exclusive|shared)$/
 const VOLUME_MAP_REGEX = /^([a-zA-Z0-9_\-/]+|[a-z-]+[::]((\S)+([=]\S+)?[,]?)+)$/
