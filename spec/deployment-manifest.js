@@ -11,14 +11,14 @@ module.exports = {
     }
   },
   role: {
-    apiVersion: 'rbac.authorization.k8s.io/v1beta1',
+    apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
     metadata: {
       name: 'system:dbowner'
     }
   },
   roleBinding: {
-    apiVersion: 'rbac.authorization.k8s.io/v1beta1',
+    apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
     metadata: {
       name: 'dbowner'
@@ -37,7 +37,7 @@ module.exports = {
     ]
   },
   deployment: {
-    apiVersion: 'apps/v1beta1',
+    apiVersion: 'apps/v1beta2',
     kind: 'Deployment',
     metadata: {
       namespace: 'data',

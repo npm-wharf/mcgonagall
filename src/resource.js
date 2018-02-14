@@ -44,7 +44,7 @@ function buildResources (config) {
   } else if (config.daemon) {
     const daemon = createDaemonSet(config)
     Object.assign(definition, daemon)
-  } else {
+  } else if (config.image) {
     const deployment = createDeployment(config)
     Object.assign(definition, deployment)
   }

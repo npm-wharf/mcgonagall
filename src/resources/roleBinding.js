@@ -40,7 +40,8 @@ function createRoleBinding (config) {
         apiVersion: getApiVersion(config, 'roleBinding'),
         kind: 'RoleBinding',
         metadata: {
-          name: config.security.account
+          name: config.security.account,
+          namespace: config.namespace
         },
         roleRef: {
           apiGroup: 'rbac.authorization.k8s.io',

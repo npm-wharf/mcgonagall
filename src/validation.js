@@ -31,7 +31,11 @@ const serviceDefinition = {
   serviceAlias: Joi.string(),
   metadata: Joi.string(),
   stateful: Joi.boolean(),
-  image: Joi.string().required(),
+  image: Joi.any().when('security', {
+    is: Joi.exist(),
+    then: Joi.string(),
+    otherwise: Joi.string().required()
+  }),
   command: Joi.alternatives().try([ Joi.string(), Joi.array().items(Joi.string()) ]),
   scale: {
     containers: Joi.number().integer(),
@@ -56,7 +60,22 @@ const serviceDefinition = {
   probes: {
     ready: Joi.string().regex(PROBE_REGEX, 'probe definition'),
     live: Joi.string().regex(PROBE_REGEX, 'probe definition')
-  }
+  },
+  security: Joi.object({
+    account: Joi.string(),
+    role: Joi.string(),
+    context: Joi.string(),
+    capabilities: Joi.array().items(Joi.string()),
+    escalation: Joi.boolean(),
+    rules: Joi.array().items(
+      Joi.object({
+        groups: Joi.array(),
+        resources: Joi.array(),
+        resourceNames: Joi.array(),
+        verbs: Joi.array()
+      })
+    )
+  })
 }
 
 const serviceSchema = Joi.compile(serviceDefinition)

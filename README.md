@@ -549,7 +549,7 @@ This section controls how the service is exposed via Kubernetes internal DNS and
 
 The security section exists to address Role Based Authentication (RBAC) - the feature set around accounts, roles and role bindings which provide access control to the Kubernetes API.
 
-The properties of `account`, `role` and the sub-heading of `rules` allow you to specify the account and role requirements for the service so that ServiceAccount, Role and RoleBinding resources will be created on your behalf where necessary.
+The properties of `account`, `role` and the sub-heading of `rules` (a TOML array) allow you to specify the account and role requirements for the service so that ServiceAccount, Role and RoleBinding resources will be created on your behalf where necessary.
 
 Container process privileges can be controlled via `runAsUser`, `fsGroup` via the `context` property. `capabilities` can be listed out as well as turning on privilege escalation via the `escalation` flag when required. Use these behaviors with caution and make sure you understand the implications.
 
@@ -582,7 +582,7 @@ In cases where you need to create an account and bind it to a role with access t
 [security]
   account = "viewer"
   role = "Role;view"
-  [security.rules]
+  [[security.rules]]
     groups = []
     resources = []
     resourceNames = [] # optionally filter by resource name

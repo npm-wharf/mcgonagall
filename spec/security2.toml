@@ -1,0 +1,12 @@
+name = "role-name.my-namespace"
+
+[security]
+  account = "some-account"
+  role = "Role;some-role"
+  [[security.rules]]
+    verbs = [ "create", "get", "update", "delete" ]
+    resources = [ "secrets" ]
+  [[security.rules]]
+    groups = [ "batch" , "extensions" ]
+    verbs = [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+    resources = [ "jobs" ]

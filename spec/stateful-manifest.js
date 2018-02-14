@@ -3,7 +3,7 @@ module.exports = {
   name: 'mydb',
   namespace: 'data',
   statefulSet: {
-    apiVersion: 'apps/v1beta1',
+    apiVersion: 'apps/v1beta2',
     kind: 'StatefulSet',
     metadata: {
       namespace: 'data',
