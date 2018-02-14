@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.0"></a>
+# [1.8.0](https://github.com/npm-wharf/mcgonagall/compare/v1.7.5...v1.8.0) (2018-02-14)
+
+
+### Features
+
+* provide full RBAC support and allow specs to provide RBAC definitions without a service type attached ([18abaf3](https://github.com/npm-wharf/mcgonagall/commit/18abaf3))
+
+
+
 <a name="1.7.5"></a>
 ## [1.7.5](https://github.com/npm-wharf/mcgonagall/compare/v1.7.4...v1.7.5) (2018-02-09)
 
