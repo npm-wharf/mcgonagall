@@ -47,7 +47,8 @@ function createDaemonSet (config) {
   }
   Object.assign(definition.daemonSet.metadata, metadata || {})
   if (config.security && config.security.account) {
-    definition.daemonSet.spec.template.serviceAccountName = config.security.account
+    definition.daemonSet.spec.template.spec.serviceAccount = config.security.account
+    definition.daemonSet.spec.template.spec.serviceAccountName = config.security.account
   }
   return definition
 }

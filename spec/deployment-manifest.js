@@ -66,7 +66,6 @@ module.exports = {
             task: 'admin'
           }
         },
-        serviceAccountName: 'dbowner',
         spec: {
           containers: [
             {
@@ -147,7 +146,9 @@ module.exports = {
                 ]
               }
             }
-          ]
+          ],
+          serviceAccount: 'dbowner',
+          serviceAccountName: 'dbowner'
         }
       }
     }

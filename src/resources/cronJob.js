@@ -55,7 +55,8 @@ function createCronJob (config) {
     definition.cronJob.spec.jobTemplate.spec.startingDeadlineSeconds = config.deployment.timeLimit
   }
   if (config.security && config.security.account) {
-    definition.cronJob.spec.jobTemplate.spec.template.serviceAccountName = config.security.account
+    definition.cronJob.spec.jobTemplate.spec.template.spec.serviceAccount = config.security.account
+    definition.cronJob.spec.jobTemplate.spec.template.spec.serviceAccountName = config.security.account
   }
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}

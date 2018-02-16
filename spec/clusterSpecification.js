@@ -258,7 +258,6 @@ module.exports = {
                 task: 'monitoring'
               }
             },
-            serviceAccountName: 'heapster',
             spec: {
               containers: [
                 {
@@ -280,7 +279,9 @@ module.exports = {
                     }
                   }
                 }
-              ]
+              ],
+              serviceAccount: 'heapster',
+              serviceAccountName: 'heapster'
             }
           }
         }

@@ -52,7 +52,8 @@ function createStatefulSet (config) {
     definition.statefulSet.spec.minReadySeconds = config.deployment.ready
   }
   if (config.security && config.security.account) {
-    definition.statefulSet.spec.template.serviceAccountName = config.security.account
+    definition.statefulSet.spec.template.spec.serviceAccount = config.security.account
+    definition.statefulSet.spec.template.spec.serviceAccountName = config.security.account
   }
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}

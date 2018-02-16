@@ -42,7 +42,8 @@ function createJob (config) {
     definition.job.spec.activeDeadlineSeconds = config.deployment.timeLimit
   }
   if (config.security && config.security.account) {
-    definition.job.spec.template.serviceAccountName = config.security.account
+    definition.job.spec.template.spec.serviceAccount = config.security.account
+    definition.job.spec.template.spec.serviceAccountName = config.security.account
   }
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
