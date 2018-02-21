@@ -1,7 +1,7 @@
 
 # mcgonagall
 
-Transfigures terse cluster and service specifications in TOML into Kubernetes manifests.
+Transfigures terse cluster and resource specifications in TOML into Kubernetes manifests.
 
 [![Build Status][travis-image]][travis-url]
 [![Coverage Status][coveralls-image]][coveralls-url]
@@ -238,7 +238,7 @@ scaleOrder = "small, medium, large, enterprise"
 
 ### [namespace.service-name]
 
-Each service is represented by a table dictionary in TOML. This value *must* match the namespace and name of the service as it was given in `name` property of the service specification file.
+Each service is represented by a table dictionary in TOML. This value *must* match the namespace and name of the service as it was given in `name` property of the resource specification file.
 
 ### `order`
 
@@ -263,7 +263,7 @@ The scale table optionally assigns scaling factors to the container based on the
  * ram limits: `ram > [requirement] < [limit]`
  * storage provisioned: `storage = [mount] + [increase], ...`
 
-As with the service specifications, RAM is expressed in `Mi` or `Gi` units and CPU limits are either fractional CPU cores or as a percentage using a `%` postfix.
+As with the resource specifications, RAM is expressed in `Mi` or `Gi` units and CPU limits are either fractional CPU cores or as a percentage using a `%` postfix.
 
 When specifying increases to provisioned storage for stateful services, be sure to match based on the mount name. Multiple mounts can be increased using a `,` to delimit the list.
 
@@ -273,7 +273,7 @@ When specifying increases to provisioned storage for stateful services, be sure 
 
 Multiple configuration maps can be specified, in any namespace, provided that they are prefixed by `configuration`. It is a simple key-value map intended to supply defaults to the services.
 
-The service specifications will still have to opt in to the configuration maps defined in the cluster configurations (see the `env` section).
+The resource specifications will still have to opt in to the configuration maps defined in the cluster configurations (see the `env` section).
 
 The purpose of the configuration map here is not to replace etcd as the preferred solution for configuration. Kubernetes does not presently provide any mechanism to alert containers on changes made to configuration maps. Updating running services to reflect configuration changes that rely solely on configuration maps is painful. 
 
@@ -291,11 +291,13 @@ This provides a simple way to handle dynamic, load-balanced ingress across conta
 
 You can see examples of this in action in the `/spec` folder under the `plain-source` (specs) and `plain-verify` (output) as well as the `tokenized-source` (specs) and `tokenized-verify` (output) folders.
 
-## Service Specification
+## Resource Specification
 
-The service specification captures the Docker image, metadata and resources required to create the service. Effort was made to eliminate Kubernetes implementation artifacts and stick to the data, but it is very clear that the service is being described in terms of a container.
+The resource specification captures the metadata necessary to define one or more resource manifests. Effort was made to eliminate Kubernetes implementation artifacts and stick to the data. The specification is bias towards creation of a single-container manifest with other manifests intended to support it.
 
-### Example Service Specification
+It is possible to create a resource spec that is intended to generate a set of RBAC manifests or a Network Policy.
+
+### Example Resource Specification
 
 The following demonstrates how all the sections would work together. Well over 200 lines of Kubernetes manifests would be derived from this, not to mention the NGiNX configuration block for the reverse proxy used by the cluster.
 
@@ -377,7 +379,7 @@ If the service needs permanent storage (think databases) this should be set to t
 
 The metadata property provides a way to add custom properties to the service's metadata block. It takes a string with key value pairs separated by `;`s. Metadata in Kubernetes is often used to select and filter services. As an example, Hikaru's continuous delivery can make use of metadata to determine if services are eligible for upgrade given what appears to be a compatible Docker image.
 
-### [scale]
+### `[scale]`
 
 Parameters to control how many containers will be provisioned, how much RAM and CPU will be reserved and what limits will be applied for each.
 
@@ -392,7 +394,7 @@ Parameters to control how many containers will be provisioned, how much RAM and 
 
 The containers parameter is intended to be the baseline/starting point/bare minimum number of containers needed for the service to work under normal circumstances. This is not meant to reflect customer/cluster size.
 
-### [env]
+### `[env]`
 
 Environment variables for the service's container can be specified as direct values or as references to a configuration map's key.
 
@@ -408,7 +410,7 @@ Configuration map references should fall under a block that includes the configu
   MY_ENV = "config_map_key"
 ```
 
-### [ports]
+### `[ports]`
 
 The ports block controls which ports will be exposed by the container, how they will be exposed, and how they will be registered with DNS. TCP is the assumed protocol unless `.udp` is postfixed to the port.
 
@@ -428,7 +430,7 @@ The ports block controls which ports will be exposed by the container, how they 
   idk = "5050.udp"
 ```
 
-### [mounts]
+### `[mounts]`
 
 This block assigns a label to a specific path as a mount point so that files, host paths or a volume claim can later be mounted to it.
 
@@ -440,7 +442,7 @@ This block assigns a label to a specific path as a mount point so that files, ho
   config-files = "/etc/my-app"
 ```
 
-### [volumes]
+### `[volumes]`
 
 Most often, these will be flat files that are going to get defined as a configuration map and then mounted to the container on start.
 
@@ -483,7 +485,7 @@ Works similarly to flat files except instead of a config map name, use the keywo
 
 > Note: the same convention is used for controlling access modes here as with the flat-files
 
-### [storage]
+### `[storage]`
 
 The storage block enumerates persistent storage requirements for services that have specified `stateful = true`.
 
@@ -500,7 +502,7 @@ where the `size` is the number of Gigabytes required and `access` is either `sha
   data = "10Gi:exclusive"
 ```
 
-### [probes]
+### `[probes]`
 
 Probes are an optional (but recommended) addition that allow Kubernetes to determine when the service is ready to accept requests (using a ready probe) as well as determine if a container should be restarted (using a live probe).
 
@@ -530,7 +532,7 @@ Each check can also support the following, optional, comma delimited, arguments 
   live = "mydb test,initial=5,period=30"
 ```
 
-### [service]
+### `[service]`
 
 This section controls how the service is exposed via Kubernetes internal DNS and, potentially, via ingress points.
 
@@ -545,14 +547,13 @@ This section controls how the service is exposed via Kubernetes internal DNS and
 
 > Note: the `serviceAlias` is intended for use with StatefulSets to serve as the secondary namespace given to each named pod instance in DNS. If this is gibberish to you now, don't worry, as you learn about Kubernetes it will start to make sense.
 
-### [security]
+### `[security]`
 
 The security section exists to address Role Based Authentication (RBAC) - the feature set around accounts, roles and role bindings which provide access control to the Kubernetes API.
 
 The properties of `account`, `role` and the sub-heading of `rules` (a TOML array) allow you to specify the account and role requirements for the service so that ServiceAccount, Role and RoleBinding resources will be created on your behalf where necessary.
 
 Container process privileges can be controlled via `runAsUser`, `fsGroup` via the `context` property. `capabilities` can be listed out as well as turning on privilege escalation via the `escalation` flag when required. Use these behaviors with caution and make sure you understand the implications.
-
 
 #### Example - heapster ClusterRole
 
@@ -728,6 +729,45 @@ Examples:
  * `* 1,4 * * * 0,5` - at 1am and 4am on Friday and Sunday
  * `* 0 1,15 * *` - midnight on the 1st and 15th of every month
 
+### `[network]`
+
+The network block lets you define a network policy. When included in a service definition (cronJob, DaemonSet, Deployment, Job, StatefulSet), the pod selector can be omitted and mcgonagall will use identifying information from the spec to select the current service's pod.
+
+ * `selector` - a `;` delimitted set of key value pairs to select the pods by label
+ * `[[network.ingress]]`
+   * `from` - an array of strings to define various ways to allow ingress. Empty ingress results in all incoming traffic getting blocked.
+   * `ports` - an array of ports to allow incoming traffic on
+ * `[[network.egress]]`
+   * `to` - an array of strings to define limits on outgoing traffic destinations
+   * `ports` - an array of ports to allow outgoing traffic on
+
+#### Ingress/Egress patterns
+
+The following patterns are all legal ways to specify ingress or egress:
+
+ * CIDR block:
+   * `[ "172.17.0.0/16" ]`
+ * CIDR block with an exception:
+   * `[ "172.17.0.0/16 ! 172.17.1.0/24" ]`
+ * By Namespace:
+   * `[ "namespace=name:kube-system" ]`
+   * `[ "namespace=label:value" ]`
+ * By Pod
+   * `[ "pod=label:value" ]`
+
+#### Port List
+
+Both Ingress and Egress expect one or more port specifications that look like:
+ 
+  * tcp ports - `[ "8080.tcp" ]`
+  * udp ports - `[ "5084.udp" ]`
+
+#### Example
+
+```toml
+[network]
+
+```
 
 # Use Cases
 

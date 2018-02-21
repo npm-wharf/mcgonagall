@@ -705,6 +705,41 @@ module.exports = {
         medium: '+1',
         small: '+0'
       },
+      networkPolicy: {
+        apiVersion: 'networking.k8s.io/v1',
+        kind: 'NetworkPolicy',
+        metadata: {
+          namespace: 'infra',
+          name: 'proxy'
+        },
+        spec: {
+          ingress: [
+            {
+              from: [
+                {
+                  ipBlock: {
+                    cidr: '0.0.0.0/16'
+                  }
+                }
+              ],
+              ports: [
+                {
+                  port: 443,
+                  protocol: 'TCP'
+                }
+              ]
+            }
+          ],
+          podSelector: {
+            matchLabels: {
+              app: 'proxy'
+            }
+          },
+          policyTypes: [
+            'Ingress'
+          ]
+        }
+      },
       deployment: {
         apiVersion: 'apps/v1beta1',
         kind: 'Deployment',

@@ -1,10 +1,14 @@
 const CONTAINER_REGEX = /([+*])\s*([0-9]+)/
 const REQUIREMENT_REGEX = /[>]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
 const STORAGE_REGEX = /([a-zA-Z0-9]+)\s*[+]\s*([0-9]+)Gi/
-const LIMIT_REGEX = /[<]\s*([.0-9]+)\s*([a-zA-Z%]+)?/
-const HTTP_PROBE_REGEX = /^[:]([0-9]+|[a-zA-Z0-9]+)([/a-zA-Z_\-0-9=?&]+)?/
-const TCP_PROBE_REGEX = /^port[:]([0-9]+|[a-zA-Z0-9]+)/
-const SERVICE_PORTS = /(([0-9]+)<=)?(([0-9]+)[.]?(tcp|udp)?)(=>([0-9]+))?$/
+const LIMIT_REGEX = /[<]\s*([.0-9]{1,6})\s*([a-zA-Z%]+)?/
+const HTTP_PROBE_REGEX = /^[:]([0-9]{2,6}|[a-zA-Z0-9]+)([/a-zA-Z_\-0-9=?&]+)?/
+const TCP_PROBE_REGEX = /^port[:]([0-9]{2,6}|[a-zA-Z0-9]+)/
+const SERVICE_PORTS = /(([0-9]{2,6})<=)?(([0-9]{2,6})[.]?(tcp|udp)?)(=>([0-9]{2,6}))?$/
+
+const POD_SELECTOR_REGEX = /((([a-zA-Z0-9_-]+)[:]([^;]+)))/g
+const POLICY_PORT_REGEX = /^([0-9]{2,6})([.](tcp|udp))?$/
+const POLICY_SOURCE_REGEX = /((([0-9]{1,3}[./]?){5})(([ ]?[!][ ]?(([0-9]{1,3}[./]?){5}))*)|(namespace|pod)[ ]?[=][ ]?(((([a-zA-Z0-9_-]+)[:]([^;]+))[;]?)+))/
 
 const accessModes = {
   exclusive: 'ReadWriteOnce',
@@ -222,6 +226,87 @@ function parseMetadata (expression) {
   }, {})
 }
 
+function parseNetworkSource (expression) {
+  const match = POLICY_SOURCE_REGEX.exec(expression)
+  if (match) {
+    const [,,
+      acceptRange,,
+      fullExclude,,
+      lastExclude,,
+      type,
+      fullSelector,
+      lastSelector,,
+      label,
+      value
+    ] = match
+    if (acceptRange) {
+      const block = {
+        ipBlock: {
+          cidr: acceptRange
+        }
+      }
+      if (fullExclude) {
+        block.ipBlock.except = []
+        if (fullExclude.length < lastExclude.length - 3) {
+          block.ipBlock.except.push(lastExclude)
+        } else {
+          fullExclude.replace(/[ ]/g, '').split('!').forEach(range => {
+            if (range !== '') {
+              block.ipBlock.except.push(range)
+            }
+          })
+        }
+      }
+      return block
+    } else if (type === 'namespace') {
+      const block = {
+        namespaceSelector: {
+          matchLabels: {}
+        }
+      }
+      if (fullSelector === lastSelector) {
+        block.namespaceSelector.matchLabels[label] = value
+      } else {
+        block.namespaceSelector.matchLabels = parsePodSelector(fullSelector)
+      }
+      return block
+    } else {
+      const block = {
+        podSelector: {
+          matchLabels: {}
+        }
+      }
+      if (fullSelector === lastSelector) {
+        block.podSelector.matchLabels[label] = value
+      } else {
+        block.podSelector.matchLabels = parsePodSelector(fullSelector)
+      }
+      return block
+    }
+  }
+}
+
+function parsePodSelector (expression) {
+  const selector = {}
+  let match
+  while ((match = POD_SELECTOR_REGEX.exec(expression))) {
+    const [, , , key, val] = match
+    selector[key] = val
+  }
+  return selector
+}
+
+function parsePolicyPort (expression) {
+  const match = POLICY_PORT_REGEX.exec(expression)
+  if (match) {
+    const [, port,, type = 'tcp'] = match
+    return {
+      protocol: type.toUpperCase(),
+      port: parseInt(port)
+    }
+  }
+}
+
 function parsePorts (ports, service = false) {
   const keys = Object.keys(ports)
   const portFn = service ? parseServicePort : parseContainerPort
@@ -397,7 +482,10 @@ module.exports = {
   parseCPU: parseCPU,
   parseEnvironmentBlock: parseEnvironmentBlock,
   parseMetadata: parseMetadata,
+  parseNetworkSource: parseNetworkSource,
+  parsePodSelector: parsePodSelector,
   parsePorts: parsePorts,
+  parsePolicyPort: parsePolicyPort,
   parseProbe: parseProbe,
   parseRAM: parseRAM,
   parseScaleFactor: parseScaleFactor,

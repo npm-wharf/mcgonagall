@@ -1,7 +1,16 @@
 require('./setup')
 
 const expressionParser = require('../src/expressionParser')
-const { checkCPUScale, checkProbe, checkRAMScale, checkVolumeMap } = require('../src/validation')
+const {
+  checkCPUScale,
+  checkEgressBlock,
+  checkIngressBlock,
+  checkPolicyPort,
+  checkPodSelector,
+  checkProbe,
+  checkRAMScale,
+  checkVolumeMap
+} = require('../src/validation')
 
 describe('Expression Parser', function () {
   it('should parse metadata correctly', function () {
@@ -511,5 +520,130 @@ describe('Expression Parser', function () {
       checkProbe('/bin/path/test command --with="/path/args"').should.equal(true)
       checkProbe('/bin/path/test command --with=$ARGS --and=%idek%').should.equal(true)
     })
+  })
+
+  describe('network policy', function () {
+    it('should parse pod selectors', function () {
+      checkPodSelector('one:a').should.equal(true)
+      checkPodSelector('one:a;two:oh look spaces').should.equal(true)
+      checkPodSelector('one:a;two:2;three:so many').should.equal(true)
+      expressionParser.parsePodSelector('one:a')
+        .should.eql({
+          one: 'a'
+        })
+
+      expressionParser.parsePodSelector('one:a lot of stuff;two:be "100";three:c')
+        .should.eql({
+          one: 'a lot of stuff',
+          two: 'be "100"',
+          three: 'c'
+        })
+    })
+
+    it('should parse policy ports', function () {
+      checkPolicyPort('8080').should.equal(true)
+      checkPolicyPort('8080.tcp').should.equal(true)
+      checkPolicyPort('8080.udp').should.equal(true)
+      checkPolicyPort('8080.upd').should.equal(false)
+      checkPolicyPort('8080.tpc').should.equal(false)
+      checkPolicyPort('8080.').should.equal(false)
+      expressionParser.parsePolicyPort('8080.tcp')
+        .should.eql({
+          protocol: 'TCP',
+          port: 8080
+        })
+
+      expressionParser.parsePolicyPort('6379')
+        .should.eql({
+          protocol: 'TCP',
+          port: 6379
+        })
+
+      expressionParser.parsePolicyPort('5445.udp')
+        .should.eql({
+          protocol: 'UDP',
+          port: 5445
+        })
+    })
+  })
+
+  it('should parse ingress and egress specifications', function () {
+    checkIngressBlock('172.17.0.0/16').should.equal(true)
+    checkIngressBlock('172.17.0.0/16 ! 172.17.1.0/24').should.equal(true)
+    checkIngressBlock('namespace=name:kube-system').should.equal(true)
+    checkIngressBlock('namespace=name:other;other:extra stuff').should.equal(true)
+    checkIngressBlock('pod=label:value').should.equal(true)
+
+    checkEgressBlock('172.17.0.0/16').should.equal(true)
+    checkEgressBlock('172.17.0.0/16 ! 172.17.1.0/24').should.equal(true)
+    checkEgressBlock('namespace=name:kube-system').should.equal(true)
+    checkEgressBlock('namespace=name:other;other:extra stuff').should.equal(true)
+    checkEgressBlock('pod=label:value').should.equal(true)
+
+    expressionParser.parseNetworkSource('172.17.0.0/16')
+      .should.eql({
+        ipBlock: {
+          cidr: '172.17.0.0/16'
+        }
+      })
+
+    expressionParser.parseNetworkSource('172.17.0.0/16 ! 172.17.1.0/24')
+      .should.eql({
+        ipBlock: {
+          cidr: '172.17.0.0/16',
+          except: [
+            '172.17.1.0/24'
+          ]
+        }
+      })
+
+    expressionParser.parseNetworkSource('172.17.0.0/16 ! 172.17.1.0/24 ! 172.17.5.0/24')
+      .should.eql({
+        ipBlock: {
+          cidr: '172.17.0.0/16',
+          except: [
+            '172.17.1.0/24',
+            '172.17.5.0/24'
+          ]
+        }
+      })
+
+    expressionParser.parseNetworkSource('namespace=name:kube-system')
+      .should.eql({
+        namespaceSelector: {
+          matchLabels: {
+            name: 'kube-system'
+          }
+        }
+      })
+
+    expressionParser.parseNetworkSource('namespace=name:kube-system;other:something extra')
+      .should.eql({
+        namespaceSelector: {
+          matchLabels: {
+            name: 'kube-system',
+            other: 'something extra'
+          }
+        }
+      })
+
+    expressionParser.parseNetworkSource('pod=name:kube-system')
+      .should.eql({
+        podSelector: {
+          matchLabels: {
+            name: 'kube-system'
+          }
+        }
+      })
+
+    expressionParser.parseNetworkSource('pod=name:kube-system;other:something extra')
+      .should.eql({
+        podSelector: {
+          matchLabels: {
+            name: 'kube-system',
+            other: 'something extra'
+          }
+        }
+      })
   })
 })

@@ -1,0 +1,25 @@
+apiVersion = '1.8'
+name = 'test'
+namespace = 'default'
+[network]
+  selector = 'name:pod;namespace:default'
+  [[network.egress]]
+    to = [
+      '0.0.0.0/16 ! 10.10.0.0/16',
+      'namespace=label:one;other:two',
+      'pod=a:1;b:this is a whole thing'
+    ]
+    ports = [ '5678', '5679.tcp', '5670.udp' ]
+  [[network.egress]]
+    to = [ 'pod=name:databass' ]
+    ports = [ '5984' ]
+  [[network.ingress]]
+    from = [
+      '172.1.0.0/16',
+      '172.1.0.0/16 ! 172.1.2.0/16 ! 172.1.3.0/16',
+      'namespace=label:one;other:two',
+      'pod=a:1;b:this is a whole thing'
+    ]
+    ports = [ '1234', '1235.tcp', '1235.udp' ]
+  [[network.ingress]]
+    from = [ 'namespace=name:data' ]

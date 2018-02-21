@@ -34,6 +34,13 @@ const VERSION_MAP = {
     '1.7': 'batch/v1',
     '1.8': 'batch/v1'
   },
+  networkPolicy: {
+    '1.4': 'networking.k8s.io/v1',
+    '1.5': 'networking.k8s.io/v1',
+    '1.6': 'networking.k8s.io/v1',
+    '1.7': 'networking.k8s.io/v1',
+    '1.8': 'networking.k8s.io/v1'
+  },
   role: {
     '1.4': 'rbac.authorization.k8s.io/v1beta1',
     '1.5': 'rbac.authorization.k8s.io/v1beta1',

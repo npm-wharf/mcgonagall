@@ -27,3 +27,11 @@ image = "nginx:1.13-alpine"
 
 [service]
   loadBalance = true
+
+[network]
+  selector = 'app:proxy'
+  [[network.ingress]]
+    from = [
+      '0.0.0.0/16'
+    ]
+    ports = [ '443' ]

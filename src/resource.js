@@ -9,6 +9,7 @@ const { createCronJob } = require('./resources/cronJob')
 const { createDaemonSet } = require('./resources/daemonSet')
 const { createDeployment } = require('./resources/deployment')
 const { createJob } = require('./resources/job')
+const { createNetworkPolicy } = require('./resources/networkPolicy')
 const { createRole } = require('./resources/role')
 const { createRoleBinding } = require('./resources/roleBinding')
 const { createService } = require('./resources/service')
@@ -65,6 +66,11 @@ function buildResources (config) {
       Object.assign(definition, role)
       Object.assign(definition, roleBinding)
     }
+  }
+
+  if (config.network) {
+    const policy = createNetworkPolicy(config)
+    Object.assign(definition, policy)
   }
 
   return omitEmptyKeys(definition)

@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  namespace: infra
+  name: proxy
+spec:
+  podSelector:
+    matchLabels:
+      app: proxy
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
