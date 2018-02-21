@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.9.0"></a>
+# [1.9.0](https://github.com/npm-wharf/mcgonagall/compare/v1.8.1...v1.9.0) (2018-02-21)
+
+
+### Features
+
+* add support for network policies ([c8f5df3](https://github.com/npm-wharf/mcgonagall/commit/c8f5df3))
+
+
+
 <a name="1.8.1"></a>
 ## [1.8.1](https://github.com/npm-wharf/mcgonagall/compare/v1.8.0...v1.8.1) (2018-02-16)
 
