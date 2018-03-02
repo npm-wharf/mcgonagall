@@ -31,3 +31,4 @@
 
 [configuration.infra.config]
   test = "hello"
+  empty = ""

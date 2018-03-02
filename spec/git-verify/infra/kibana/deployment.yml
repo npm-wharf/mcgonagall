@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   namespace: infra
   name: kibana
+  labels:
+    name: kibana
+    namespace: infra
 spec:
   replicas: 1
   revisionHistoryLimit: 1
@@ -17,6 +20,8 @@ spec:
     metadata:
       labels:
         app: kibana
+        name: kibana
+        namespace: infra
     spec:
       containers:
         - name: kibana

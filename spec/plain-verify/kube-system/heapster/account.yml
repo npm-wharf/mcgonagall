@@ -3,3 +3,8 @@ kind: ServiceAccount
 metadata:
   name: heapster
   namespace: kube-system
+  labels:
+    name: heapster
+    namespace: kube-system
+    task: monitoring
+    k8s-app: heapster

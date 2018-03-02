@@ -733,6 +733,8 @@ Examples:
 
 The network block lets you define a network policy. When included in a service definition (cronJob, DaemonSet, Deployment, Job, StatefulSet), the pod selector can be omitted and mcgonagall will use identifying information from the spec to select the current service's pod.
 
+> Note: when mcgonagall generates manifests, it emits the name and namespace in the labels under metadata automatically to make selection by this criteria simple.
+
  * `selector` - a `;` delimitted set of key value pairs to select the pods by label
  * `[[network.ingress]]`
    * `from` - an array of strings to define various ways to allow ingress. Empty ingress results in all incoming traffic getting blocked.
@@ -754,6 +756,45 @@ The following patterns are all legal ways to specify ingress or egress:
    * `[ "namespace=label:value" ]`
  * By Pod
    * `[ "pod=label:value" ]`
+
+
+#### Default Ingress Patterns
+
+Deny All
+
+```toml
+[network]
+  selector = ""
+  [network.ingress]
+```
+
+Allow All
+
+```toml
+[network]
+  selector = ""
+  [network.ingress]
+    from = []
+```
+
+#### Default Egress Patterns
+
+Deny All
+
+```toml
+[network]
+  selector = ""
+  [network.egress]
+```
+
+Allow All
+
+```toml
+[network]
+  selector = ""
+  [network.egress]
+    to = []
+```
 
 #### Port List
 

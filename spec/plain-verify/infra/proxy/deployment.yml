@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   namespace: infra
   name: proxy
+  labels:
+    name: proxy
+    namespace: infra
 spec:
   replicas: 2
   revisionHistoryLimit: 2
@@ -17,6 +20,8 @@ spec:
     metadata:
       labels:
         app: proxy
+        name: proxy
+        namespace: infra
     spec:
       containers:
         - name: proxy

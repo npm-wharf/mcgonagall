@@ -1,3 +1,4 @@
+const expressionParser = require('../expressionParser')
 const { getApiVersion } = require('../apiVersionMap')
 
 function createRoleBinding (config) {
@@ -10,14 +11,17 @@ function createRoleBinding (config) {
   } else {
     role = roleParts[0]
   }
-
+  let definition
   if (clusterRole) {
-    const definition = {
+    definition = {
       roleBinding: {
         apiVersion: getApiVersion(config, 'roleBinding'),
         kind: 'ClusterRoleBinding',
         metadata: {
-          name: config.security.account
+          name: config.security.account,
+          labels: {
+            name: config.security.account
+          }
         },
         roleRef: {
           apiGroup: 'rbac.authorization.k8s.io',
@@ -33,15 +37,18 @@ function createRoleBinding (config) {
         ]
       }
     }
-    return definition
   } else {
-    const definition = {
+    definition = {
       roleBinding: {
         apiVersion: getApiVersion(config, 'roleBinding'),
         kind: 'RoleBinding',
         metadata: {
           name: config.security.account,
-          namespace: config.namespace
+          namespace: config.namespace,
+          labels: {
+            name: config.security.account,
+            namespace: config.namespace
+          }
         },
         roleRef: {
           apiGroup: 'rbac.authorization.k8s.io',
@@ -57,8 +64,17 @@ function createRoleBinding (config) {
         ]
       }
     }
-    return definition
   }
+
+  const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
+  Object.assign(definition.roleBinding.metadata, metadata || {})
+
+  const labels = expressionParser.parseMetadata(config.labels || '') || {}
+  if (Object.keys(labels).length) {
+    Object.assign(definition.roleBinding.metadata.labels, labels)
+  }
+
+  return definition
 }
 
 module.exports = {

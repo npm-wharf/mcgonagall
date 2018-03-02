@@ -5,6 +5,8 @@
     name: influx
     labels:
       app: influx
+      name: influx
+      namespace: data
   spec:
     selector:
       app: influxdb
@@ -21,6 +23,8 @@
     name: influxdb
     labels:
       app: influxdb
+      name: influxdb
+      namespace: data
   spec:
     selector:
       app: influxdb

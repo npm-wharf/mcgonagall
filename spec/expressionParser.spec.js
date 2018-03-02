@@ -524,6 +524,7 @@ describe('Expression Parser', function () {
 
   describe('network policy', function () {
     it('should parse pod selectors', function () {
+      checkPodSelector('').should.eql(true)
       checkPodSelector('one:a').should.equal(true)
       checkPodSelector('one:a;two:oh look spaces').should.equal(true)
       checkPodSelector('one:a;two:2;three:so many').should.equal(true)

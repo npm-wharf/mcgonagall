@@ -1,0 +1,6 @@
+apiVersion = '1.8'
+name = 'deny-all-ingress'
+namespace = 'default'
+[network]
+  selector = ''
+  [[network.ingress]]

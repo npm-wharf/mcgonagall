@@ -3,6 +3,9 @@ kind: StatefulSet
 metadata:
   namespace: data
   name: kapacitor
+  labels:
+    name: kapacitor
+    namespace: data
 spec:
   serviceName: kapacitor
   replicas: 1
@@ -16,6 +19,8 @@ spec:
     metadata:
       labels:
         app: kapacitor
+        name: kapacitor
+        namespace: data
     spec:
       containers:
         - name: kapacitor

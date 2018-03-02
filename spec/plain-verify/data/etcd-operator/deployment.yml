@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   namespace: data
   name: etcd-operator
+  labels:
+    name: etcd-operator
+    namespace: data
 spec:
   replicas: 1
   revisionHistoryLimit: 1
@@ -17,6 +20,8 @@ spec:
     metadata:
       labels:
         app: etcd-operator
+        name: etcd-operator
+        namespace: data
     spec:
       containers:
         - name: etcd-operator

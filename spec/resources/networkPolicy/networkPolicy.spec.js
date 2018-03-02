@@ -1,14 +1,43 @@
-require('../setup')
+require('../../setup')
 const fs = require('fs')
 const path = require('path')
 const toml = require('toml-j0.4')
-const {createNetworkPolicy} = require('../../src/resources/networkPolicy')
-const spec1raw = fs.readFileSync(path.resolve('./spec/resources/network-policy-spec-1.toml'), 'utf8')
-const spec1 = toml.parse(spec1raw)
+
+const {createNetworkPolicy} = require('../../../src/resources/networkPolicy')
 const manifest1 = require('./network-policy-manifest-1')
+
+function createFromToml (file) {
+  const fullPath = path.join(path.resolve('./spec/resources/networkPolicy/'), file)
+  const raw = fs.readFileSync(fullPath, 'utf8')
+  const spec = toml.parse(raw)
+  return createNetworkPolicy(spec)
+}
+
 describe('Network Policy', function () {
+  describe('when creating default ingress and egress policies', function () {
+    it('should create deny all ingress', function () {
+      const manifest = require('./deny-all-ingress-manifest.js')
+      createFromToml('deny-all-ingress.toml').should.eql(manifest)
+    })
+
+    it('should create accept all ingress', function () {
+      const manifest = require('./accept-all-ingress-manifest.js')
+      createFromToml('accept-all-ingress.toml').should.eql(manifest)
+    })
+
+    it('should create deny all egress', function () {
+      const manifest = require('./deny-all-egress-manifest.js')
+      createFromToml('deny-all-egress.toml').should.eql(manifest)
+    })
+
+    it('should create accept all egress', function () {
+      const manifest = require('./accept-all-egress-manifest.js')
+      createFromToml('accept-all-egress.toml').should.eql(manifest)
+    })
+  })
+
   it('should create networkPolicy from toml spec', function () {
-    createNetworkPolicy(spec1).should.eql(manifest1)
+    createFromToml('network-policy-spec-1.toml').should.eql(manifest1)
   })
 
   it('should create networkPolicy from object representation', function () {

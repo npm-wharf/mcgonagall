@@ -5,6 +5,8 @@
     name: kapacitor
     labels:
       app: kapacitor
+      name: kapacitor
+      namespace: data
   spec:
     selector:
       app: kapacitor

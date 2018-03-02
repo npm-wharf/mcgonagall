@@ -15,7 +15,11 @@ function createDaemonSet (config) {
       kind: 'DaemonSet',
       metadata: {
         namespace: config.namespace,
-        name: config.name
+        name: config.name,
+        labels: {
+          name: config.name,
+          namespace: config.namespace
+        }
       },
       spec: {
         replicas: config.scale ? config.scale.containers : 1,
@@ -28,7 +32,9 @@ function createDaemonSet (config) {
         template: {
           metadata: {
             labels: {
-              app: config.name
+              app: config.name,
+              name: config.name,
+              namespace: config.namespace
             }
           },
           spec: {
@@ -43,6 +49,7 @@ function createDaemonSet (config) {
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
+    Object.assign(definition.daemonSet.metadata.labels, labels)
     Object.assign(definition.daemonSet.spec.template.metadata.labels, labels)
   }
   Object.assign(definition.daemonSet.metadata, metadata || {})

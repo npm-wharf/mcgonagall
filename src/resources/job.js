@@ -15,7 +15,11 @@ function createJob (config) {
       kind: 'Job',
       metadata: {
         namespace: config.namespace,
-        name: config.name
+        name: config.name,
+        labels: {
+          name: config.name,
+          namespace: config.namespace
+        }
       },
       spec: {
         parallelism: config.scale ? config.scale.containers : 1,
@@ -23,7 +27,9 @@ function createJob (config) {
         template: {
           metadata: {
             labels: {
-              app: config.name
+              app: config.name,
+              name: config.name,
+              namespace: config.namespace
             }
           },
           spec: {
@@ -48,6 +54,7 @@ function createJob (config) {
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
+    Object.assign(definition.job.metadata.labels, labels)
     Object.assign(definition.job.spec.template.metadata.labels, labels)
   }
   Object.assign(definition.job.metadata, metadata || {})

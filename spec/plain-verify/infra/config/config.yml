@@ -5,3 +5,4 @@ metadata:
   namespace: infra
 data:
   test: hello
+  empty: ''

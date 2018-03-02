@@ -3,6 +3,9 @@ kind: StatefulSet
 metadata:
   namespace: data
   name: influxdb
+  labels:
+    name: influxdb
+    namespace: data
 spec:
   serviceName: influx
   replicas: 1
@@ -16,6 +19,8 @@ spec:
     metadata:
       labels:
         app: influxdb
+        name: influxdb
+        namespace: data
     spec:
       containers:
         - name: influxdb

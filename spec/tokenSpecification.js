@@ -23,7 +23,9 @@ module.exports = {
             'namespace': 'infra',
             'name': 'es',
             'labels': {
-              'app': 'es'
+              'app': 'es',
+              'name': 'es',
+              'namespace': 'infra'
             }
           },
           'spec': {
@@ -52,7 +54,11 @@ module.exports = {
         'kind': 'Deployment',
         'metadata': {
           'namespace': 'infra',
-          'name': 'elasticsearch'
+          'name': 'elasticsearch',
+          'labels': {
+            'name': 'elasticsearch',
+            'namespace': 'infra'
+          }
         },
         'spec': {
           'replicas': 1,
@@ -71,7 +77,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'elasticsearch'
+                'app': 'elasticsearch',
+                'name': 'elasticsearch',
+                'namespace': 'infra'
               }
             },
             'spec': {
@@ -117,7 +125,9 @@ module.exports = {
             'namespace': 'infra',
             'name': 'kibana',
             'labels': {
-              'app': 'kibana'
+              'app': 'kibana',
+              'name': 'kibana',
+              'namespace': 'infra'
             }
           },
           'spec': {
@@ -140,7 +150,11 @@ module.exports = {
         'kind': 'Deployment',
         'metadata': {
           'namespace': 'infra',
-          'name': 'kibana'
+          'name': 'kibana',
+          'labels': {
+            'name': 'kibana',
+            'namespace': 'infra'
+          }
         },
         'spec': {
           'replicas': 1,
@@ -159,7 +173,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'kibana'
+                'app': 'kibana',
+                'name': 'kibana',
+                'namespace': 'infra'
               }
             },
             'spec': {
@@ -204,7 +220,9 @@ module.exports = {
             'namespace': 'infra',
             'name': 'logstash',
             'labels': {
-              'app': 'logstash'
+              'app': 'logstash',
+              'name': 'logstash',
+              'namespace': 'infra'
             }
           },
           'spec': {
@@ -227,7 +245,11 @@ module.exports = {
         'kind': 'Deployment',
         'metadata': {
           'namespace': 'infra',
-          'name': 'logstash'
+          'name': 'logstash',
+          'labels': {
+            'name': 'logstash',
+            'namespace': 'infra'
+          }
         },
         'spec': {
           'replicas': 1,
@@ -246,7 +268,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'logstash'
+                'app': 'logstash',
+                'name': 'logstash',
+                'namespace': 'infra'
               }
             },
             'spec': {
@@ -313,7 +337,11 @@ module.exports = {
         'kind': 'Deployment',
         'metadata': {
           'namespace': 'infra',
-          'name': 'filebeat'
+          'name': 'filebeat',
+          'labels': {
+            'name': 'filebeat',
+            'namespace': 'infra'
+          }
         },
         'spec': {
           'replicas': 1,
@@ -332,7 +360,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'filebeat'
+                'app': 'filebeat',
+                'name': 'filebeat',
+                'namespace': 'infra'
               }
             },
             'spec': {
@@ -436,7 +466,9 @@ module.exports = {
             'namespace': 'infra',
             'name': 'proxy',
             'labels': {
-              'app': 'proxy'
+              'app': 'proxy',
+              'name': 'proxy',
+              'namespace': 'infra'
             }
           },
           'spec': {
@@ -466,7 +498,11 @@ module.exports = {
         'kind': 'Deployment',
         'metadata': {
           'namespace': 'infra',
-          'name': 'proxy'
+          'name': 'proxy',
+          'labels': {
+            'name': 'proxy',
+            'namespace': 'infra'
+          }
         },
         'spec': {
           'replicas': 2,
@@ -485,7 +521,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'proxy'
+                'app': 'proxy',
+                'name': 'proxy',
+                'namespace': 'infra'
               }
             },
             'spec': {

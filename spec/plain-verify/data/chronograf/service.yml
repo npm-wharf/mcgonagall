@@ -5,6 +5,8 @@
     name: chrono
     labels:
       app: chrono
+      name: chrono
+      namespace: data
   spec:
     selector:
       app: chronograf
@@ -21,6 +23,8 @@
     name: chronograf
     labels:
       app: chronograf
+      name: chronograf
+      namespace: data
   spec:
     selector:
       app: chronograf

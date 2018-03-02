@@ -51,7 +51,9 @@ function createService (config) {
       namespace: config.namespace,
       name: config.service.alias || config.name,
       labels: {
-        app: config.service.alias || config.name
+        app: config.service.alias || config.name,
+        name: config.service.alias || config.name,
+        namespace: config.namespace
       }
     },
     spec: {
@@ -82,6 +84,7 @@ function createService (config) {
       statefulService.spec.clusterIP = 'None'
       service.metadata.name = config.name
       service.metadata.labels.app = config.name
+      service.metadata.labels.name = config.name
       definition.services.push(statefulService)
     } else {
       service.spec.clusterIP = 'None'

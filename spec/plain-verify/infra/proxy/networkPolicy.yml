@@ -3,6 +3,9 @@ kind: NetworkPolicy
 metadata:
   namespace: infra
   name: proxy
+  labels:
+    name: proxy
+    namespace: infra
 spec:
   podSelector:
     matchLabels:

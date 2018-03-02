@@ -1,0 +1,6 @@
+apiVersion = '1.8'
+name = 'deny-all-egress'
+namespace = 'default'
+[network]
+  selector = ''
+  [[network.egress]]

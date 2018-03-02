@@ -5,6 +5,8 @@
     name: proxy
     labels:
       app: proxy
+      name: proxy
+      namespace: infra
   spec:
     selector:
       app: proxy

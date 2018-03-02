@@ -7,7 +7,11 @@ module.exports = {
     kind: 'ServiceAccount',
     metadata: {
       name: 'some-account',
-      namespace: 'my-namespace'
+      namespace: 'my-namespace',
+      labels: {
+        name: 'some-account',
+        namespace: 'my-namespace'
+      }
     }
   },
   role: {
@@ -15,7 +19,11 @@ module.exports = {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     metadata: {
       name: 'some-role',
-      namespace: 'my-namespace'
+      namespace: 'my-namespace',
+      labels: {
+        name: 'some-role',
+        namespace: 'my-namespace'
+      }
     },
     rules: [
       {
@@ -30,7 +38,11 @@ module.exports = {
     kind: 'RoleBinding',
     metadata: {
       name: 'some-account',
-      namespace: 'my-namespace'
+      namespace: 'my-namespace',
+      labels: {
+        name: 'some-account',
+        namespace: 'my-namespace'
+      }
     },
     roleRef:
     {

@@ -9,7 +9,11 @@ module.exports = {
       namespace: 'data',
       name: 'mydb',
       owner: 'npm',
-      branch: 'master'
+      branch: 'master',
+      labels: {
+        name: 'mydb',
+        namespace: 'data'
+      }
     },
     spec: {
       serviceName: 'datums',
@@ -26,7 +30,9 @@ module.exports = {
       template: {
         metadata: {
           labels: {
-            app: 'mydb'
+            app: 'mydb',
+            name: 'mydb',
+            namespace: 'data'
           }
         },
         spec: {
@@ -157,7 +163,9 @@ module.exports = {
         namespace: 'data',
         name: 'datums',
         labels: {
-          app: 'datums'
+          app: 'datums',
+          name: 'datums',
+          namespace: 'data'
         }
       },
       spec: {
@@ -188,7 +196,9 @@ module.exports = {
         namespace: 'data',
         name: 'mydb',
         labels: {
-          app: 'mydb'
+          app: 'mydb',
+          name: 'mydb',
+          namespace: 'data'
         }
       },
       spec: {

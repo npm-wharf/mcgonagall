@@ -1,3 +1,4 @@
+const expressionParser = require('../expressionParser')
 const { getApiVersion } = require('../apiVersionMap')
 
 function createRole (config) {
@@ -23,13 +24,24 @@ function createRole (config) {
       kind: cluster ? 'ClusterRole' : 'Role',
       apiVersion: getApiVersion(config, 'role'),
       metadata: {
-        name: roleName
+        name: roleName,
+        labels: {
+          name: roleName
+        }
       },
       rules: ruleSet.length ? ruleSet : undefined
     }
   }
   if (!cluster) {
     definition.role.metadata.namespace = config.namespace
+    definition.role.metadata.labels.namespace = config.namespace
+  }
+  const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
+  Object.assign(definition.role.metadata, metadata || {})
+
+  const labels = expressionParser.parseMetadata(config.labels || '') || {}
+  if (Object.keys(labels).length) {
+    Object.assign(definition.role.metadata.labels, labels)
   }
   return definition
 }

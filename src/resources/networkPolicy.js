@@ -10,7 +10,7 @@ function createNetworkPolicy (config) {
   let egress
   if (config.network.ingress) {
     types.push('Ingress')
-    ingress = config.network.ingress.map(ingress => {
+    ingress = config.network.ingress.reduce((list, ingress) => {
       let froms, ports
       const block = {}
       if (ingress.from) {
@@ -25,12 +25,18 @@ function createNetworkPolicy (config) {
         )
         block.ports = ports
       }
-      return block
-    })
+      if (Object.keys(block).length > 0) {
+        if (block.from.length === 0) {
+          delete block.from
+        }
+        list.push(block)
+      }
+      return list
+    }, [])
   }
   if (config.network.egress) {
     types.push('Egress')
-    egress = config.network.egress.map(egress => {
+    egress = config.network.egress.reduce((list, egress) => {
       let tos, ports
       const block = {}
       if (egress.to) {
@@ -45,8 +51,14 @@ function createNetworkPolicy (config) {
         )
         block.ports = ports
       }
-      return block
-    })
+      if (Object.keys(block).length > 0) {
+        if (block.to.length === 0) {
+          delete block.to
+        }
+        list.push(block)
+      }
+      return list
+    }, [])
   }
   const definition = {
     networkPolicy: {
@@ -54,7 +66,11 @@ function createNetworkPolicy (config) {
       kind: 'NetworkPolicy',
       metadata: {
         namespace: config.namespace,
-        name: config.name
+        name: config.name,
+        labels: {
+          name: config.name,
+          namespace: config.namespace
+        }
       },
       spec: {
         podSelector: selector,
@@ -63,11 +79,19 @@ function createNetworkPolicy (config) {
     }
   }
 
-  if (ingress) {
+  if (ingress && ingress.length > 0) {
     definition.networkPolicy.spec.ingress = ingress
   }
-  if (egress) {
+  if (egress && egress.length > 0) {
     definition.networkPolicy.spec.egress = egress
+  }
+
+  const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
+  Object.assign(definition.networkPolicy.metadata, metadata || {})
+
+  const labels = expressionParser.parseMetadata(config.labels || '') || {}
+  if (Object.keys(labels).length) {
+    Object.assign(definition.networkPolicy.metadata.labels, labels)
   }
 
   return definition

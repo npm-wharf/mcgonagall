@@ -4,7 +4,11 @@ module.exports = {
     kind: 'NetworkPolicy',
     metadata: {
       name: 'test',
-      namespace: 'default'
+      namespace: 'default',
+      labels: {
+        name: 'test',
+        namespace: 'default'
+      }
     },
     spec: {
       egress: [

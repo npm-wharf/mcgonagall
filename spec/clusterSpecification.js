@@ -14,6 +14,7 @@ module.exports = {
         namespace: 'infra'
       },
       data: {
+        empty: '',
         test: 'hello'
       }
     },
@@ -72,7 +73,11 @@ module.exports = {
         kind: 'StatefulSet',
         metadata: {
           name: 'chronograf',
-          namespace: 'data'
+          namespace: 'data',
+          labels: {
+            name: 'chronograf',
+            namespace: 'data'
+          }
         },
         spec: {
           replicas: 1,
@@ -89,7 +94,9 @@ module.exports = {
           template: {
             metadata: {
               labels: {
-                app: 'chronograf'
+                app: 'chronograf',
+                name: 'chronograf',
+                namespace: 'data'
               }
             },
             spec: {
@@ -167,7 +174,9 @@ module.exports = {
           kind: 'Service',
           metadata: {
             labels: {
-              app: 'chrono'
+              app: 'chrono',
+              name: 'chrono',
+              namespace: 'data'
             },
             name: 'chrono',
             namespace: 'data'
@@ -192,7 +201,9 @@ module.exports = {
           kind: 'Service',
           metadata: {
             labels: {
-              app: 'chronograf'
+              app: 'chronograf',
+              name: 'chronograf',
+              namespace: 'data'
             },
             name: 'chronograf',
             namespace: 'data'
@@ -219,14 +230,25 @@ module.exports = {
         kind: 'ServiceAccount',
         metadata: {
           name: 'heapster',
-          namespace: 'kube-system'
+          namespace: 'kube-system',
+          labels: {
+            name: 'heapster',
+            namespace: 'kube-system',
+            'k8s-app': 'heapster',
+            task: 'monitoring'
+          }
         }
       },
       role: {
         apiVersion: 'rbac.authorization.k8s.io/v1beta1',
         kind: 'ClusterRole',
         metadata: {
-          name: 'system:heapster'
+          name: 'system:heapster',
+          labels: {
+            name: 'system:heapster',
+            'k8s-app': 'heapster',
+            task: 'monitoring'
+          }
         }
       },
       deployment: {
@@ -234,7 +256,13 @@ module.exports = {
         kind: 'Deployment',
         metadata: {
           name: 'heapster',
-          namespace: 'kube-system'
+          namespace: 'kube-system',
+          labels: {
+            name: 'heapster',
+            namespace: 'kube-system',
+            'k8s-app': 'heapster',
+            task: 'monitoring'
+          }
         },
         spec: {
           replicas: 1,
@@ -254,6 +282,8 @@ module.exports = {
             metadata: {
               labels: {
                 app: 'heapster',
+                name: 'heapster',
+                namespace: 'kube-system',
                 'k8s-app': 'heapster',
                 task: 'monitoring'
               }
@@ -294,7 +324,12 @@ module.exports = {
         apiVersion: 'rbac.authorization.k8s.io/v1beta1',
         kind: 'ClusterRoleBinding',
         metadata: {
-          name: 'heapster'
+          name: 'heapster',
+          labels: {
+            name: 'heapster',
+            'k8s-app': 'heapster',
+            task: 'monitoring'
+          }
         },
         roleRef: {
           apiGroup: 'rbac.authorization.k8s.io',
@@ -321,7 +356,11 @@ module.exports = {
         kind: 'StatefulSet',
         metadata: {
           name: 'influxdb',
-          namespace: 'data'
+          namespace: 'data',
+          labels: {
+            name: 'influxdb',
+            namespace: 'data'
+          }
         },
         spec: {
           replicas: 1,
@@ -338,7 +377,9 @@ module.exports = {
           template: {
             metadata: {
               labels: {
-                app: 'influxdb'
+                app: 'influxdb',
+                name: 'influxdb',
+                namespace: 'data'
               }
             },
             spec: {
@@ -412,7 +453,9 @@ module.exports = {
           kind: 'Service',
           metadata: {
             labels: {
-              app: 'influx'
+              app: 'influx',
+              name: 'influx',
+              namespace: 'data'
             },
             name: 'influx',
             namespace: 'data'
@@ -437,7 +480,9 @@ module.exports = {
           kind: 'Service',
           metadata: {
             labels: {
-              app: 'influxdb'
+              app: 'influxdb',
+              name: 'influxdb',
+              namespace: 'data'
             },
             name: 'influxdb',
             namespace: 'data'
@@ -464,7 +509,11 @@ module.exports = {
         kind: 'StatefulSet',
         metadata: {
           name: 'kapacitor',
-          namespace: 'data'
+          namespace: 'data',
+          labels: {
+            name: 'kapacitor',
+            namespace: 'data'
+          }
         },
         spec: {
           replicas: 1,
@@ -481,7 +530,9 @@ module.exports = {
           template: {
             metadata: {
               labels: {
-                app: 'kapacitor'
+                app: 'kapacitor',
+                name: 'kapacitor',
+                namespace: 'data'
               }
             },
             spec: {
@@ -555,7 +606,9 @@ module.exports = {
           kind: 'Service',
           metadata: {
             labels: {
-              app: 'kapacitor'
+              app: 'kapacitor',
+              name: 'kapacitor',
+              namespace: 'data'
             },
             name: 'kapacitor',
             namespace: 'data'
@@ -587,7 +640,11 @@ module.exports = {
         'kind': 'Job',
         'metadata': {
           'name': 'create-cert',
-          'namespace': 'infra'
+          'namespace': 'infra',
+          labels: {
+            'name': 'create-cert',
+            'namespace': 'infra'
+          }
         },
         'spec': {
           'completions': 1,
@@ -595,7 +652,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'create-cert'
+                'app': 'create-cert',
+                'name': 'create-cert',
+                'namespace': 'infra'
               }
             },
             'spec': {
@@ -710,7 +769,11 @@ module.exports = {
         kind: 'NetworkPolicy',
         metadata: {
           namespace: 'infra',
-          name: 'proxy'
+          name: 'proxy',
+          labels: {
+            namespace: 'infra',
+            name: 'proxy'
+          }
         },
         spec: {
           ingress: [
@@ -745,7 +808,11 @@ module.exports = {
         kind: 'Deployment',
         metadata: {
           name: 'proxy',
-          namespace: 'infra'
+          namespace: 'infra',
+          labels: {
+            name: 'proxy',
+            namespace: 'infra'
+          }
         },
         spec: {
           replicas: 2,
@@ -766,7 +833,9 @@ module.exports = {
           template: {
             metadata: {
               labels: {
-                app: 'proxy'
+                app: 'proxy',
+                name: 'proxy',
+                namespace: 'infra'
               }
             },
             spec: {
@@ -842,7 +911,9 @@ module.exports = {
           kind: 'Service',
           metadata: {
             labels: {
-              app: 'proxy'
+              app: 'proxy',
+              name: 'proxy',
+              namespace: 'infra'
             },
             name: 'proxy',
             namespace: 'infra'
@@ -896,7 +967,11 @@ module.exports = {
         'kind': 'Deployment',
         'metadata': {
           'namespace': 'data',
-          'name': 'etcd-operator'
+          'name': 'etcd-operator',
+          labels: {
+            'namespace': 'data',
+            'name': 'etcd-operator'
+          }
         },
         'spec': {
           'replicas': 1,
@@ -915,7 +990,9 @@ module.exports = {
           'template': {
             'metadata': {
               'labels': {
-                'app': 'etcd-operator'
+                'app': 'etcd-operator',
+                'namespace': 'data',
+                'name': 'etcd-operator'
               }
             },
             'spec': {

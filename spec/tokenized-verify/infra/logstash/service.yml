@@ -5,6 +5,8 @@
     name: logstash
     labels:
       app: logstash
+      name: logstash
+      namespace: infra
   spec:
     selector:
       app: logstash

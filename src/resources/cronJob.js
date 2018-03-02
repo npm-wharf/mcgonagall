@@ -23,7 +23,11 @@ function createCronJob (config) {
       kind: 'CronJob',
       metadata: {
         namespace: config.namespace,
-        name: config.name
+        name: config.name,
+        labels: {
+          name: config.name,
+          namespace: config.namespace
+        }
       },
       spec: {
         schedule: config.deployment.schedule,
@@ -35,7 +39,9 @@ function createCronJob (config) {
             template: {
               metadata: {
                 labels: {
-                  app: config.name
+                  app: config.name,
+                  name: config.name,
+                  namespace: config.namespace
                 }
               },
               spec: {
@@ -61,7 +67,8 @@ function createCronJob (config) {
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
-    Object.assign(definition.cronJob.spec.template.metadata.labels, labels)
+    Object.assign(definition.cronJob.metadata.labels, labels)
+    Object.assign(definition.cronJob.spec.jobTemplate.spec.template.metadata.labels, labels)
   }
   Object.assign(definition.cronJob.metadata, metadata || {})
   return definition

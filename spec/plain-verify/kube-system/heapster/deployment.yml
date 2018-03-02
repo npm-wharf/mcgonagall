@@ -3,6 +3,11 @@ kind: Deployment
 metadata:
   namespace: kube-system
   name: heapster
+  labels:
+    name: heapster
+    namespace: kube-system
+    task: monitoring
+    k8s-app: heapster
 spec:
   replicas: 1
   revisionHistoryLimit: 1
@@ -17,6 +22,8 @@ spec:
     metadata:
       labels:
         app: heapster
+        name: heapster
+        namespace: kube-system
         task: monitoring
         k8s-app: heapster
     spec:

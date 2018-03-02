@@ -1,0 +1,7 @@
+apiVersion = '1.8'
+name = 'accept-all-egress'
+namespace = 'default'
+[network]
+  selector = ''
+  [[network.egress]]
+    to = []

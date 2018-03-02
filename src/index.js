@@ -56,6 +56,9 @@ function write (target, config) {
         case 'job':
           writeJob(target, namespace, name, definition[type])
           break
+        case 'networkPolicy':
+          writeNetworkPolicy(target, namespace, name, definition[type])
+          break
         case 'nginxBlock':
           writeNginx(target, namespace, name, definition[type])
           break
@@ -170,6 +173,17 @@ function writeNginx (target, namespace, name, definition) {
     fs.writeFileSync(fullPath, definition, 'utf8')
   } catch (e) {
     throw new Error(`Failed to write nginx configuration to ${fullPath} because: ${e.message}`)
+  }
+}
+
+function writeNetworkPolicy (target, namespace, name, definition) {
+  const fullPath = path.join(target, namespace, name, 'networkPolicy.yml')
+  const yml = yaml.safeDump(definition)
+  try {
+    ensurePath(fullPath)
+    fs.writeFileSync(fullPath, yml, 'utf8')
+  } catch (e) {
+    throw new Error(`Failed to write network policy to ${fullPath} because: ${e.message}`)
   }
 }
 

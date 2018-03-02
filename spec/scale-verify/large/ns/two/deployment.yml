@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   namespace: ns
   name: two
+  labels:
+    name: two
+    namespace: ns
 spec:
   replicas: 1
   revisionHistoryLimit: 1
@@ -17,6 +20,8 @@ spec:
     metadata:
       labels:
         app: two
+        name: two
+        namespace: ns
     spec:
       containers:
         - name: two

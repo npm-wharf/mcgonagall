@@ -5,6 +5,8 @@
     name: es
     labels:
       app: es
+      name: es
+      namespace: infra
   spec:
     selector:
       app: elasticsearch

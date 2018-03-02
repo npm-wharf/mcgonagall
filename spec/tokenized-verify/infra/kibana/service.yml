@@ -5,6 +5,8 @@
     name: kibana
     labels:
       app: kibana
+      name: kibana
+      namespace: infra
   spec:
     selector:
       app: kibana

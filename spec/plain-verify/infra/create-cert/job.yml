@@ -3,6 +3,9 @@ kind: Job
 metadata:
   namespace: infra
   name: create-cert
+  labels:
+    name: create-cert
+    namespace: infra
 spec:
   parallelism: 1
   completions: 1
@@ -10,6 +13,8 @@ spec:
     metadata:
       labels:
         app: create-cert
+        name: create-cert
+        namespace: infra
     spec:
       containers:
         - name: create-cert

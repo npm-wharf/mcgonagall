@@ -7,21 +7,40 @@ module.exports = {
     kind: 'ServiceAccount',
     metadata: {
       name: 'dbowner',
-      namespace: 'data'
+      namespace: 'data',
+      branch: 'master',
+      owner: 'npm',
+      labels: {
+        name: 'dbowner',
+        namespace: 'data',
+        task: 'admin'
+      }
     }
   },
   role: {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
     metadata: {
-      name: 'system:dbowner'
+      name: 'system:dbowner',
+      branch: 'master',
+      owner: 'npm',
+      labels: {
+        name: 'system:dbowner',
+        task: 'admin'
+      }
     }
   },
   roleBinding: {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
     metadata: {
-      name: 'dbowner'
+      name: 'dbowner',
+      branch: 'master',
+      owner: 'npm',
+      labels: {
+        name: 'dbowner',
+        task: 'admin'
+      }
     },
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
@@ -43,7 +62,12 @@ module.exports = {
       namespace: 'data',
       name: 'dbadmin',
       owner: 'npm',
-      branch: 'master'
+      branch: 'master',
+      labels: {
+        task: 'admin',
+        name: 'dbadmin',
+        namespace: 'data'
+      }
     },
     spec: {
       replicas: 2,
@@ -63,7 +87,9 @@ module.exports = {
         metadata: {
           labels: {
             app: 'dbadmin',
-            task: 'admin'
+            task: 'admin',
+            name: 'dbadmin',
+            namespace: 'data'
           }
         },
         spec: {
@@ -162,6 +188,8 @@ module.exports = {
         name: 'dbadmin',
         labels: {
           app: 'dbadmin',
+          name: 'dbadmin',
+          namespace: 'data',
           task: 'admin',
           'kubernetes.io/cluster-service': 'false'
         }

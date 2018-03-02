@@ -15,7 +15,11 @@ function createStatefulSet (config) {
       kind: 'StatefulSet',
       metadata: {
         namespace: config.namespace,
-        name: config.name
+        name: config.name,
+        labels: {
+          name: config.name,
+          namespace: config.namespace
+        }
       },
       spec: {
         serviceName: config.service.alias,
@@ -32,7 +36,9 @@ function createStatefulSet (config) {
         template: {
           metadata: {
             labels: {
-              app: config.name
+              app: config.name,
+              name: config.name,
+              namespace: config.namespace
             }
           },
           spec: {
@@ -58,6 +64,7 @@ function createStatefulSet (config) {
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
+    Object.assign(definition.statefulSet.metadata.labels, labels)
     Object.assign(definition.statefulSet.spec.template.metadata.labels, labels)
   }
   Object.assign(definition.statefulSet.metadata, metadata || {})

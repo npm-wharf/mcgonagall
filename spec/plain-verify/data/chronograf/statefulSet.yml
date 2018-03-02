@@ -3,6 +3,9 @@ kind: StatefulSet
 metadata:
   namespace: data
   name: chronograf
+  labels:
+    name: chronograf
+    namespace: data
 spec:
   serviceName: chrono
   replicas: 1
@@ -16,6 +19,8 @@ spec:
     metadata:
       labels:
         app: chronograf
+        name: chronograf
+        namespace: data
     spec:
       containers:
         - name: chronograf
