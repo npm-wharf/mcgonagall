@@ -79,7 +79,7 @@ function createContainer (config) {
     }
   }
 
-  if (config.pull) {
+  if (config.deployment && config.deployment.pull) {
     container.imagePullPolicy = config.deployment.pull
   }
 
