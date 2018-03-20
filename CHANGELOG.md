@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 <a name="1.10.0"></a>
+# [1.10.0](https://github.com/npm-wharf/mcgonagall/compare/v1.9.0...v1.10.0) (2018-03-20)
+
+
+### Bug Fixes
+
+* correct defect around imagePullPolicy setting ([f0065b0](https://github.com/npm-wharf/mcgonagall/commit/f0065b0))
+
+
+### Features
+
+* expand label metadata for consistentcy and improved selectivity ([cf00bdd](https://github.com/npm-wharf/mcgonagall/commit/cf00bdd))
+
+
+
+<a name="1.10.0"></a>
 # [1.10.0](https://github.com/npm-wharf/mcgonagall/compare/v1.9.0...v1.10.0) (2018-03-07)
 
 
