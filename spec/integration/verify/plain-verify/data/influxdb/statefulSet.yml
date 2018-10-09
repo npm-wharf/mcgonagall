@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: data
+  name: influxdb
+  labels:
+    name: influxdb
+    namespace: data
+spec:
+  serviceName: influx
+  replicas: 1
+  revisionHistoryLimit: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+        name: influxdb
+        namespace: data
+    spec:
+      containers:
+        - name: influxdb
+          image: 'influxdb:1.3-alpine'
+          env:
+            - name: INFLUXDB_GRAPHITE_ENABLED
+              value: 'false'
+          ports:
+            - name: http
+              containerPort: 8086
+              protocol: TCP
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 100m
+            limits:
+              memory: 200Mi
+              cpu: 200m
+          volumeMounts:
+            - name: influx-data
+              mountPath: /var/lib/influxdb
+  volumeClaimTemplates:
+    - metadata:
+        name: influx-data
+        namespace: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi

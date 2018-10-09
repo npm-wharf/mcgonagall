@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kube-system
+  name: heapster
+  labels:
+    name: heapster
+    namespace: kube-system
+    task: monitoring
+    k8s-app: heapster
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: heapster
+  template:
+    metadata:
+      labels:
+        app: heapster
+        name: heapster
+        namespace: kube-system
+        task: monitoring
+        k8s-app: heapster
+    spec:
+      containers:
+        - name: heapster
+          image: 'gcr.io/google_containers/heapster-amd64:v1.3.0'
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 100m
+            limits:
+              memory: 200Mi
+              cpu: 200m
+          command:
+            - /heapster
+            - '--source=kubernetes:https://kubernetes.default'
+            - '--sink=influxdb:http://influxdb.data:8086'
+      serviceAccount: heapster
+      serviceAccountName: heapster

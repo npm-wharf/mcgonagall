@@ -15,7 +15,7 @@ const { createRoleBinding } = require('./resources/roleBinding')
 const { createService } = require('./resources/service')
 const { createStatefulSet } = require('./resources/statefulSet')
 
-function buildResources (config) {
+function buildResources (cluster, config) {
   const result = validation.validateConfig(config)
   if (result.error) {
     throw new Error(`Error building specification for '${config.name}' due to validation errors:\n\t${result.error}`)
@@ -35,18 +35,34 @@ function buildResources (config) {
     Object.assign(definition, service)
   }
 
+  if (config.image && cluster.imagePullSecrets[namespace]) {
+    let [part2, part1, image] = config.image.split('/')
+    let registry = part2
+    let repository = part1 || image
+    if (!registry && part1.split('.').length > 1) {
+      registry = part1
+      repository = image
+    }
+    const pullSecret = cluster.imagePullSecrets[namespace][registry]
+    if (image && pullSecret) {
+      if (!pullSecret.metadata.repositories || pullSecret.metadata.repositories.indexOf(repository) >= 0) {
+        config.imagePullSecret = cluster.imagePullSecrets[namespace][registry].metadata.name
+      }
+    }
+  }
+
   if (config.job) {
     let job = config.deployment.schedule
-      ? createCronJob(config) : createJob(config)
+      ? createCronJob(cluster, config) : createJob(cluster, config)
     Object.assign(definition, job)
   } else if (config.stateful) {
-    const set = createStatefulSet(config)
+    const set = createStatefulSet(cluster, config)
     Object.assign(definition, set)
   } else if (config.daemon) {
-    const daemon = createDaemonSet(config)
+    const daemon = createDaemonSet(cluster, config)
     Object.assign(definition, daemon)
   } else if (config.image) {
-    const deployment = createDeployment(config)
+    const deployment = createDeployment(cluster, config)
     Object.assign(definition, deployment)
   }
 

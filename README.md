@@ -38,7 +38,7 @@ With only the path to the specification mcgonagall returns the full cluster spec
   levels: [], // sorted array of levels
   order: { // map of cardinal ordering to arrays of service spec keys
   },
-  services: { // map of service specs
+  resources: { // map of service specs
   },
   configuration: [ // list of configuration specs
   ]
@@ -197,7 +197,7 @@ To avoid the prompts, you can use the `--tokenFile` argument and supply an input
 
 ## Specifications
 
-Both specifications attempt to eliminate Kubernetes implementation details where possible and focus on minimal information needed to define our system as a collection of services and configuration that can then be deployed to an available cluster with a list of possible scaling variations depending on target cluster size.
+Both specifications attempt to eliminate Kubernetes implementation details where possible and focus on minimal information needed to define our system as a collection of resources and configuration that can then be deployed to an available cluster with a list of possible scaling variations depending on target cluster size.
 
 # Specification Format
 
@@ -205,7 +205,7 @@ The specification formats are in TOML. This choice was made partially due to its
 
 ## Cluster Specification
 
-The cluster specification identifies the services, the order in which to create them, scaling factors for target cluster sizes and shared default configuration (if any). The scaling factors are expressed as number of containers to provision per service related to the baseline.
+The cluster specification identifies the resources, the order in which to create them, scaling factors for target cluster sizes and shared default configuration (if any). The scaling factors are expressed as number of containers to provision per service related to the baseline.
 
 ### Example Cluster Specification
 
@@ -234,6 +234,16 @@ scaleOrder = "small, medium, large, enterprise"
   database_host = "data.postgres"
   database_port = 5432
   redis_url = "redis://redis.data:6379"
+
+[secret.app.auth]
+  database_username = "admin"
+  database_password = "thisisapasswordyesitis"
+
+[imagePullSecret.my-registry]
+  namespaces = [ "app" ]
+  registry = "https://my.registry.io"
+  username = "service-account"
+  password = "1234"
 ```
 
 ### [namespace.service-name]
@@ -242,9 +252,9 @@ Each service is represented by a table dictionary in TOML. This value *must* mat
 
 ### `order`
 
-The order value specifies what order the service will be created in. This value does not need to be unique and can be thought of as a 'round' during which all services with the same order value will be created in parallel.
+The order value specifies what order the service will be created in. This value does not need to be unique and can be thought of as a 'round' during which all resources with the same order value will be created in parallel.
 
-The next ordinal round of services will not be sent to the Kubernetes API until the previous round of services have been created successfully. This would respect interdependencies between services and avoid failure/restart cascades across containers which in turn could lead to growing restart cool-downs and effectively malfunctioning clusters.
+The next ordinal round of resources will not be sent to the Kubernetes API until the previous round of resources have been created successfully. This would respect interdependencies between resources and avoid failure/restart cascades across containers which in turn could lead to growing restart cool-downs and effectively malfunctioning clusters.
 
 ### `scaleOrder` and `[namespace.service-name.scale]`
 
@@ -265,19 +275,19 @@ The scale table optionally assigns scaling factors to the container based on the
 
 As with the resource specifications, RAM is expressed in `Mi` or `Gi` units and CPU limits are either fractional CPU cores or as a percentage using a `%` postfix.
 
-When specifying increases to provisioned storage for stateful services, be sure to match based on the mount name. Multiple mounts can be increased using a `,` to delimit the list.
+When specifying increases to provisioned storage for stateful resources, be sure to match based on the mount name. Multiple mounts can be increased using a `,` to delimit the list.
 
-> Note: when possible, try to limit scaling by container count first. The example above includes services like postgres and redis specifically because these might be cases where increasing containers might pose an implementation challenge where just increasing resources is a simpler possible alternative. Changing resource limits and requirements may make it harder to predict how your containers behave between scale levels
+> Note: when possible, try to limit scaling by container count first. The example above includes resources like postgres and redis specifically because these might be cases where increasing containers might pose an implementation challenge where just increasing resources is a simpler possible alternative. Changing resource limits and requirements may make it harder to predict how your containers behave between scale levels
 
 ### `[configuration.namespace.configuration-map-name]`
 
-Multiple configuration maps can be specified, in any namespace, provided that they are prefixed by `configuration`. It is a simple key-value map intended to supply defaults to the services.
+Multiple configuration maps can be specified, in any namespace, provided that they are prefixed by `configuration`. It is a simple key-value map intended to supply defaults to the resources.
 
 The resource specifications will still have to opt in to the configuration maps defined in the cluster configurations (see the `env` section).
 
-The purpose of the configuration map here is not to replace etcd as the preferred solution for configuration. Kubernetes does not presently provide any mechanism to alert containers on changes made to configuration maps. Updating running services to reflect configuration changes that rely solely on configuration maps is painful. 
+The purpose of the configuration map here is not to replace etcd as the preferred solution for configuration. Kubernetes does not presently provide any mechanism to alert containers on changes made to configuration maps. Updating running workloads to reflect configuration changes that rely solely on configuration maps is painful. 
 
-Our containers currently provide a process host, kickerd, that monitors etcd keyspaces for changes and then restarts the process in the event of a relevant change. By combining the two, we can have services that start with sensible defaults for the cluster but respond to customizations stored in etcd.
+Our containers currently provide a process host, kickerd, that monitors etcd keyspaces for changes and then restarts the process in the event of a relevant change. By combining the two, we can have workloads that start with sensible defaults for the cluster but respond to customizations stored in etcd.
 
 ### Configuration Files
 
@@ -290,6 +300,18 @@ A special case for an `nginx.conf` file is made when it contains the tag `$SERVE
 This provides a simple way to handle dynamic, load-balanced ingress across containers.
 
 You can see examples of this in action in the `/spec` folder under the `plain-source` (specs) and `plain-verify` (output) as well as the `tokenized-source` (specs) and `tokenized-verify` (output) folders.
+
+### `[secret.namespace.secret-name]`
+
+Secrets can also be defined at the namespace level for the cluster similarly to configuration maps and work the same way with the exception that they must be referenced as secrets from your resource specifications in order to use them.
+
+### `[imagePullSecret.secret-name]`
+
+Image pull secrets are special in that mcgonagall handles everythingso that you don't have to worry about creating it in a quoted JSON structure, base64 encoding it, or copy-pasting the same secret definition across multiple namespaces.
+
+mcgonagall also compares the `registry` field in the imagePullSecret against the `image` field of specs in matching namespaces and if those match, mcgonagall will automaticall emit the necessary `imagePullSecret` stanza into that resource's Pod definition.
+
+This means you'll never have to go through your cluster specifications adding, removing or changing these out. If the namespace and registry portion of the image match, mcgonagall will take care of the rest.
 
 ## Resource Specification
 
@@ -377,7 +399,7 @@ If the service needs permanent storage (think databases) this should be set to t
 
 #### metadata
 
-The metadata property provides a way to add custom properties to the service's metadata block. It takes a string with key value pairs separated by `;`s. Metadata in Kubernetes is often used to select and filter services. As an example, Hikaru's continuous delivery can make use of metadata to determine if services are eligible for upgrade given what appears to be a compatible Docker image.
+The metadata property provides a way to add custom properties to the service's metadata block. It takes a string with key value pairs separated by `;`s. Metadata in Kubernetes is often used to select and filter resources. As an example, Hikaru's continuous delivery can make use of metadata to determine if resources are eligible for upgrade given what appears to be a compatible Docker image.
 
 ### `[scale]`
 
@@ -396,7 +418,7 @@ The containers parameter is intended to be the baseline/starting point/bare mini
 
 ### `[env]`
 
-Environment variables for the service's container can be specified as direct values or as references to a configuration map's key.
+Environment variables for the service's container can be specified as direct values, as references to a configuration map's key, or references to a secret key.
 
 Configuration map references should fall under a block that includes the configuration map's name as a nested key (ex: `[env.my-config-map-name]`).
 
@@ -408,6 +430,8 @@ Configuration map references should fall under a block that includes the configu
 
 [env.my-config]
   MY_ENV = "config_map_key"
+[env.secret-name]
+  OTHER_ENV = "secret-key"
 ```
 
 ### `[ports]`
@@ -487,7 +511,7 @@ Works similarly to flat files except instead of a config map name, use the keywo
 
 ### `[storage]`
 
-The storage block enumerates persistent storage requirements for services that have specified `stateful = true`.
+The storage block enumerates persistent storage requirements for resources that have specified `stateful = true`.
 
 The key name should match the key name of a mount in the `[mounts]` block and the value should follow the form:
 
@@ -862,7 +886,8 @@ To secure your NGiNX endpoints using an htpasswd, you can avoid a pre-generated 
 
 Each approach will prompt you for a username and password during deployment and mask the password in the CLI. The bcrypted password would be placed in either a manifest or an output file pulled into a config/secret source.
 
-### 
+### Stored As A File
+
 An alternative would be to store an `htpasswd` file next to your NGiNX spec itself with the contents:
 
 ```bash
@@ -887,6 +912,7 @@ The following lines can be added to any NGiNX block to secure it with the passwo
 ```
 
 ### Stored As Environment
+
 ```toml
 [env]
   AUTH = "<%= userName %>:<%= hash('bcrypt', password) %>"

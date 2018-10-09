@@ -1,0 +1,39 @@
+name = "dbadmin.data"
+image = "pretend/mydb:1.0.0"
+command = 'bash -exc export HOST="$(hostname).datums" admin'
+metadata = "owner=npm;branch=master"
+labels = "task=admin"
+
+[scale]
+  containers = 2
+  ram = "> 100Mi < 0.5Gi"
+  cpu = "> 50% < 1"
+
+[env]
+  ONE = "http://one:1234/wat"
+
+  [env.config-map]
+    TWO = "a_thing"
+  [env.connection]
+    USERNAME = "username"
+    PASSWORD = "password"
+
+[ports]
+  http = "8081"
+
+[mounts]
+  config = "/etc/mydb"
+
+[volumes]
+  config = "actual-config::conf/mydb.conf,ssl.cert=cert/ssl.cert"
+
+[probes]
+  ready = ":9999/_monitor/ping,initial=5,period=5,timeout=1,success=1,failure=3"
+
+[security]
+  account = "dbowner"
+  role = "ClusterRole;system:dbowner"
+
+[service]
+  labels = "task=admin;kubernetes.io/cluster-service=false"
+  subdomain = "dbadmin"

@@ -1,0 +1,30 @@
+{
+  "namespaces": [
+    "kube-system",
+    "infra",
+    "data"
+  ],
+  "order": {
+    "0": [
+      "heapster.kube-system"
+    ],
+    "10": [
+      "create-cert.infra"
+    ],
+    "50": [
+      "chronograf.data",
+      "influxdb.data",
+      "kapacitor.data"
+    ],
+    "100": [
+      "proxy.infra"
+    ]
+  },
+  "levels": [
+    0,
+    10,
+    50,
+    100
+  ],
+  "apiVersion": "1.9"
+}

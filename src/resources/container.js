@@ -1,6 +1,6 @@
 const expressionParser = require('../expressionParser')
 
-function createContainer (config) {
+function createContainer (cluster, config) {
   const resources = { resources: {} }
   let command = null
   let args = null
@@ -16,7 +16,7 @@ function createContainer (config) {
     }
   }
   if (config.env) {
-    env = expressionParser.parseEnvironmentBlock(config.env)
+    env = expressionParser.parseEnvironmentBlock(cluster, config.namespace, config.env)
   }
   if (config.ports) {
     ports = expressionParser.parsePorts(config.ports)

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: infra
+  labels:
+    name: filebeat-config
+    namespace: infra
+data:
+  filebeat.yml: |-
+    filebeat.registry_file: /var/log/containers/filebeat_registry
+
+    filebeat.prospectors:
+    -
+      paths:
+        - "/var/log/containers/*.log"
+      symlinks: true
+      json.message_key: log
+      json.keys_under_root: true
+      json.add_error_key: true
+      multiline.pattern: '^\s'
+      multiline.match: after
+      document_type: kube-logs
+      fields:
+        host: ${FILEBEAT_HOST:${HOSTNAME}}
+      fields_under_root: true
+
+    output.logstash:
+        hosts: ${LOGSTASH_HOSTS:?No logstash host configured. Use env var LOGSTASH_HOSTS to set hosts.}
+        timeout: 15
+
+    logging.level: ${LOG_LEVEL:error}

@@ -1,8 +1,0 @@
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: 'system:heapster'
-  labels:
-    name: 'system:heapster'
-    task: monitoring
-    k8s-app: heapster

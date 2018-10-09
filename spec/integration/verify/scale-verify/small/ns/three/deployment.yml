@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ns
+  name: three
+  labels:
+    name: three
+    namespace: ns
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: three
+  template:
+    metadata:
+      labels:
+        app: three
+        name: three
+        namespace: ns
+    spec:
+      containers:
+        - name: three
+          image: 'repo/three:latest'
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        namespace: ns
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi

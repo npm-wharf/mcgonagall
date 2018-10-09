@@ -4,6 +4,7 @@ const path = require('path')
 const { parseTOMLFile, parseRawFile } = require('./parser')
 const expressionParser = require('./expressionParser')
 const { buildResources } = require('./resource')
+const { createConfig } = require('./resources/configMap')
 const tokenizer = require('./tokenizer')
 
 const SCALE_PROPS = ['containers', 'cpu', 'ram', 'storage']
@@ -19,15 +20,7 @@ function addConfigFile (cluster, options, parentFilePath, key, relativePath, fil
     }
   })
   if (!map) {
-    map = {
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: name,
-        namespace: namespace
-      },
-      data: {}
-    }
+    map = createConfig(cluster, namespace, name, {})
     cluster.configuration.push(map)
   }
   const fullPath = path.join(parentFilePath, relativePath)
@@ -56,7 +49,7 @@ function createFromFile (cluster, file, options) {
       addConfigFile: addConfigFile.bind(null, cluster, options, path.dirname(path.resolve(file))),
       data: options.data
     })
-    return buildResources(config)
+    return buildResources(cluster, config)
   } else if (/raw.ya?ml$/.test(file)) {
     const definition = parseRawFile(file, {
       data: options.data
@@ -66,14 +59,14 @@ function createFromFile (cluster, file, options) {
 }
 
 function getNginxServerConfig (cluster) {
-  const serviceNames = Object.keys(cluster.services)
-  return serviceNames.reduce((acc, serviceName) => {
-    const service = cluster.services[serviceName]
-    if (service.nginxBlock) {
-      acc.push(service.nginxBlock
+  const resourceNames = Object.keys(cluster.resources)
+  return resourceNames.reduce((acc, resourceName) => {
+    const resource = cluster.resources[resourceName]
+    if (resource.nginxBlock) {
+      acc.push(resource.nginxBlock
         .replace(/[\\]"/g, '"')
         .replace(/\\n/g, '\n'))
-      delete service.nginxBlock
+      delete resource.nginxBlock
     }
     return acc
   }, []).join('\n\n')
@@ -84,7 +77,7 @@ function setScale (cluster, level, order, definition) {
     return
   }
   const key = definition.name
-  const service = cluster.services[key]
+  const resource = cluster.resources[key]
   const baseScale = definition.scale || {}
   const base = {
     containers: baseScale.containers || 1,
@@ -92,7 +85,7 @@ function setScale (cluster, level, order, definition) {
     cpu: baseScale.cpu
   }
   const scales = order.reduce((acc, scale, index) => {
-    let set = service[scale]
+    let set = resource[scale]
     if (!set) {
       if (index === 0) {
         acc[scale] = base

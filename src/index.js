@@ -26,16 +26,20 @@ function transfigure (source, options = {}) {
 }
 
 function write (target, config) {
-  const services = config.services
+  const resources = config.resources
   const configMaps = config.configuration
-  delete config.services
+  const secrets = config.secrets
+  delete config.resources
   delete config.configuration
+  delete config.secrets
+  delete config.imagePullSecrets
   ensurePath(target)
   writeCluster(target, config)
   writeConfigFiles(target, configMaps)
-  const keys = Object.keys(services)
+  writeSecretFiles(target, secrets)
+  const keys = Object.keys(resources)
   keys.forEach(key => {
-    const definition = services[key]
+    const definition = resources[key]
     const name = definition.name
     const namespace = definition.namespace
     const types = Object.keys(definition)
@@ -206,6 +210,25 @@ function writeRoleBinding (target, namespace, name, definition) {
     fs.writeFileSync(fullPath, yml, 'utf8')
   } catch (e) {
     throw new Error(`Failed to write role binding to ${fullPath} because: ${e.message}`)
+  }
+}
+
+function writeSecretFiles (target, secrets) {
+  secrets.forEach(secret => {
+    const namespace = secret.metadata.namespace
+    const name = secret.metadata.name
+    writeSecretFile(target, namespace, name, secret)
+  })
+}
+
+function writeSecretFile (target, namespace, fileName, secret) {
+  const fullPath = path.join(target, namespace, 'secret', fileName + '.yml')
+  const yml = yaml.safeDump(secret)
+  try {
+    ensurePath(fullPath)
+    fs.writeFileSync(fullPath, yml, 'utf8')
+  } catch (e) {
+    throw new Error(`Failed to write secret file to ${fullPath} because: ${e.message}`)
   }
 }
 

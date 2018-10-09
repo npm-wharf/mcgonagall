@@ -4,8 +4,8 @@ const expressionParser = require('../expressionParser')
 const { createVolumes } = require('./volume')
 const { createVolumeClaims } = require('./volumeClaim')
 
-function createCronJob (config) {
-  const container = createContainer(config)
+function createCronJob (cluster, config) {
+  const container = createContainer(cluster, config)
   const volumes = createVolumes(config)
   const volumeClaims = createVolumeClaims(config)
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
@@ -63,6 +63,13 @@ function createCronJob (config) {
   if (config.security && config.security.account) {
     definition.cronJob.spec.jobTemplate.spec.template.spec.serviceAccount = config.security.account
     definition.cronJob.spec.jobTemplate.spec.template.spec.serviceAccountName = config.security.account
+  }
+  if (config.imagePullSecret) {
+    definition.cronJob.spec.jobTemplate.template.spec.imagePullSecrets = [
+      {
+        name: config.imagePullSecret
+      }
+    ]
   }
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}

@@ -8,12 +8,15 @@ const toml = require('toml-j0.4')
 const git = require('simple-git/promise')
 const tokenizer = require('./tokenizer')
 const hasher = require('./hasher')
+const { createConfig } = require('./resources/configMap')
+const { createSecret } = require('./resources/secret')
 const { getVolumeTokens } = require('./resource')
 
 const CLUSTER_FILE = 'cluster.toml'
 const GIT_URL_REGEX = /(https[:][/]{2}|git[:][/]{2}|git[@])([^/]+)(([/]|[:])([^/]+))([/]([^/:]+))([:]([a-z0-9_.-]+))?/i
 
 _.templateSettings.imports.hash = hasher.hash
+_.templateSettings.imports.encode = (x, encoding) => Buffer.from(x).toString(encoding)
 
 function expandTarball (fullPath) {
   const extractTo = path.dirname(fullPath)
@@ -153,13 +156,13 @@ function getTokenList (fullPath) {
 function onConfig (options, config) {
   const cluster = processConfig(config, options)
   return processDefinitions(options.clusterPath, cluster, options)
-    .then(services => {
-      const keys = Object.keys(services)
+    .then(resources => {
+      const keys = Object.keys(resources)
       keys.forEach(key => {
-        if (cluster.services[key]) {
-          Object.assign(cluster.services[key], services[key])
+        if (cluster.resources[key]) {
+          Object.assign(cluster.resources[key], resources[key])
         } else {
-          cluster.services[key] = services[key]
+          cluster.resources[key] = resources[key]
         }
       })
       if (cluster.replaceNginxToken) {
@@ -199,11 +202,13 @@ function parseGitUrl (url) {
 function processConfig (config, options = {}) {
   const cluster = {
     namespaces: [],
-    services: {},
+    resources: {},
     order: {},
     levels: new Set(),
-    apiVersion: options.version || '1.7',
-    configuration: []
+    apiVersion: options.version || '1.9',
+    configuration: [],
+    secrets: [],
+    imagePullSecrets: {}
   }
 
   if (config.scaleOrder) {
@@ -214,7 +219,11 @@ function processConfig (config, options = {}) {
 
   const namespaces = Object.keys(config)
   namespaces.forEach(name => {
-    if (name !== 'configuration' && typeof config[name] !== 'string') {
+    if (
+        name !== 'configuration' &&
+        name !== 'imagePullSecret' &&
+        typeof config[name] !== 'string'
+      ) {
       let namespace = config[name]
       processNamespace(config, cluster, name, namespace)
     }
@@ -228,29 +237,22 @@ function processConfig (config, options = {}) {
       return acc
     }, [])
   cluster.levels.sort((x, y) => x - y)
-  cluster.configuration = processConfigMaps(config.configuration || {})
+  cluster.configuration = processConfigMaps(cluster, config.configuration || {})
+  cluster.imagePullSecrets = processImagePullSecrets(cluster, config.imagePullSecret || {})
+  cluster.secrets = processSecrets(cluster, config.secret || {})
   return cluster
 }
 
-function processConfigMaps (config) {
-  const mapNames = Object.keys(config)
-  return mapNames.reduce((acc, key) => {
-    acc.push(processConfigMap(config[key], key))
+function processConfigMaps (config, maps) {
+  const namespaces = Object.keys(maps)
+  return namespaces.reduce((acc, namespace) => {
+    const set = maps[namespace]
+    Object.keys(set).forEach(mapName => {
+      const map = set[mapName]
+      acc.push(createConfig(config, namespace, mapName, map))
+    })
     return acc
   }, [])
-}
-
-function processConfigMap (data, key) {
-  const name = Object.keys(data)[0]
-  return {
-    apiVersion: 'v1',
-    kind: 'ConfigMap',
-    metadata: {
-      name: name,
-      namespace: key
-    },
-    data: data[name]
-  }
 }
 
 function processDefinitions (fullPath, cluster, options) {
@@ -266,26 +268,78 @@ function processDefinitions (fullPath, cluster, options) {
     })
 }
 
+function processImagePullSecrets (config, secrets) {
+  const names = Object.keys(secrets)
+  return names.reduce((acc, name) => {
+    const secret = secrets[ name ]
+    const namespaces = secret.namespaces || config.namespaces
+    const data = { auths: {} }
+    data.auths[secret.registry] = {
+      auth: Buffer.from(`${secret.username}:${secret.password}`).toString('base64')
+    }
+    const json = JSON.stringify(data)
+    const encodedSecret = {
+      '.dockerconfigjson': Buffer.from(json).toString('base64')
+    }
+    namespaces.forEach(namespace => {
+      const definition = createSecret(
+        config,
+        namespace,
+        name,
+        encodedSecret,
+        'kubernetes.io/dockerconfigjson'
+      )
+      if (secret.repositories) {
+        definition.metadata.repositories = secret.repositories
+      }
+      if (!acc[namespace]) {
+        acc[namespace] = {}
+      }
+      acc[namespace][secret.registry] = definition
+    })
+    return acc
+  }, {})
+}
+
 function processNamespace (config, cluster, namespace, obj) {
   cluster.namespaces.push(namespace)
   const keys = Object.keys(obj)
-  keys.forEach(serviceName => {
-    let service = config[namespace][serviceName]
-    service.name = serviceName
-    service.namespace = namespace
-    service.fqn = [serviceName, namespace].join('.')
-    processService(cluster, serviceName, service)
+  keys.forEach(resourceName => {
+    let resource = config[namespace][resourceName]
+    resource.name = resourceName
+    resource.namespace = namespace
+    resource.fqn = [resourceName, namespace].join('.')
+    processResource(cluster, resourceName, resource)
   })
 }
 
-function processService (cluster, serviceName, service) {
-  service.order = service.order || 0
-  cluster.services[service.fqn] = service
-  cluster.levels.add(service.order)
-  if (!cluster.order[service.order]) {
-    cluster.order[service.order] = []
+function processResource (cluster, resourceName, resource) {
+  resource.order = resource.order || 0
+  cluster.resources[resource.fqn] = resource
+  cluster.levels.add(resource.order)
+  if (!cluster.order[resource.order]) {
+    cluster.order[resource.order] = []
   }
-  cluster.order[service.order].push(service.fqn)
+  cluster.order[resource.order].push(resource.fqn)
+}
+
+function processSecrets (config, secrets) {
+  // pull secrets from imagePullSecrets
+  const pullSecrets = _.reduce(config.imagePullSecrets, (acc, namespace) => {
+    acc = acc.concat(Object.values(namespace))
+    return acc
+  }, [])
+  const namespaces = Object.keys(secrets)
+  const secretDefinitions = namespaces.reduce((acc, namespace) => {
+    const set = secrets[namespace]
+    Object.keys(set).forEach(secretName => {
+      const secret = set[secretName]
+      acc.push(createSecret(config, namespace, secretName, secret))
+    })
+    return acc
+  }, [])
+
+  return secretDefinitions.concat(pullSecrets)
 }
 
 module.exports = {
@@ -298,5 +352,5 @@ module.exports = {
   processConfig: processConfig,
   processDefinitions: processDefinitions,
   processNamespace: processNamespace,
-  processService: processService
+  processResource: processResource
 }

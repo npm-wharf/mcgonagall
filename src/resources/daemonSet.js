@@ -4,8 +4,8 @@ const expressionParser = require('../expressionParser')
 const { createVolumes } = require('./volume')
 const { createVolumeClaims } = require('./volumeClaim')
 
-function createDaemonSet (config) {
-  const container = createContainer(config)
+function createDaemonSet (cluster, config) {
+  const container = createContainer(cluster, config)
   const volumes = createVolumes(config)
   const volumeClaims = createVolumeClaims(config)
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
@@ -56,6 +56,13 @@ function createDaemonSet (config) {
   if (config.security && config.security.account) {
     definition.daemonSet.spec.template.spec.serviceAccount = config.security.account
     definition.daemonSet.spec.template.spec.serviceAccountName = config.security.account
+  }
+  if (config.imagePullSecret) {
+    definition.daemonSet.spec.template.spec.imagePullSecrets = [
+      {
+        name: config.imagePullSecret
+      }
+    ]
   }
   return definition
 }

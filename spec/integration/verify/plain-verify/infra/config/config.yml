@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: infra
+  labels:
+    name: config
+    namespace: infra
+data:
+  test: hello
+  empty: ''

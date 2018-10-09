@@ -110,7 +110,7 @@ require('yargs') // eslint-disable-line no-unused-expressions
       apiVersion: {
         alias: 'v',
         describe: 'the Kubernetes API to build manifests for',
-        default: '1.7'
+        default: '1.9'
       },
       gitBasePath: {
         alias: 'g',

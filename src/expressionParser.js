@@ -72,6 +72,48 @@ function addResource (resources, resource, limits) {
   }
 }
 
+function hasConfiguration (cluster, namespace, map, block) {
+  var configMap
+  var hasKeys = false
+  let i = 0
+  while (!configMap && i < cluster.configuration.length) {
+    const m = cluster.configuration[i]
+    if (m.metadata.namespace === namespace && m.metadata.name === map) {
+      configMap = m
+      break
+    }
+    i++
+  }
+  if (configMap) {
+    hasKeys = Object.values(block).reduce((acc, key) => {
+      acc = acc && configMap.data[key] !== undefined
+      return acc
+    }, true)
+  }
+  return hasKeys
+}
+
+function hasSecret (cluster, namespace, secretName, block) {
+  var secret
+  var hasKeys = false
+  let i = 0
+  while (!secret && i < cluster.secrets.length) {
+    const m = cluster.secrets[i]
+    if (m.metadata.namespace === namespace && m.metadata.name === secretName) {
+      secret = m
+      break
+    }
+    i++
+  }
+  if (secret) {
+    hasKeys = Object.values(block).reduce((acc, key) => {
+      acc = acc && secret.data[key] !== undefined
+      return acc
+    }, true)
+  }
+  return hasKeys
+}
+
 function getResource (set) {
   const resource = /[a-z]+/.exec(set)[0]
   return [resourceType[resource], set.replace(resource, '')]
@@ -124,26 +166,15 @@ function parseCommand (expression) {
 function parseConfigBlock (name, block) {
   const keys = Object.keys(block)
   return keys.reduce((acc, key) => {
-    if (name === 'fieldRef') {
-      acc.push({
-        name: key,
-        valueFrom: {
-          fieldRef: {
-            fieldPath: block[key]
-          }
+    acc.push({
+      name: key,
+      valueFrom: {
+        configMapKeyRef: {
+          name: name,
+          key: block[key]
         }
-      })
-    } else {
-      acc.push({
-        name: key,
-        valueFrom: {
-          configMapKeyRef: {
-            name: name,
-            key: block[key]
-          }
-        }
-      })
-    }
+      }
+    })
     return acc
   }, [])
 }
@@ -178,18 +209,39 @@ function parseCPU (expression, factors = { resources: {} }) {
   return factors
 }
 
-function parseEnvironmentBlock (block) {
+function parseEnvironmentBlock (cluster, namespace, block) {
   const keys = Object.keys(block)
   return keys.reduce((acc, key) => {
     const val = block[key]
     if (typeof val === 'object') {
-      acc = acc.concat(parseConfigBlock(key, val))
+      if (hasConfiguration(cluster, namespace, key, val)) {
+        acc = acc.concat(parseConfigBlock(key, val))
+      } else if (hasSecret(cluster, namespace, key, val)) {
+        acc = acc.concat(parseSecretBlock(key, val))
+      } else {
+        acc = acc.concat(parseFieldRefBlock(key, val))
+      }
     } else {
       acc.push({
         name: key,
         value: val
       })
     }
+    return acc
+  }, [])
+}
+
+function parseFieldRefBlock (name, block) {
+  const keys = Object.keys(block)
+  return keys.reduce((acc, key) => {
+    acc.push({
+      name: key,
+      valueFrom: {
+        fieldRef: {
+          fieldPath: block[key]
+        }
+      }
+    })
     return acc
   }, [])
 }
@@ -345,6 +397,22 @@ function parseScaleFactor (expression) {
       return Object.assign(acc, parseStorage(factor))
     }
   }, {})
+}
+
+function parseSecretBlock (name, block) {
+  const keys = Object.keys(block)
+  return keys.reduce((acc, key) => {
+    acc.push({
+      name: key,
+      valueFrom: {
+        secretKeyRef: {
+          name: name,
+          key: block[key]
+        }
+      }
+    })
+    return acc
+  }, [])
 }
 
 function parseServicePort (name, expression) {

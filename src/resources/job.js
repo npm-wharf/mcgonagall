@@ -4,8 +4,8 @@ const expressionParser = require('../expressionParser')
 const { createVolumes } = require('./volume')
 const { createVolumeClaims } = require('./volumeClaim')
 
-function createJob (config) {
-  const container = createContainer(config)
+function createJob (cluster, config) {
+  const container = createContainer(cluster, config)
   const volumes = createVolumes(config)
   const volumeClaims = createVolumeClaims(config)
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
@@ -50,6 +50,13 @@ function createJob (config) {
   if (config.security && config.security.account) {
     definition.job.spec.template.spec.serviceAccount = config.security.account
     definition.job.spec.template.spec.serviceAccountName = config.security.account
+  }
+  if (config.imagePullSecret) {
+    definition.job.spec.template.spec.imagePullSecrets = [
+      {
+        name: config.imagePullSecret
+      }
+    ]
   }
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
