@@ -44,7 +44,7 @@ function parseRawFile (filePath, options = {}) {
 }
 
 function parseTOMLContent (raw, options = {}) {
-  const apiVersion = options.apiVersion || '1.7'
+  const apiVersion = options.apiVersion || '1.9'
   const addConfigFile = options.addConfigFile
   const setScale = options.setScale
   let config

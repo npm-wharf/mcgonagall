@@ -687,5 +687,7 @@ module.exports = {
       }
     }
   ],
-  secrets: []
+  secrets: [],
+  contentHash: 'X2cv/dTZK7WIiOrs1ftiiBFQX92EKInNA5O+eoki6MM=',
+  dataHash: 'e+iGfQUlx3uDxvYQj+BunSTFAPv6wbyuaep5uBqUhQI='
 }

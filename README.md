@@ -41,7 +41,13 @@ With only the path to the specification mcgonagall returns the full cluster spec
   resources: { // map of service specs
   },
   configuration: [ // list of configuration specs
-  ]
+  ],
+  secrets: [ // list of secret specs
+  ],
+  imagePullSecrets: [ // pull secrets are duplicated here
+  ],
+  contentHash: '', // a hash string "fingerprint" for the spec
+  dataHash: '' // a hash string "fingerprint" based on token data
 }
 ```
 
@@ -89,7 +95,7 @@ Note: to change folder structure or file formats, just start with the cluster sp
 
 ### Controlling For Versions
 
-Some Kubernetes API versions require changes to the manifests that get produced. As of now, the default Kubernetes API version is 1.7. To change this, provide a different version number via the `version` property in the option hash.
+Some Kubernetes API versions require changes to the manifests that get produced. As of now, the default Kubernetes API version is 1.9. To change this, provide a different version number via the `version` property in the option hash.
 
 ```js
 const mcgonagall = require('mcgonagall')

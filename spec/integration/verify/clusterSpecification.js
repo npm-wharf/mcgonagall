@@ -1096,5 +1096,7 @@ module.exports = {
         }
       }
     }
-  }
+  },
+  contentHash: 'HvoFlNWzRfkhiqT700DJ9vTgHF3hSl6czFHZquyLFrw=',
+  dataHash: 'Eq4yyx7ALQHto1gbEnwf7jsNxTVy7WuvI5choD2C4SY='
 }

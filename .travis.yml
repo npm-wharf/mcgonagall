@@ -9,5 +9,5 @@ script:
   - nyc npm test && nyc report --reporter=text-lcov | coveralls
 
 node_js:
-  - "6"
   - "8"
+  - "10"
