@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.10.0"></a>
+# [1.10.0](https://github.com/npm-wharf/mcgonagall/compare/v1.9.0...v1.10.0) (2018-10-20)
+
+
+### Bug Fixes
+
+* add fingerprint hashes to output specifications to help with detection of deploy targets ([7775892](https://github.com/npm-wharf/mcgonagall/commit/7775892))
+* correct defect around imagePullPolicy setting ([408fb56](https://github.com/npm-wharf/mcgonagall/commit/408fb56))
+
+
+### Features
+
+* add support for secrets and imagePullSecrets, improve layout of spec folder. ([364ced1](https://github.com/npm-wharf/mcgonagall/commit/364ced1))
+* expand label metadata for consistentcy and improved selectivity ([cf00bdd](https://github.com/npm-wharf/mcgonagall/commit/cf00bdd))
+
+
+
 <a name="1.9.2"></a>
 # [1.9.2](https://github.com/npm-wharf/mcgonagall/compare/v1.9.1...v1.9.2) (2018-03-20)
 
