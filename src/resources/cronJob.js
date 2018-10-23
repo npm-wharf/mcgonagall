@@ -65,7 +65,7 @@ function createCronJob (cluster, config) {
     definition.cronJob.spec.jobTemplate.spec.template.spec.serviceAccountName = config.security.account
   }
   if (config.imagePullSecret) {
-    definition.cronJob.spec.jobTemplate.template.spec.imagePullSecrets = [
+    definition.cronJob.spec.jobTemplate.spec.template.spec.imagePullSecrets = [
       {
         name: config.imagePullSecret
       }
