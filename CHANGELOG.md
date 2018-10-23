@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.10.2"></a>
+## [1.10.2](https://github.com/npm-wharf/mcgonagall/compare/v1.10.1...v1.10.2) (2018-10-23)
+
+
+### Bug Fixes
+
+* correct path issue with imagePullSecret and cronJob specification ([a3ae408](https://github.com/npm-wharf/mcgonagall/commit/a3ae408))
+
+
+
 <a name="1.10.1"></a>
 ## [1.10.1](https://github.com/npm-wharf/mcgonagall/compare/v1.10.0...v1.10.1) (2018-10-23)
 
