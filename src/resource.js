@@ -36,13 +36,7 @@ function buildResources (cluster, config) {
   }
 
   if (config.image && cluster.imagePullSecrets[namespace]) {
-    let [part2, part1, image] = config.image.split('/')
-    let registry = part2
-    let repository = part1 || image
-    if (!registry && part1.split('.').length > 1) {
-      registry = part1
-      repository = image
-    }
+    let [registry, repository, image] = expressionParser.parseImage(config.image)
     const pullSecret = cluster.imagePullSecrets[namespace][registry]
     if (image && pullSecret) {
       if (!pullSecret.metadata.repositories || pullSecret.metadata.repositories.indexOf(repository) >= 0) {

@@ -214,6 +214,44 @@ describe('Expression Parser', function () {
     })
   })
 
+  describe('image parser', function () {
+    it('should parse official image with implicit registry', function () {
+      expressionParser.parseImage('postgres:tag')
+        .should.eql([
+          'hub.docker.com',
+          'official',
+          'postgres:tag'
+        ])
+    })
+
+    it('should parse image with implicit registry', function () {
+      expressionParser.parseImage('my-repo/my-image:tag')
+        .should.eql([
+          'hub.docker.com',
+          'my-repo',
+          'my-image:tag'
+        ])
+    })
+
+    it('should parse image with explicit registry', function () {
+      expressionParser.parseImage('registry.io/my-repo/my-image:tag')
+        .should.eql([
+          'registry.io',
+          'my-repo',
+          'my-image:tag'
+        ])
+    })
+
+    it('should parse image with multi-path registry', function () {
+      expressionParser.parseImage('registry.io/some-path/bits/my-repo/my-image:tag')
+        .should.eql([
+          'registry.io/some-path/bits',
+          'my-repo',
+          'my-image:tag'
+        ])
+    })
+  })
+
   describe('scale parsers', function () {
     it('should add resource to resources hash from service scale setting', function () {
       const resources = {

@@ -267,6 +267,15 @@ function parseHTTPProbe (expression) {
   return probe
 }
 
+function parseImage (image) {
+  let parts = image.split('/')
+  return [
+    parts.slice(0, -2).join('/') || 'hub.docker.com',
+    parts.slice(-2, -1)[0] || 'official',
+    parts.slice(-1)[0]
+  ]
+}
+
 function parseMetadata (expression) {
   const sets = expression.split(';')
   return sets.reduce((acc, set) => {
@@ -549,6 +558,7 @@ module.exports = {
   parseContext: parseContext,
   parseCPU: parseCPU,
   parseEnvironmentBlock: parseEnvironmentBlock,
+  parseImage: parseImage,
   parseMetadata: parseMetadata,
   parseNetworkSource: parseNetworkSource,
   parsePodSelector: parsePodSelector,
