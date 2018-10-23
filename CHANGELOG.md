@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.10.1"></a>
+## [1.10.1](https://github.com/npm-wharf/mcgonagall/compare/v1.10.0...v1.10.1) (2018-10-23)
+
+
+### Bug Fixes
+
+* add support for image pull secret use with registries that make use of complex path structures ([9597342](https://github.com/npm-wharf/mcgonagall/commit/9597342))
+
+
+
 <a name="1.10.0"></a>
 # [1.10.0](https://github.com/npm-wharf/mcgonagall/compare/v1.9.0...v1.10.0) (2018-10-20)
 
