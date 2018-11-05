@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.10.3"></a>
+## [1.10.3](https://github.com/npm-wharf/mcgonagall/compare/v1.10.2...v1.10.3) (2018-11-05)
+
+
+### Bug Fixes
+
+* correct issue blocking use of multi-level data structures in satisfying template tokens ([191a0c2](https://github.com/npm-wharf/mcgonagall/commit/191a0c2))
+
+
+
 <a name="1.10.2"></a>
 ## [1.10.2](https://github.com/npm-wharf/mcgonagall/compare/v1.10.1...v1.10.2) (2018-10-23)
 
