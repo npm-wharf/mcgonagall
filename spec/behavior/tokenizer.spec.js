@@ -8,7 +8,7 @@ const cluster = require('../../src/cluster')
 const plain = fs.readFileSync(path.resolve('./spec/integration/source/plain-source/cluster.toml'), 'utf8')
 const template = fs.readFileSync(path.resolve('./spec/behavior/source/template.toml'), 'utf8')
 
-describe('Expression Parser', function () {
+describe('Token Handling', function () {
   it('should detect the presence of tokens', function () {
     tokenizer.hasTokens(plain).should.equal(false)
     tokenizer.hasTokens(template).should.equal(true)
@@ -48,5 +48,30 @@ describe('Expression Parser', function () {
       .should.eventually.eql([
         'namespace', 'elk.start', 'filebeat'
       ])
+  })
+
+  it('should handle recognize the presence of multi-level tokens correctly', function () {
+    const tokens = [ 'namespace', 'elk.start', 'filebeat', 'super.nested.level.property' ]
+    const data = {
+      namespace: 'my-namespace',
+      elk: {
+        start: 1
+      },
+      filebeat: 'filething',
+      super: {
+        nested: {
+          level: {
+            property: 100
+          }
+        }
+      }
+    }
+    cluster.onTokens(
+      {
+        data,
+        clusterPath: 'test'
+      },
+      tokens
+    ).should.eql('test')
   })
 })

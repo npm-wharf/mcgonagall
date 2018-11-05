@@ -198,10 +198,25 @@ function onConfig (options, config) {
 
 function onTokens (options, tokens) {
   const missing = tokens.reduce((acc, token) => {
-    if (tokens.length && (!options.data || !options.data[token])) {
+    let levels = token.split('.')
+    let obj = options.data
+    while (levels.length >= 2) {
+      let level = levels.shift()
+      if (obj && obj[ level ]) {
+        obj = obj[ level ]
+      } else {
+        obj = undefined
+      }
+    }
+    let last = levels.shift()
+    if (!obj || !obj[last]) {
       acc.push(token)
     }
     return acc
+    // if (tokens.length && (!options.data || !options.data[token])) {
+    //   acc.push(token)
+    // }
+    // return acc
   }, [])
   if (missing.length) {
     const err = new Error(`Cluster specification at '${options.clusterPath}' contains tokens which were not provided`)
@@ -373,6 +388,7 @@ module.exports = {
   loadClusterFile: loadClusterFile,
   getClusterConfig: getClusterConfig,
   getTokenList: getTokenList,
+  onTokens: onTokens,
   processConfig: processConfig,
   processDefinitions: processDefinitions,
   processNamespace: processNamespace,
