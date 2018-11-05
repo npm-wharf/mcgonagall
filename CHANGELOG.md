@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.10.4"></a>
+## [1.10.4](https://github.com/npm-wharf/mcgonagall/compare/v1.10.3...v1.10.4) (2018-11-05)
+
+
+### Bug Fixes
+
+* correct additional issue in multi-level token detection ([6a103f6](https://github.com/npm-wharf/mcgonagall/commit/6a103f6))
+
+
+
 <a name="1.10.3"></a>
 ## [1.10.3](https://github.com/npm-wharf/mcgonagall/compare/v1.10.2...v1.10.3) (2018-11-05)
 
