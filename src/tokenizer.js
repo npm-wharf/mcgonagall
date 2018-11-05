@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const TAG_REGEX = /<%[+-=]?[ ]*(([^%]|(%(?!>)))*)[ ]*%>/g
-const TOKEN_REGEX = /((['"][^'"]+['"])|([a-zA-Z][_a-zA-Z0-9]+)[(]|([a-zA-Z][_a-zA-Z0-9]+))/g
+const TOKEN_REGEX = /((['"][^'"]+['"])|([a-zA-Z][_a-zA-Z0-9.]+)[(]|([a-zA-Z][_a-zA-Z0-9.]+))/g
 
 function getMatches (regex, string, index) {
   let last
