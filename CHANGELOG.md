@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.10.5"></a>
+## [1.10.5](https://github.com/npm-wharf/mcgonagall/compare/v1.10.4...v1.10.5) (2018-11-05)
+
+
+### Bug Fixes
+
+* correct the final tokens check in cluster.js (onTokens) to correctly validate multi-level tokens ([843b925](https://github.com/npm-wharf/mcgonagall/commit/843b925))
+
+
+
 <a name="1.10.4"></a>
 ## [1.10.4](https://github.com/npm-wharf/mcgonagall/compare/v1.10.3...v1.10.4) (2018-11-05)
 
