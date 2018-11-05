@@ -143,8 +143,18 @@ function getTokenList (fullPath) {
           if (/toml$/.test(file)) {
             if (fileTokens.length > 0) {
               const filler = fileTokens.reduce((acc, token) => {
-                if (token !== 'hash') {
-                  acc[token] = 'empty'
+                let levels = token.split('.')
+                let obj = acc
+                while (levels.length >= 2) {
+                  let level = levels.shift()
+                  if (!obj[ level ]) {
+                    obj[ level ] = {}
+                  }
+                  obj = obj[ level ]
+                }
+                let last = levels.shift()
+                if (last !== 'hash') {
+                  obj[ last ] = 0
                 }
                 return acc
               }, {})

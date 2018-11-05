@@ -3,6 +3,7 @@ const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
 const tokenizer = require('../../src/tokenizer')
+const cluster = require('../../src/cluster')
 
 const plain = fs.readFileSync(path.resolve('./spec/integration/source/plain-source/cluster.toml'), 'utf8')
 const template = fs.readFileSync(path.resolve('./spec/behavior/source/template.toml'), 'utf8')
@@ -40,5 +41,12 @@ describe('Expression Parser', function () {
 [my-namespace.filething]
   order = 0
 `)
+  })
+
+  it('should create fillers without fail', function () {
+    cluster.getTokenList('./spec/behavior/source')
+      .should.eventually.eql([
+        'namespace', 'elk.start', 'filebeat'
+      ])
   })
 })
