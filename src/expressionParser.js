@@ -511,18 +511,18 @@ function parseVolume (name, expression) {
           if (/:/.test(set.path)) {
             let octal
             [set.path, octal] = set.path.split(':')
-            set.defaultMode = parseInt(octal, 8)
-            if (set.defaultMode > mode) {
-              mode = set.defaultMode
+            set.mode = parseInt(octal, 8)
+            if (set.mode > mode) {
+              mode = set.mode
             }
           }
         } else if (/:/.test(set.key)) {
           let octal
           [set.key, octal] = set.key.split(':')
           set.path = set.key
-          set.defaultMode = parseInt(octal, 8)
-          if (set.defaultMode > mode) {
-            mode = set.defaultMode
+          set.mode = parseInt(octal, 8)
+          if (set.mode > mode) {
+            mode = set.mode
           }
         }
         return set

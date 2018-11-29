@@ -79,12 +79,12 @@ describe('Expression Parser', function () {
             name: 'test',
             items: [
               {
-                defaultMode: 436,
+                mode: 436,
                 key: 'file1.txt',
                 path: 'subdir/file.txt'
               },
               {
-                defaultMode: 256,
+                mode: 256,
                 key: 'file2.txt',
                 path: 'file2.txt'
               }
