@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.11.0"></a>
+# [1.11.0](https://github.com/npm-wharf/mcgonagall/compare/v1.10.5...v1.11.0) (2019-01-07)
+
+
+### Bug Fixes
+
+* use mode prop in configMap items, rather than defaultMode ([4470a62](https://github.com/npm-wharf/mcgonagall/commit/4470a62))
+
+
+### Features
+
+* allow pods to share aliasing without creating duplicate services so that transient pods can share a fronting service name for service discovery ([e2a39e0](https://github.com/npm-wharf/mcgonagall/commit/e2a39e0))
+
+
+
 <a name="1.10.6"></a>
 ## [1.10.6](https://github.com/npm-wharf/mcgonagall/compare/v1.10.5...v1.10.6) (2018-12-01)
 
