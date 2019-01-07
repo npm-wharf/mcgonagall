@@ -26,13 +26,13 @@ function createDaemonSet (cluster, config) {
         revisionHistoryLimit: config.deployment.history,
         selector: {
           matchLabels: {
-            app: config.name
+            app: config.service.alias || config.name
           }
         },
         template: {
           metadata: {
             labels: {
-              app: config.name,
+              app: config.service.alias || config.name,
               name: config.name,
               namespace: config.namespace
             }

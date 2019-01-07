@@ -39,7 +39,7 @@ function createCronJob (cluster, config) {
             template: {
               metadata: {
                 labels: {
-                  app: config.name,
+                  app: config.service.alias || config.name,
                   name: config.name,
                   namespace: config.namespace
                 }

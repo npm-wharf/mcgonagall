@@ -213,10 +213,6 @@ function onTokens (options, tokens) {
       acc.push(token)
     }
     return acc
-    // if (tokens.length && (!options.data || !options.data[token])) {
-    //   acc.push(token)
-    // }
-    // return acc
   }, [])
   if (missing.length) {
     const err = new Error(`Cluster specification at '${options.clusterPath}' contains tokens which were not provided`)

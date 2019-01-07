@@ -9,7 +9,7 @@
       namespace: data
   spec:
     selector:
-      app: chronograf
+      app: chrono
     ports:
       - name: http
         port: 8888
@@ -27,7 +27,7 @@
       namespace: data
   spec:
     selector:
-      app: chronograf
+      app: chrono
     ports:
       - name: http
         port: 8888

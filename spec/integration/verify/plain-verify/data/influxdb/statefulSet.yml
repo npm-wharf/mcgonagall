@@ -14,11 +14,11 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: influxdb
+      app: influx
   template:
     metadata:
       labels:
-        app: influxdb
+        app: influx
         name: influxdb
         namespace: data
     spec:

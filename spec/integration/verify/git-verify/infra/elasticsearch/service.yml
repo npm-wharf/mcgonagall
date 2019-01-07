@@ -9,7 +9,7 @@
       namespace: infra
   spec:
     selector:
-      app: elasticsearch
+      app: es
     ports:
       - name: primary
         port: 9200

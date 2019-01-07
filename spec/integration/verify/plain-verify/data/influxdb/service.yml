@@ -9,7 +9,7 @@
       namespace: data
   spec:
     selector:
-      app: influxdb
+      app: influx
     ports:
       - name: http
         port: 8086
@@ -27,7 +27,7 @@
       namespace: data
   spec:
     selector:
-      app: influxdb
+      app: influx
     ports:
       - name: http
         port: 8086

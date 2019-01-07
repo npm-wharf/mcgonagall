@@ -30,7 +30,7 @@ function buildResources (cluster, config) {
     namespace: namespace
   }
 
-  if (config.ports) {
+  if (config.ports && !((config.service || {}).shared)) {
     const service = createService(config)
     Object.assign(definition, service)
   }

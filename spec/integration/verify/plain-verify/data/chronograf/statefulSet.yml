@@ -14,11 +14,11 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: chronograf
+      app: chrono
   template:
     metadata:
       labels:
-        app: chronograf
+        app: chrono
         name: chronograf
         namespace: data
     spec:

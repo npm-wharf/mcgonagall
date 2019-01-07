@@ -143,14 +143,14 @@ module.exports = {
           },
           selector: {
             matchLabels: {
-              app: 'chronograf'
+              app: 'chrono'
             }
           },
           serviceName: 'chrono',
           template: {
             metadata: {
               labels: {
-                app: 'chronograf',
+                app: 'chrono',
                 name: 'chronograf',
                 namespace: 'data'
               }
@@ -252,7 +252,7 @@ module.exports = {
               }
             ],
             selector: {
-              app: 'chronograf'
+              app: 'chrono'
             },
             clusterIP: 'None'
           }
@@ -279,7 +279,7 @@ module.exports = {
               }
             ],
             selector: {
-              app: 'chronograf'
+              app: 'chrono'
             }
           }
         }
@@ -432,13 +432,13 @@ module.exports = {
           serviceName: 'influx',
           selector: {
             matchLabels: {
-              app: 'influxdb'
+              app: 'influx'
             }
           },
           template: {
             metadata: {
               labels: {
-                app: 'influxdb',
+                app: 'influx',
                 name: 'influxdb',
                 namespace: 'data'
               }
@@ -531,7 +531,7 @@ module.exports = {
               }
             ],
             selector: {
-              app: 'influxdb'
+              app: 'influx'
             },
             clusterIP: 'None'
           }
@@ -558,7 +558,7 @@ module.exports = {
               }
             ],
             selector: {
-              app: 'influxdb'
+              app: 'influx'
             }
           }
         }
@@ -1097,6 +1097,6 @@ module.exports = {
       }
     }
   },
-  contentHash: 'HvoFlNWzRfkhiqT700DJ9vTgHF3hSl6czFHZquyLFrw=',
+  contentHash: 'BR5+2vwncG6O/qNXoLdUI7bCwJKz6Z0aI/hqiPSQQWs=',
   dataHash: 'Eq4yyx7ALQHto1gbEnwf7jsNxTVy7WuvI5choD2C4SY='
 }

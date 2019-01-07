@@ -30,13 +30,13 @@ function createStatefulSet (cluster, config) {
         },
         selector: {
           matchLabels: {
-            app: config.name
+            app: config.service.alias || config.name
           }
         },
         template: {
           metadata: {
             labels: {
-              app: config.name,
+              app: config.service.alias || config.name,
               name: config.name,
               namespace: config.namespace
             }

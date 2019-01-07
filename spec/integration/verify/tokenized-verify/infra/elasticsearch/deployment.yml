@@ -15,11 +15,11 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: elasticsearch
+      app: es
   template:
     metadata:
       labels:
-        app: elasticsearch
+        app: es
         name: elasticsearch
         namespace: infra
     spec:

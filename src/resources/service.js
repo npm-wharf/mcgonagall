@@ -58,7 +58,7 @@ function createService (config) {
     },
     spec: {
       selector: {
-        app: config.name
+        app: config.service.alias || config.name
       },
       ports: [
       ]

@@ -30,7 +30,7 @@ module.exports = {
           },
           'spec': {
             'selector': {
-              'app': 'elasticsearch'
+              'app': 'es'
             },
             'ports': [
               {
@@ -71,13 +71,13 @@ module.exports = {
           },
           'selector': {
             'matchLabels': {
-              'app': 'elasticsearch'
+              'app': 'es'
             }
           },
           'template': {
             'metadata': {
               'labels': {
-                'app': 'elasticsearch',
+                'app': 'es',
                 'name': 'elasticsearch',
                 'namespace': 'infra'
               }
@@ -688,6 +688,6 @@ module.exports = {
     }
   ],
   secrets: [],
-  contentHash: 'X2cv/dTZK7WIiOrs1ftiiBFQX92EKInNA5O+eoki6MM=',
+  contentHash: 'o9c0ZIEsBsXNxiGdQbnpgeNfKrELsUlhIzuNx2OoaVY=',
   dataHash: 'e+iGfQUlx3uDxvYQj+BunSTFAPv6wbyuaep5uBqUhQI='
 }

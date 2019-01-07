@@ -382,6 +382,7 @@ metadata = "owner=npm;branch=master"
   labels = "example=true"
   annotations = "service.alpha.kubernetes.io/tolerate-unready-endpoints=true"
   loadBalance = false
+  shared = false
 ```
 
 ### top-level properties
@@ -393,7 +394,7 @@ Top level properties describe the name, type of service and Docker image that wi
  * `command|arguments` - optionally provide the command or arguments to the Docker container
  * `metadata` - optional metadata to tag the service with, important for CD
  * `labels` - optional, nested label metadata for the specification (part of Kubernetes convention)
- 
+ * `shared` - optional, if set to true, omits generation of a new service with expectation that alias will match an existing service
 
 #### name
 
@@ -406,6 +407,12 @@ If the service needs permanent storage (think databases) this should be set to t
 #### metadata
 
 The metadata property provides a way to add custom properties to the service's metadata block. It takes a string with key value pairs separated by `;`s. Metadata in Kubernetes is often used to select and filter resources. As an example, Hikaru's continuous delivery can make use of metadata to determine if resources are eligible for upgrade given what appears to be a compatible Docker image.
+
+#### shared
+
+The purpose of `shared` is to address edge cases when you need to have multiple backing temporal pods from jobs/cronjobs that share a service through `alias` matching. This does mean one of the pods will need to expose a service without using `shared` and if the service needs to be reachable externally, have a `subdomain`.
+
+> Note: `alias` collisions are possible for other types and can cause invalid cluster specifications. Only use matching aliases across jobs/cronjobs to share a fronting service.
 
 ### `[scale]`
 

@@ -24,13 +24,13 @@ module.exports = {
       },
       selector: {
         matchLabels: {
-          app: 'mydb'
+          app: 'datums'
         }
       },
       template: {
         metadata: {
           labels: {
-            app: 'mydb',
+            app: 'datums',
             name: 'mydb',
             namespace: 'data'
           }
@@ -171,7 +171,7 @@ module.exports = {
       spec: {
         clusterIP: 'None',
         selector: {
-          app: 'mydb'
+          app: 'datums'
         },
         ports: [
           {
@@ -203,7 +203,7 @@ module.exports = {
       },
       spec: {
         selector: {
-          app: 'mydb'
+          app: 'datums'
         },
         ports: [
           {
