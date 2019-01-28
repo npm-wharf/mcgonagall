@@ -51,6 +51,7 @@ spec:
             - /etc/create-cert/create-cert.sh
           securityContext:
             allowPrivilegeEscalation: true
+            privileged: true
             capabilities:
               - NET_ADMIN
               - SYS_TIME

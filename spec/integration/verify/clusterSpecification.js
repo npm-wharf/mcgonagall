@@ -778,6 +778,7 @@ module.exports = {
                     }
                   },
                   'securityContext': {
+                    'privileged': true,
                     'allowPrivilegeEscalation': true,
                     'capabilities': [ 'NET_ADMIN', 'SYS_TIME' ],
                     'runAsUser': 1000,
@@ -1097,6 +1098,6 @@ module.exports = {
       }
     }
   },
-  contentHash: 'BR5+2vwncG6O/qNXoLdUI7bCwJKz6Z0aI/hqiPSQQWs=',
+  contentHash: 'XDrgTOd2aVNG2K5LkLlzv7r0bS0hCiI4QbYc/1aeKHM=',
   dataHash: 'Eq4yyx7ALQHto1gbEnwf7jsNxTVy7WuvI5choD2C4SY='
 }

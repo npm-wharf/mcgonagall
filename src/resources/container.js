@@ -68,6 +68,9 @@ function createContainer (cluster, config) {
     if (config.security.escalation) {
       security.securityContext.allowPrivilegeEscalation = true
     }
+    if (config.security.privileged) {
+      security.securityContext.privileged = true
+    }
     if (config.security.capabilities) {
       security.securityContext.capabilities = config.security.capabilities
     }

@@ -31,6 +31,7 @@ job = true
   files = "self-sign-files::create-cert.sh,secret-template.json"
 
 [security]
+  privileged = true
   context = "user=1000;group=1000"
   capabilities = [ "NET_ADMIN", "SYS_TIME" ]
   escalation = true
