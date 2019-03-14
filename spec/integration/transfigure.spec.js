@@ -10,10 +10,10 @@ const index = require('../../src/index')
 
 // controls whether or not integration tests
 // remove output directories after test
-const ERASE_OUTPUT = false
+const DELETE_OUTPUT_AFTER_TESTS = false
 
-function eraseOutput (done, output) {
-  if (ERASE_OUTPUT) {
+function eraseOutput (done, output, eraseOutput = DELETE_OUTPUT_AFTER_TESTS) {
+  if (eraseOutput) {
     rimraf(`./spec/integration/target/${output}`, (ohnoes) => {
       if (ohnoes) {
         console.log('McGonagall frowns and offers you a biscuit all the same.', ohnoes)
@@ -29,6 +29,11 @@ const clusterSpecification = require('./verify/clusterSpecification')
 const tokenSpecification = require('./verify/tokenSpecification')
 
 describe('Transfiguration', function () {
+  before(function (done) {
+    // If we don't erase any existing build first, we're likely to get invalid results
+    eraseOutput(done, '', true)
+  })
+
   describe('from a plain spec without a target directory', function () {
     it('should create a full cluster specification object', function () {
       return index.transfigure('./spec/integration/source/plain-source')

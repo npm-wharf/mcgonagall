@@ -53,12 +53,12 @@
     "url": "git://github.com/npm-wharf/mcgonagall.git"
   },
   "scripts": {
-    "continuous": "./node_modules/mocha/bin/mocha spec/**/.spec.js -w",
+    "continuous": "mocha './spec/**/*.spec.js' './spec/*.spec.js' -w",
     "coverage": "nyc npm test",
     "pretest": "standard",
     "release": "standard-version",
     "standard": "standard --fix",
-    "test": "./node_modules/mocha/bin/mocha ./spec/**/*.spec.js ./spec/*.spec.js"
+    "test": "mocha './spec/**/*.spec.js' './spec/*.spec.js'"
   },
   "standard": {
     "env": [
