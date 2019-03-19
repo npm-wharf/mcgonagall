@@ -72,7 +72,7 @@ const serviceDefinition = {
   ),
   mounts: Joi.object().pattern(
     /^.*$/,
-    Joi.string().uri({allowRelative: true})
+    Joi.string().uri({ allowRelative: true })
   ),
   volumes: {
     config: Joi.string().regex(VOLUME_MAP_REGEX, 'config map format')

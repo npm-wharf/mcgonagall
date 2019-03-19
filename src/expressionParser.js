@@ -155,11 +155,11 @@ function parseCLIProbe (expression) {
 
 function parseCommand (expression) {
   if (Array.isArray(expression)) {
-    return {command: expression}
+    return { command: expression }
   } else if (/\n/.test(expression)) {
-    return {command: [ expression.replace(/\t/g, '  ') ]}
+    return { command: [ expression.replace(/\t/g, '  ') ] }
   } else {
-    return {command: expression.split(' ')}
+    return { command: expression.split(' ') }
   }
 }
 
@@ -398,10 +398,10 @@ function parseScaleFactor (expression) {
       return Object.assign(acc, parseContainer(factor))
     } else if (/cpu/.test(factor)) {
       let limits = factor.replace(/^[ ]?cpu[ ]?/, '')
-      return Object.assign(acc, {cpu: limits})
+      return Object.assign(acc, { cpu: limits })
     } else if (/ram/.test(factor)) {
       let limits = factor.replace(/^[ ]?ram[ ]?/, '')
-      return Object.assign(acc, {ram: limits})
+      return Object.assign(acc, { ram: limits })
     } else if (/storage/.test(factor)) {
       return Object.assign(acc, parseStorage(factor))
     }
@@ -458,7 +458,7 @@ function parseStorage (expression) {
   const storage = { storage: {} }
   const sets = expression.split('=')[1].split(',')
   sets.map(set => {
-    const [_, mount, value] = STORAGE_REGEX.exec(set)  // eslint-disable-line no-unused-vars
+    const [_, mount, value] = STORAGE_REGEX.exec(set) // eslint-disable-line no-unused-vars
     storage.storage[mount] = value
   })
   return storage

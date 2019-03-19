@@ -17,26 +17,26 @@ describe('Expression Parser', function () {
     expressionParser.parseMetadata(
       'owner=npm;branch=master'
     )
-    .should.eql({
-      owner: 'npm',
-      branch: 'master'
-    })
+      .should.eql({
+        owner: 'npm',
+        branch: 'master'
+      })
   })
 
   it('should parse command', function () {
     expressionParser.parseCommand(
       'testCommand --arg1=one --arg2 2 --arg3 /file/path'
     )
-    .should.eql({
-      command: [
-        'testCommand',
-        '--arg1=one',
-        '--arg2',
-        '2',
-        '--arg3',
-        '/file/path'
-      ]
-    })
+      .should.eql({
+        command: [
+          'testCommand',
+          '--arg1=one',
+          '--arg2',
+          '2',
+          '--arg3',
+          '/file/path'
+        ]
+      })
   })
 
   it('should parse security context', function () {
@@ -324,7 +324,7 @@ describe('Expression Parser', function () {
 
   describe('port parsers', function () {
     it('should parse service container port', function () {
-      expressionParser.parsePorts({http: '8080'}, true)
+      expressionParser.parsePorts({ http: '8080' }, true)
         .should.eql([
           {
             name: 'http',
@@ -336,7 +336,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse service container and target port', function () {
-      expressionParser.parsePorts({http: '8000<=8080'}, true)
+      expressionParser.parsePorts({ http: '8000<=8080' }, true)
         .should.eql([
           {
             name: 'http',
@@ -348,7 +348,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse service container and node port', function () {
-      expressionParser.parsePorts({http: '8080=>80'}, true)
+      expressionParser.parsePorts({ http: '8080=>80' }, true)
         .should.eql([
           {
             name: 'http',
@@ -361,7 +361,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse service container, target and node port', function () {
-      expressionParser.parsePorts({http: '8000<=8080=>80'}, true)
+      expressionParser.parsePorts({ http: '8000<=8080=>80' }, true)
         .should.eql([
           {
             name: 'http',
@@ -374,7 +374,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse container port', function () {
-      expressionParser.parsePorts({http: '8080'})
+      expressionParser.parsePorts({ http: '8080' })
         .should.eql([
           {
             name: 'http',
@@ -385,7 +385,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse container and target port', function () {
-      expressionParser.parsePorts({http: '8000<=8080'})
+      expressionParser.parsePorts({ http: '8000<=8080' })
         .should.eql([
           {
             name: 'http',
@@ -396,7 +396,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse container and node port', function () {
-      expressionParser.parsePorts({http: '8080=>80'})
+      expressionParser.parsePorts({ http: '8080=>80' })
         .should.eql([
           {
             name: 'http',
@@ -407,7 +407,7 @@ describe('Expression Parser', function () {
     })
 
     it('should parse container, target and node port', function () {
-      expressionParser.parsePorts({http: '8000<=8080=>80'})
+      expressionParser.parsePorts({ http: '8000<=8080=>80' })
         .should.eql([
           {
             name: 'http',

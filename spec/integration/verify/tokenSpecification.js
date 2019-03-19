@@ -653,7 +653,7 @@ module.exports = {
         }
       },
       'data': {
-        'elasticsearch-pipeline.conf': _.template(PIPELINE)({namespace: 'infra'})
+        'elasticsearch-pipeline.conf': _.template(PIPELINE)({ namespace: 'infra' })
       }
     },
     {

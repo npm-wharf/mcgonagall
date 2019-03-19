@@ -40,7 +40,7 @@ describe('Transfiguration', function () {
 
   describe('from a tokenized spec without a target directory', function () {
     it('should reject with a list of tokens in the spec when data is missing', function () {
-      return index.transfigure('./spec/integration/source/tokenized-source', {version: '1.7'})
+      return index.transfigure('./spec/integration/source/tokenized-source', { version: '1.7' })
         .then(
           null,
           err => {
@@ -66,9 +66,9 @@ describe('Transfiguration', function () {
           password: 'pass'
         }
       })
-      .then(cluster => {
-        return cluster.should.eql(tokenSpecification)
-      })
+        .then(cluster => {
+          return cluster.should.eql(tokenSpecification)
+        })
     })
   })
 
@@ -89,7 +89,7 @@ describe('Transfiguration', function () {
           const c2 = JSON.parse(json2)
           try {
             assert.deepStrictEqual(c1, c2)
-            assert.equal(json1, json2)
+            assert.strict.equal(json1, json2)
           } catch (e) {
             const diff = jsdiff.diffChars(json1, json2)
             diff.forEach(function (part) {
@@ -139,7 +139,7 @@ describe('Transfiguration', function () {
             const c2 = JSON.parse(json2)
             try {
               assert.deepStrictEqual(c1, c2)
-              assert.equal(json1, json2)
+              assert.strict.equal(json1, json2)
             } catch (e) {
               const diff = jsdiff.diffChars(json1, json2)
               diff.forEach(function (part) {
@@ -188,7 +188,7 @@ describe('Transfiguration', function () {
             const c2 = JSON.parse(json2)
             try {
               assert.deepStrictEqual(c1, c2)
-              assert.equal(json1, json2)
+              assert.strict.equal(json1, json2)
             } catch (e) {
               const diff = jsdiff.diffChars(json1, json2)
               diff.forEach(function (part) {
@@ -237,7 +237,7 @@ describe('Transfiguration', function () {
             const c2 = JSON.parse(json2)
             try {
               assert.deepStrictEqual(c1, c2)
-              assert.equal(json1, json2)
+              assert.strict.equal(json1, json2)
             } catch (e) {
               const diff = jsdiff.diffChars(json1, json2)
               diff.forEach(function (part) {
@@ -297,7 +297,7 @@ describe('Transfiguration', function () {
 
           try {
             assert.deepStrictEqual(c1, c2)
-            assert.equal(json1, json2)
+            assert.strict.equal(json1, json2)
           } catch (e) {
             const diff = jsdiff.diffChars(json1, json2)
             diff.forEach(function (part) {
@@ -355,7 +355,7 @@ describe('Transfiguration', function () {
 
           try {
             assert.deepStrictEqual(c1, c2)
-            assert.equal(json1, json2)
+            assert.strict.equal(json1, json2)
           } catch (e) {
             const diff = jsdiff.diffChars(json1, json2)
             diff.forEach(function (part) {

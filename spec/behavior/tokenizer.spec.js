@@ -32,7 +32,7 @@ describe('Token Handling', function () {
       filebeat: 'filething'
     })
     result.should.eql(
-`[my-namespace.elasticsearch]
+      `[my-namespace.elasticsearch]
   order = 1
 [my-namespace.kibana]
   order = 2

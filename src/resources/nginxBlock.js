@@ -32,7 +32,7 @@ function buildNginxBlock (config) {
     fqdn
   }
   const nginxBlock = nginxLocation.getBlock(fqdn, data)
-  return {nginxBlock}
+  return { nginxBlock }
 }
 
 module.exports = {

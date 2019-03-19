@@ -35,8 +35,8 @@ chai.Assertion.addMethod('partiallyEql', function (partial) {
   return obj.then(function (actual) {
     var diffs = deepCompare(partial, actual)
     return self.assert(
-    diffs.length === 0,
-    diffs.join('\n\t')
+      diffs.length === 0,
+      diffs.join('\n\t')
     )
   })
 })

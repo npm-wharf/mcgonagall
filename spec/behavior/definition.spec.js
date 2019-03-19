@@ -28,7 +28,7 @@ describe('Kube Definition', function () {
       secrets: [],
       imagePullSecrets: {}
     }
-    definition.createFromFile(cluster, './spec/behavior/source/statefulset1.toml', {apiVersion: '1.8'})
+    definition.createFromFile(cluster, './spec/behavior/source/statefulset1.toml', { apiVersion: '1.8' })
       .should.eql(statefulManifest)
   })
 
@@ -64,7 +64,7 @@ describe('Kube Definition', function () {
       ],
       imagePullSecrets: {}
     }
-    definition.createFromFile(cluster, './spec/behavior/source/deployment1.toml', {apiVersion: '1.8'})
+    definition.createFromFile(cluster, './spec/behavior/source/deployment1.toml', { apiVersion: '1.8' })
       .should.eql(deploymentManifest)
   })
 
@@ -79,10 +79,10 @@ describe('Kube Definition', function () {
       secrets: [],
       imagePullSecrets: {}
     }
-    definition.createFromFile(cluster, './spec/behavior/source/security1.toml', {apiVersion: '1.8'})
+    definition.createFromFile(cluster, './spec/behavior/source/security1.toml', { apiVersion: '1.8' })
       .should.eql(securityManifest1)
 
-    definition.createFromFile(cluster, './spec/behavior/source/security2.toml', {apiVersion: '1.8'})
+    definition.createFromFile(cluster, './spec/behavior/source/security2.toml', { apiVersion: '1.8' })
       .should.eql(securityManifest2)
   })
 })

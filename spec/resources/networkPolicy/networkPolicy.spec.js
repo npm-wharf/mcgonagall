@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const toml = require('toml-j0.4')
 
-const {createNetworkPolicy} = require('../../../src/resources/networkPolicy')
+const { createNetworkPolicy } = require('../../../src/resources/networkPolicy')
 const manifest1 = require('./network-policy-manifest-1')
 
 function createFromToml (file) {

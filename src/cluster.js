@@ -25,12 +25,12 @@ function expandTarball (fullPath) {
     file: fullPath,
     C: extractTo
   })
-  .then(
-    () => extractTo,
-    err => {
-      throw new Error(`Could not extract the tarball at '${fullPath}':\n\t${err.message}`)
-    }
-  )
+    .then(
+      () => extractTo,
+      err => {
+        throw new Error(`Could not extract the tarball at '${fullPath}':\n\t${err.message}`)
+      }
+    )
 }
 
 function fetchGitRepo (fullPath, options) {
@@ -255,10 +255,10 @@ function processConfig (config, options = {}) {
   const namespaces = Object.keys(config)
   namespaces.forEach(name => {
     if (
-        name !== 'configuration' &&
+      name !== 'configuration' &&
         name !== 'imagePullSecret' &&
         typeof config[name] !== 'string'
-      ) {
+    ) {
       let namespace = config[name]
       processNamespace(config, cluster, name, namespace)
     }
