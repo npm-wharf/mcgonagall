@@ -20,8 +20,8 @@ function write (target, specification) {
 
   const { resources, configuration, secrets, imagePullSecrets, ...cluster } = specification
   writeCluster(target, cluster)
-  configuration.forEach(x => writeCommon(target, x, x.metadata.namespace, 'config', x.metadata.name))
-  secrets.forEach(x => writeCommon(target, x, x.metadata.namespace, 'secret', x.metadata.name))
+  writeYamlArray(target, configuration, 'config')
+  writeYamlArray(target, secrets, 'secret')
   writeResources(target, resources)
 }
 
@@ -29,6 +29,10 @@ function writeCluster (target, definition) {
   const fullPath = path.join(target, CLUSTER_FILE)
   const json = JSON.stringify(definition, null, 2) + '\n'
   outputWriter.write(fullPath, json)
+}
+
+function writeYamlArray (target, xs, namePrefix) {
+  xs.forEach(x => writeCommon(target, x, x.metadata.namespace, namePrefix, x.metadata.name))
 }
 
 function writeCommon (target, definition, namespace, namePrefix, name) {
