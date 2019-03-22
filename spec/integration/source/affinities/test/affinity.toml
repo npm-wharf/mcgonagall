@@ -1,0 +1,39 @@
+name = "test.basicPod"
+image = "pretend/bash:1.0.0"
+
+[scale]
+  containers = 1
+
+[[affinity.pod]]
+  type = "hard"
+  weight = 100
+  scope = "os"
+  [[affinity.pod.match]]
+    Gt = { cpuCount = 2}
+
+[[affinity.pod]]
+  type = "soft"
+  weight = 75
+  scope = "host"
+  [[affinity.pod.match]]
+    In = { plain1 = "test1", array1 = ["test2", "test3"] }
+    NotIn = { multiOperator = ["test4", "test5"] }
+
+[[affinity.pod]]
+  type = "soft"
+  weight = -99
+  scope = "host"
+  [[affinity.pod.match]]
+    In = { name = "heavyProcess"}
+
+# TODO: These are unimplemented samples for node affinity
+#[[affinity.node]]
+#  type = "soft"
+#  weight = 100
+#  [[affinity.node.match]]
+#    in = { usage = "utility", routing = "local"}
+
+#[[affinity.node]]
+#  type = "hard"
+#  [[affinity.node.match]]
+#    notIn = { purpose = "monitoring"}

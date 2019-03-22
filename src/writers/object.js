@@ -10,7 +10,7 @@ function prepare (targetPath) {
 }
 
 function write (targetPath, contents) {
-  const segments = targetPath.split(path.delimiter)
+  const segments = path.normalize(targetPath).split(path.sep)
   const leaf = segments[segments.length - 1]
   let target = output
 
@@ -29,8 +29,12 @@ function write (targetPath, contents) {
 }
 
 function result () {
-  // TODO: swallow all the target prefix keys
-  return output
+  const prefix = path.normalize(basePath).split(path.sep)
+  let result = output
+  for (const segment of prefix) {
+    result = result[segment]
+  }
+  return result
 }
 
 module.exports = {

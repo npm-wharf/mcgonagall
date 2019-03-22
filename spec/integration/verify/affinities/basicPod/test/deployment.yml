@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: basicPod
+  name: test
+  labels:
+    name: test
+    namespace: basicPod
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+        name: test
+        namespace: basicPod
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: cpuCount
+                      operator: Gt
+                      values:
+                        - 2
+                topologyKey: kubernetes.io/os
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 75
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: plain1
+                      operator: In
+                      values:
+                        - test1
+                    - key: array1
+                      operator: In
+                      values:
+                        - test2
+                        - test3
+                    - key: multiOperator
+                      operator: NotIn
+                      values:
+                        - test4
+                        - test5
+                topologyKey: kubernetes.io/hostname
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 99
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                        - heavyProcess
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: test
+          image: 'pretend/bash:1.0.0'

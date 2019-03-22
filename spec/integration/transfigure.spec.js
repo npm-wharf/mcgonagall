@@ -1,11 +1,18 @@
 require('../setup')
 const assert = require('assert')
+const chalk = require('chalk')
 const fs = require('fs')
-const path = require('path')
 const hasher = require('folder-hash')
 const jsdiff = require('diff')
+const path = require('path')
+const { promisify } = require('util')
+const readdir = promisify(fs.readdir)
+const readFile = promisify(fs.readFile)
 const rimraf = require('rimraf') // behold i am become rimraf destroyer of files
-const chalk = require('chalk')
+const sinon = require('sinon')
+
+const fileWriter = require('../../src/writers/file')
+const objectWriter = require('../../src/writers/object')
 const index = require('../../src/index')
 
 // controls whether or not integration tests
@@ -25,6 +32,38 @@ function eraseOutput (done, output, eraseOutput = DELETE_OUTPUT_AFTER_TESTS) {
   }
 }
 
+async function loadVerificationSpec (target) {
+  const loadedSpec = {}
+  const currentDir = await readdir(target, { withFileTypes: true })
+
+  // recurse on subdirs, load files
+  for (const dirent of currentDir) {
+    const thisPath = path.join(target, dirent.name)
+    if (dirent.isDirectory()) {
+      loadedSpec[dirent.name] = loadVerificationSpec(thisPath)
+    } else if (dirent.isFile()) {
+      loadedSpec[dirent.name] = readFile(thisPath, { encoding: 'utf8' })
+    }
+  }
+
+  // map all the promises to resolve, then assign back into the original object
+  return Object.assign(loadedSpec, ...await Promise.all(
+    Object.entries(loadedSpec).map(
+      async ([key, value]) => ({ [key]: await value })
+    )
+  ))
+}
+
+function clearContentHashes (tree) {
+  if (tree.hasOwnProperty('cluster.json')) {
+    let contents = JSON.parse(tree['cluster.json'])
+    delete contents.contentHash
+    delete contents.dataHash
+    tree['cluster.json'] = JSON.stringify(contents, null, 2) + '\n'
+  }
+  return tree
+}
+
 const clusterSpecification = require('./verify/clusterSpecification')
 const tokenSpecification = require('./verify/tokenSpecification')
 
@@ -32,6 +71,27 @@ describe('Transfiguration', function () {
   before(function (done) {
     // If we don't erase any existing build first, we're likely to get invalid results
     eraseOutput(done, '', true)
+  })
+
+  describe('from a spec containing affinity rules', function () {
+    let affinityVerification //eslint-disable-line
+    before(async function () {
+      affinityVerification = await loadVerificationSpec(path.resolve('spec/integration/verify/affinities'))
+      sinon.stub(fileWriter, 'prepare').callsFake(objectWriter.prepare)
+      sinon.stub(fileWriter, 'write').callsFake(objectWriter.write)
+    })
+
+    after(function () {
+      sinon.restore()
+    })
+
+    it('should create a cluster that supports affinities', async function () {
+      await index.transfigure(
+        './spec/integration/source/affinities',
+        { output: './spec/integration/target/affinities' }
+      )
+      return clearContentHashes(objectWriter.result()).should.deep.equal(affinityVerification)
+    })
   })
 
   describe('from a plain spec without a target directory', function () {
@@ -42,7 +102,6 @@ describe('Transfiguration', function () {
         })
     })
   })
-
   describe('from a tokenized spec without a target directory', function () {
     it('should reject with a list of tokens in the spec when data is missing', function () {
       return index.transfigure('./spec/integration/source/tokenized-source', { version: '1.7' })

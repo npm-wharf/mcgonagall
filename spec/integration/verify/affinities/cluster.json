@@ -1,0 +1,14 @@
+{
+  "namespaces": [
+    "test"
+  ],
+  "order": {
+    "0": [
+      "basicPod.test"
+    ]
+  },
+  "levels": [
+    0
+  ],
+  "apiVersion": "1.9"
+}

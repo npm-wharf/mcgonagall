@@ -1,6 +1,6 @@
 const path = require('path')
 const yaml = require('js-yaml')
-const outputWriter = require('./writers/file.js')
+const outputWriter = require('./writers/file')
 const cluster = require('./cluster')
 const CLUSTER_FILE = 'cluster.json'
 

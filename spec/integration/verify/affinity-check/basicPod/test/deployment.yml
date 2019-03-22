@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: basicPod
+  name: test
+  labels:
+    name: test
+    namespace: basicPod
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+        name: test
+        namespace: basicPod
+    spec:
+      containers:
+        - name: test
+          image: 'pretend/bash:1.0.0'

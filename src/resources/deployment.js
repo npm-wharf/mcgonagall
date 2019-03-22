@@ -1,6 +1,7 @@
 const { getApiVersion } = require('../apiVersionMap')
 const { createContainer } = require('./container')
 const expressionParser = require('../expressionParser')
+const { createAffinities } = require('./affinity')
 const { createVolumes } = require('./volume')
 const { createVolumeClaims } = require('./volumeClaim')
 
@@ -9,6 +10,7 @@ function createDeployment (cluster, config) {
   const volumes = createVolumes(config)
   const volumeClaims = createVolumeClaims(config)
   const metadata = expressionParser.parseMetadata(config.metadata || '') || {}
+  const affinities = createAffinities(cluster, config)
   const definition = {
     deployment: {
       apiVersion: getApiVersion(config, 'deployment'),
@@ -44,6 +46,7 @@ function createDeployment (cluster, config) {
             }
           },
           spec: {
+            affinity: affinities,
             containers: [ container ],
             volumes: volumes
           }
@@ -70,6 +73,8 @@ function createDeployment (cluster, config) {
       }
     ]
   }
+
+  Object.keys(definition).forEach((key) => (definition[key] == null) && delete definition[key])
 
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
