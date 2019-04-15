@@ -65,5 +65,8 @@
       "mocha"
     ]
   },
+  "nyc": {
+    "include": "src"
+  },
   "version": "1.12.0"
 }
