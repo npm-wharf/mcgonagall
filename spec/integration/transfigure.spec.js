@@ -8,12 +8,18 @@ const path = require('path')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const readFile = promisify(fs.readFile)
+const stat = promisify(fs.stat) // for pre node 10 shim
 const rimraf = require('rimraf') // behold i am become rimraf destroyer of files
 const sinon = require('sinon')
 
 const fileWriter = require('../../src/writers/file')
 const objectWriter = require('../../src/writers/object')
 const index = require('../../src/index')
+
+// for pre node 10 shim
+const NODEV = {};
+[NODEV.major, NODEV.minor, NODEV.patch] = process.versions.node.split('.').map(x => parseInt(x))
+const NODIRENT = NODEV.major < 10 || (NODEV.major === 10 && NODEV.minor < 10)
 
 // controls whether or not integration tests
 // remove output directories after test
@@ -37,7 +43,16 @@ async function loadVerificationSpec (target) {
   const currentDir = await readdir(target, { withFileTypes: true })
 
   // recurse on subdirs, load files
-  for (const dirent of currentDir) {
+  for (let dirent of currentDir) {
+    if (NODIRENT) { // Remove this block when dropping node 8 support
+      const currentStat = await stat(path.join(target, dirent))
+      dirent = {
+        name: dirent,
+        isDirectory: () => currentStat.isDirectory(),
+        isFile: () => currentStat.isFile()
+      }
+    }
+
     const thisPath = path.join(target, dirent.name)
     if (dirent.isDirectory()) {
       loadedSpec[dirent.name] = loadVerificationSpec(thisPath)
