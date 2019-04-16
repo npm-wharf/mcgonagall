@@ -1,5 +1,53 @@
 const R = require('ramda')
 
+const topologies = new Map([
+  ['host', 'kubernetes.io/hostname'],
+  ['zone', 'failure-domain.beta.kubernetes.io/zone'],
+  ['region', 'failure-domain.beta.kubernetes.io/region'],
+  ['instance-type', 'beta.kubernetes.io/instance-type'],
+  ['os', 'kubernetes.io/os'],
+  ['arch', 'kubernetes.io/arch']
+])
+const affinityOperators = new Set(['In', 'NotIn', 'Exists', 'DoesNotExist', 'Gt', 'Lt'])
+
+const validAffinityOperator = (x) => affinityOperators.has(x)
+const anyInvalidOperators = R.compose(R.not, R.all(validAffinityOperator), R.keys)
+
+const splitByNegative = R.partition(x => R.gte(x.weight, 0))
+const splitByPreferred = R.partition(R.propEq('type', 'hard'))
+
+const weightLens = R.lensProp('weight')
+const negateWeight = R.map(R.over(weightLens, R.negate))
+const removeWeight = R.map(R.omit(['weight']))
+
+const mapKeyedObjectValues = R.pipe(R.mapObjIndexed, R.values)
+const flatmapKeyedObjectValues = R.compose(R.flatten, mapKeyedObjectValues)
+
+function sortMatchExpressions (xs) {
+  if (anyInvalidOperators(xs)) {
+    throw new Error(`Valid affinity matching operators are ${[...affinityOperators].join(', ')}, but found ${xs}`)
+  }
+
+  return flatmapKeyedObjectValues((x, operator) =>
+    mapKeyedObjectValues((values, key) => (
+      { key: key, operator: operator, values: [].concat(values) }
+    ), x)
+  , xs)
+}
+
+const parsePreferredAffinity = R.map(x => {
+  return {
+    weight: x.weight,
+    podAffinityTerm: {
+      labelSelector: {
+        matchExpressions: R.chain(sortMatchExpressions)(x.match)
+      },
+      topologyKey: topologies.has(x.scope || null) ? topologies.get(x.scope) : topologies.get('host') // COULDDO: Support custom topologies here
+    }
+  }
+})
+const parseRequiredAffinity = R.compose(removeWeight, parsePreferredAffinity)
+
 function createAffinities (cluster, config) {
   if (!config.hasOwnProperty('affinity')) {
     return null
@@ -33,57 +81,6 @@ function createAffinities (cluster, config) {
   }
   return affinities
 }
-
-const splitByPreferred = R.partition(R.propEq('type', 'hard'))
-const splitByNegative = R.partition(x => R.gte(x.weight, 0))
-
-const weightLens = R.lensProp('weight')
-const negateWeight = R.map(R.over(weightLens, R.negate))
-const removeWeight = R.map(R.omit(['weight']))
-
-const parsePreferredAffinity = R.map(x => {
-  return {
-    weight: x.weight,
-    podAffinityTerm: {
-      labelSelector: {
-        matchExpressions: R.chain(sortMatchExpressions)(x.match)
-      },
-      topologyKey: topologies.has(x.scope || null) ? topologies.get(x.scope) : topologies.get('host') // COULDDO: Support custom topologies here
-    }
-  }
-})
-
-const parseRequiredAffinity = R.compose(removeWeight, parsePreferredAffinity)
-
-function sortMatchExpressions (xs) {
-  if (anyInvalidOperators(xs)) {
-    throw new Error(`Valid affinity matching operators are ${[...affinityOperators].join(', ')}, but found ${xs}`)
-  }
-
-  return R.flatten(R.values(R.mapObjIndexed((x, operator) => {
-    return R.values(R.mapObjIndexed((values, key) => {
-      return {
-        key: key,
-        operator: operator,
-        values: [].concat(values)
-      }
-    }
-    )(x))
-  })(xs)))
-}
-
-const topologies = new Map([
-  ['host', 'kubernetes.io/hostname'],
-  ['zone', 'failure-domain.beta.kubernetes.io/zone'],
-  ['region', 'failure-domain.beta.kubernetes.io/region'],
-  ['instance-type', 'beta.kubernetes.io/instance-type'],
-  ['os', 'kubernetes.io/os'],
-  ['arch', 'kubernetes.io/arch']
-])
-
-const affinityOperators = new Set(['In', 'NotIn', 'Exists', 'DoesNotExist', 'Gt', 'Lt'])
-const validAffinityOperator = (x) => affinityOperators.has(x)
-const anyInvalidOperators = R.compose(R.not, R.all(validAffinityOperator), R.keys)
 
 module.exports = {
   createAffinities: createAffinities

@@ -74,8 +74,6 @@ function createDeployment (cluster, config) {
     ]
   }
 
-  Object.keys(definition).forEach((key) => (definition[key] == null) && delete definition[key])
-
   const labels = expressionParser.parseMetadata(config.labels || '') || {}
   if (Object.keys(labels).length) {
     Object.assign(definition.deployment.metadata.labels, labels)
