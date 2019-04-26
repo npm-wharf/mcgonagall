@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.13.0"></a>
+# [1.13.0](https://github.com/npm-wharf/mcgonagall/compare/v1.11.0...v1.13.0) (2019-04-26)
+
+
+### Bug Fixes
+
+* add node8 compatability fixes to tests ([6a7a933](https://github.com/npm-wharf/mcgonagall/commit/6a7a933))
+
+
+### Features
+
+* add basic object writer output option ([c39896e](https://github.com/npm-wharf/mcgonagall/commit/c39896e))
+* Add basic podAffinity support ([a9e0aee](https://github.com/npm-wharf/mcgonagall/commit/a9e0aee))
+* allow privileged containers ([#3](https://github.com/npm-wharf/mcgonagall/issues/3)) ([563a707](https://github.com/npm-wharf/mcgonagall/commit/563a707))
+
+
+
 <a name="1.11.0"></a>
 # [1.11.0](https://github.com/npm-wharf/mcgonagall/compare/v1.10.5...v1.11.0) (2019-01-07)
 
