@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.14.0"></a>
+# [1.14.0](https://github.com/npm-wharf/mcgonagall/compare/v1.13.0...v1.14.0) (2019-04-30)
+
+
+### Features
+
+* support `self` shorthand in deployment affinities ([a3ea6e4](https://github.com/npm-wharf/mcgonagall/commit/a3ea6e4))
+
+
+
 <a name="1.13.0"></a>
 # [1.13.0](https://github.com/npm-wharf/mcgonagall/compare/v1.11.0...v1.13.0) (2019-04-26)
 
