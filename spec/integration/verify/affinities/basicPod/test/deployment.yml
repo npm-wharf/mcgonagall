@@ -65,6 +65,15 @@ spec:
                       values:
                         - heavyProcess
                 topologyKey: kubernetes.io/hostname
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                        - test
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: test
           image: 'pretend/bash:1.0.0'

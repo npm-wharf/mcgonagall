@@ -48,6 +48,10 @@ const parsePreferredAffinity = R.map(x => {
 })
 const parseRequiredAffinity = R.compose(removeWeight, parsePreferredAffinity)
 
+const createSelfResolver = (name) => R.lift(R.when(
+  R.equals('self'), R.always({ name })
+))
+
 function createAffinities (cluster, config) {
   if (!config.hasOwnProperty('affinity')) {
     return null
@@ -55,8 +59,12 @@ function createAffinities (cluster, config) {
 
   const affinities = {}
 
-  const [podAffinities, podAntiAffinities] = splitByNegative(config.affinity.pod)
+  // Resolve `self` references before creating structures to avoid having to
+  // pass config throughout every function
+  const resolveSelfToName = createSelfResolver(config.name)
+  const affinitySources = R.map(R.over(R.lensProp('match'), R.map(resolveSelfToName)))(config.affinity.pod)
 
+  const [podAffinities, podAntiAffinities] = splitByNegative(affinitySources)
   if (podAffinities.length > 0) {
     const podAffinity = affinities.podAffinity = {}
     const [required, preferred] = splitByPreferred(podAffinities)

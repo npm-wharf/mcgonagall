@@ -26,6 +26,12 @@ image = "pretend/bash:1.0.0"
   [[affinity.pod.match]]
     In = { name = "heavyProcess"}
 
+[[affinity.pod]]
+  type = "soft"
+  weight = -1
+  [[affinity.pod.match]]
+    In = "self"
+
 # TODO: These are unimplemented samples for node affinity
 #[[affinity.node]]
 #  type = "soft"
