@@ -48,6 +48,7 @@ const parsePreferredAffinity = R.map(x => {
 })
 const parseRequiredAffinity = R.compose(removeWeight, parsePreferredAffinity)
 
+// Returns a function which replaces { <AnyKey> : self } with { <AnyKey> : { name : some_name } }
 const createSelfResolver = (name) => R.lift(R.when(
   R.equals('self'), R.always({ name })
 ))
@@ -60,7 +61,10 @@ function createAffinities (cluster, config) {
   const affinities = {}
 
   // Resolve `self` references before creating structures to avoid having to
-  // pass config throughout every function
+  // pass config throughout every function.
+  // Create a resolver function using this deployment's `name`, then for every
+  // pod definition, for every `match` key, update the term to resolve `self`
+  // values without changing the key referring to it
   const resolveSelfToName = createSelfResolver(config.name)
   const affinitySources = R.map(R.over(R.lensProp('match'), R.map(resolveSelfToName)))(config.affinity.pod)
 
