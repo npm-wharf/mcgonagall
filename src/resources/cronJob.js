@@ -31,11 +31,12 @@ function createCronJob (cluster, config) {
       },
       spec: {
         schedule: config.deployment.schedule,
+        successfulJobsHistoryLimit: config.deployment.history || 1,
+        failedJobsHistoryLimit: config.deployment.history || 1,
+        concurrencyPolicy: concurrency,
         jobTemplate: {
           spec: {
-            successfulJobsHistoryLimit: config.deployment.history || 1,
-            failedJobsHistoryLimit: config.deployment.history || 1,
-            concurrencyPolicy: concurrency,
+            backoffLimit: config.deployment.backoff || 6,
             template: {
               metadata: {
                 labels: {
@@ -47,7 +48,6 @@ function createCronJob (cluster, config) {
               spec: {
                 containers: [ container ],
                 restartPolicy: config.deployment.restart || 'Never',
-                backoffLimit: config.deployment.backoff || 6,
                 volumes: volumes
               }
             },
