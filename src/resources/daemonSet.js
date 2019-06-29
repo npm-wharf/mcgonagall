@@ -22,7 +22,6 @@ function createDaemonSet (cluster, config) {
         }
       },
       spec: {
-        replicas: config.scale ? config.scale.containers : 1,
         revisionHistoryLimit: config.deployment.history,
         selector: {
           matchLabels: {
