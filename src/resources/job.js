@@ -24,6 +24,7 @@ function createJob (cluster, config) {
       spec: {
         parallelism: config.scale ? config.scale.containers : 1,
         completions: config.deployment.completions || config.scale.containers,
+        backoffLimit: config.deployment.backoff || 6,
         template: {
           metadata: {
             labels: {
@@ -35,7 +36,6 @@ function createJob (cluster, config) {
           spec: {
             containers: [ container ],
             restartPolicy: config.deployment.restart || 'Never',
-            backoffLimit: config.deployment.backoff || 6,
             volumes: volumes
           }
         },
