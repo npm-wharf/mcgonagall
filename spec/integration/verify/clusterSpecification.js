@@ -710,6 +710,7 @@ module.exports = {
         'spec': {
           'completions': 1,
           'parallelism': 1,
+          'backoffLimit': 4,
           'template': {
             'metadata': {
               'labels': {
@@ -719,7 +720,6 @@ module.exports = {
               }
             },
             'spec': {
-              'backoffLimit': 4,
               'containers': [
                 {
                   'command': [ '/etc/create-cert/create-cert.sh' ],
@@ -1097,7 +1097,5 @@ module.exports = {
         }
       }
     }
-  },
-  contentHash: 'XDrgTOd2aVNG2K5LkLlzv7r0bS0hCiI4QbYc/1aeKHM=',
-  dataHash: 'Eq4yyx7ALQHto1gbEnwf7jsNxTVy7WuvI5choD2C4SY='
+  }
 }

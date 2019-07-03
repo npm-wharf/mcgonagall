@@ -45,9 +45,7 @@ With only the path to the specification mcgonagall returns the full cluster spec
   secrets: [ // list of secret specs
   ],
   imagePullSecrets: [ // pull secrets are duplicated here
-  ],
-  contentHash: '', // a hash string "fingerprint" for the spec
-  dataHash: '' // a hash string "fingerprint" based on token data
+  ]
 }
 ```
 

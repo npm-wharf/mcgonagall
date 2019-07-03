@@ -1,9 +1,6 @@
 require('../setup')
 const assert = require('assert')
-const chalk = require('chalk')
 const fs = require('fs')
-const hasher = require('folder-hash')
-const jsdiff = require('diff')
 const path = require('path')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
@@ -69,16 +66,6 @@ async function loadVerificationSpec (target) {
   ))
 }
 
-function clearContentHashes (tree) {
-  if (tree.hasOwnProperty('cluster.json')) {
-    let contents = JSON.parse(tree['cluster.json'])
-    delete contents.contentHash
-    delete contents.dataHash
-    tree['cluster.json'] = JSON.stringify(contents, null, 2) + '\n'
-  }
-  return tree
-}
-
 const clusterSpecification = require('./verify/clusterSpecification')
 const tokenSpecification = require('./verify/tokenSpecification')
 
@@ -105,7 +92,7 @@ describe('Transfiguration', function () {
         './spec/integration/source/affinities',
         { output: './spec/integration/target/affinities' }
       )
-      return clearContentHashes(objectWriter.result()).should.deep.equal(affinityVerification)
+      return objectWriter.result().should.deep.equal(affinityVerification)
     })
   })
 
@@ -123,15 +110,10 @@ describe('Transfiguration', function () {
         .then(
           null,
           err => {
-            return err.should.partiallyEql({
-              specPath: path.resolve('./spec/integration/source/tokenized-source'),
-              tokens: [
-                'namespace',
-                'domain',
-                'username',
-                'password'
-              ]
-            })
+            return Promise.all([
+              err.tokens.should.eql(['namespace', 'domain', 'username', 'password']),
+              err.specPath.should.eql(path.resolve('./spec/integration/source/tokenized-source'))
+            ])
           }
         )
     })
@@ -152,13 +134,6 @@ describe('Transfiguration', function () {
   })
 
   describe('from a plain spec with a target directory', function () {
-    let verifyHash
-    before(function () {
-      return hasher.hashElement('./spec/integration/verify/plain-verify')
-        .then(hash => {
-          verifyHash = hash
-        })
-    })
     it('should output files', function () {
       return index.transfigure('./spec/integration/source/plain-source', { output: './spec/integration/target/plain-target' })
         .then(cluster => {
@@ -166,32 +141,8 @@ describe('Transfiguration', function () {
           const json2 = fs.readFileSync('./spec/integration/target/plain-target/cluster.json', 'utf8')
           const c1 = JSON.parse(json1)
           const c2 = JSON.parse(json2)
-          try {
-            assert.deepStrictEqual(c1, c2)
-            assert.strict.equal(json1, json2)
-          } catch (e) {
-            const diff = jsdiff.diffChars(json1, json2)
-            diff.forEach(function (part) {
-              var color = part.added ? 'green'
-                : part.removed ? 'red' : 'grey'
-              if (part.value !== '\n') {
-                console.log(chalk[color](part.value))
-              } else {
-                console.log(chalk[color]('newline'))
-              }
-            })
-          }
-          return hasher.hashElement('./spec/integration/target/plain-target')
-        })
-        .then(hash => {
-          // children are compared because the top level hashes
-          // include the top level folder names which differ
-          // this has been tested to prove that so much as a
-          // white-space character out of place will cause the
-          // hash to fail on the correct file and make the diff
-          // clear in the object tree as to which file is causing
-          // the problem (but not why)
-          return hash.children.should.eql(verifyHash.children)
+          assert.deepStrictEqual(c1, c2)
+          assert.strict.equal(json1, json2)
         })
     })
 
@@ -202,13 +153,6 @@ describe('Transfiguration', function () {
 
   describe('from a spec with scale levels', function () {
     describe('when scale is small', function () {
-      let verifyHash
-      before(function () {
-        return hasher.hashElement('./spec/integration/verify/scale-verify/small')
-          .then(hash => {
-            verifyHash = hash
-          })
-      })
       it('should output files', function () {
         return index.transfigure('./spec/integration/source/scale-source', { output: './spec/integration/target/scale-target/small', scale: 'small' })
           .then(cluster => {
@@ -216,32 +160,8 @@ describe('Transfiguration', function () {
             const json2 = fs.readFileSync('./spec/integration/target/scale-target/small/cluster.json', 'utf8')
             const c1 = JSON.parse(json1)
             const c2 = JSON.parse(json2)
-            try {
-              assert.deepStrictEqual(c1, c2)
-              assert.strict.equal(json1, json2)
-            } catch (e) {
-              const diff = jsdiff.diffChars(json1, json2)
-              diff.forEach(function (part) {
-                var color = part.added ? 'green'
-                  : part.removed ? 'red' : 'grey'
-                if (part.value !== '\n') {
-                  console.log(chalk[color](part.value))
-                } else {
-                  console.log(chalk[color]('newline'))
-                }
-              })
-            }
-            return hasher.hashElement('./spec/integration/target/scale-target/small')
-          })
-          .then(hash => {
-            // children are compared because the top level hashes
-            // include the top level folder names which differ
-            // this has been tested to prove that so much as a
-            // white-space character out of place will cause the
-            // hash to fail on the correct file and make the diff
-            // clear in the object tree as to which file is causing
-            // the problem (but not why)
-            return hash.children.should.eql(verifyHash.children)
+            assert.deepStrictEqual(c1, c2)
+            assert.strict.equal(json1, json2)
           })
       })
 
@@ -251,13 +171,6 @@ describe('Transfiguration', function () {
     })
 
     describe('when scale is medium', function () {
-      let verifyHash
-      before(function () {
-        return hasher.hashElement('./spec/integration/verify/scale-verify/medium')
-          .then(hash => {
-            verifyHash = hash
-          })
-      })
       it('should output files', function () {
         return index.transfigure('./spec/integration/source/scale-source', { output: './spec/integration/target/scale-target/medium', scale: 'medium' })
           .then(cluster => {
@@ -265,32 +178,8 @@ describe('Transfiguration', function () {
             const json2 = fs.readFileSync('./spec/integration/target/scale-target/medium/cluster.json', 'utf8')
             const c1 = JSON.parse(json1)
             const c2 = JSON.parse(json2)
-            try {
-              assert.deepStrictEqual(c1, c2)
-              assert.strict.equal(json1, json2)
-            } catch (e) {
-              const diff = jsdiff.diffChars(json1, json2)
-              diff.forEach(function (part) {
-                var color = part.added ? 'green'
-                  : part.removed ? 'red' : 'grey'
-                if (part.value !== '\n') {
-                  console.log(chalk[color](part.value))
-                } else {
-                  console.log(chalk[color]('newline'))
-                }
-              })
-            }
-            return hasher.hashElement('./spec/integration/target/scale-target/medium')
-          })
-          .then(hash => {
-            // children are compared because the top level hashes
-            // include the top level folder names which differ
-            // this has been tested to prove that so much as a
-            // white-space character out of place will cause the
-            // hash to fail on the correct file and make the diff
-            // clear in the object tree as to which file is causing
-            // the problem (but not why)
-            return hash.children.should.eql(verifyHash.children)
+            assert.deepStrictEqual(c1, c2)
+            assert.strict.equal(json1, json2)
           })
       })
 
@@ -300,13 +189,6 @@ describe('Transfiguration', function () {
     })
 
     describe('when scale is large', function () {
-      let verifyHash
-      before(function () {
-        return hasher.hashElement('./spec/integration/verify/scale-verify/large')
-          .then(hash => {
-            verifyHash = hash
-          })
-      })
       it('should output files', function () {
         return index.transfigure('./spec/integration/source/scale-source', { output: './spec/integration/target/scale-target/large', scale: 'large' })
           .then(cluster => {
@@ -314,32 +196,8 @@ describe('Transfiguration', function () {
             const json2 = fs.readFileSync('./spec/integration/target/scale-target/large/cluster.json', 'utf8')
             const c1 = JSON.parse(json1)
             const c2 = JSON.parse(json2)
-            try {
-              assert.deepStrictEqual(c1, c2)
-              assert.strict.equal(json1, json2)
-            } catch (e) {
-              const diff = jsdiff.diffChars(json1, json2)
-              diff.forEach(function (part) {
-                var color = part.added ? 'green'
-                  : part.removed ? 'red' : 'grey'
-                if (part.value !== '\n') {
-                  console.log(chalk[color](part.value))
-                } else {
-                  console.log(chalk[color]('newline'))
-                }
-              })
-            }
-            return hasher.hashElement('./spec/integration/target/scale-target/large')
-          })
-          .then(hash => {
-            // children are compared because the top level hashes
-            // include the top level folder names which differ
-            // this has been tested to prove that so much as a
-            // white-space character out of place will cause the
-            // hash to fail on the correct file and make the diff
-            // clear in the object tree as to which file is causing
-            // the problem (but not why)
-            return hash.children.should.eql(verifyHash.children)
+            assert.deepStrictEqual(c1, c2)
+            assert.strict.equal(json1, json2)
           })
       })
 
@@ -350,13 +208,6 @@ describe('Transfiguration', function () {
   })
 
   describe('from a tokenized spec with a target directory', function () {
-    let verifyHash
-    before(function () {
-      return hasher.hashElement('./spec/integration/verify/tokenized-verify')
-        .then(hash => {
-          verifyHash = hash
-        })
-    })
     it('should output files', function () {
       return index.transfigure('./spec/integration/source/tokenized-source', {
         version: '1.7',
@@ -374,32 +225,8 @@ describe('Transfiguration', function () {
           const c1 = JSON.parse(json1)
           const c2 = JSON.parse(json2)
 
-          try {
-            assert.deepStrictEqual(c1, c2)
-            assert.strict.equal(json1, json2)
-          } catch (e) {
-            const diff = jsdiff.diffChars(json1, json2)
-            diff.forEach(function (part) {
-              var color = part.added ? 'green'
-                : part.removed ? 'red' : 'grey'
-              if (part.value !== '\n') {
-                console.log(chalk[color](part.value))
-              } else {
-                console.log(chalk[color]('newline'))
-              }
-            })
-          }
-          return hasher.hashElement('./spec/integration/target/tokenized-target')
-        })
-        .then(hash => {
-          // children are compared because the top level hashes
-          // include the top level folder names which differ
-          // this has been tested to prove that so much as a
-          // white-space character out of place will cause the
-          // hash to fail on the correct file and make the diff
-          // clear in the object tree as to which file is causing
-          // the problem (but not why)
-          return hash.children.should.eql(verifyHash.children)
+          assert.deepStrictEqual(c1, c2)
+          assert.strict.equal(json1, json2)
         })
     })
 
@@ -409,13 +236,6 @@ describe('Transfiguration', function () {
   })
 
   describe('from a tokenized git repo with a target directory', function () {
-    let verifyHash
-    before(function () {
-      return hasher.hashElement('./spec/integration/verify/git-verify')
-        .then(hash => {
-          verifyHash = hash
-        })
-    })
     it('should output files', function () {
       return index.transfigure('git://github.com/arobson/elk-spec', {
         gitBasePath: './spec/integration/target/git',
@@ -432,32 +252,8 @@ describe('Transfiguration', function () {
           const c1 = JSON.parse(json1)
           const c2 = JSON.parse(json2)
 
-          try {
-            assert.deepStrictEqual(c1, c2)
-            assert.strict.equal(json1, json2)
-          } catch (e) {
-            const diff = jsdiff.diffChars(json1, json2)
-            diff.forEach(function (part) {
-              var color = part.added ? 'green'
-                : part.removed ? 'red' : 'grey'
-              if (part.value !== '\n') {
-                console.log(chalk[color](part.value))
-              } else {
-                console.log(chalk[color]('newline'))
-              }
-            })
-          }
-          return hasher.hashElement('./spec/integration/target/tokenized-git')
-        })
-        .then(hash => {
-          // children are compared because the top level hashes
-          // include the top level folder names which differ
-          // this has been tested to prove that so much as a
-          // white-space character out of place will cause the
-          // hash to fail on the correct file and make the diff
-          // clear in the object tree as to which file is causing
-          // the problem (but not why)
-          return hash.children.should.eql(verifyHash.children)
+          assert.deepStrictEqual(c1, c2)
+          assert.strict.equal(json1, json2)
         })
     })
 

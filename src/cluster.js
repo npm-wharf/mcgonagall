@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const crypto = require('crypto')
 const fs = require('fs')
 const glob = require('globulesce')
 const path = require('path')
@@ -108,12 +107,6 @@ function loadClusterFile (options, fullPath) {
   }
 }
 
-function fingerprint (options, cluster) {
-  cluster.contentHash = hashData(cluster)
-  cluster.dataHash = hashData(options.data || '')
-  return cluster
-}
-
 function getClusterConfig (fullPath, options) {
   let wait = Promise.resolve(fullPath)
   if (/([.]tgz|[.]tar)/.test(path.extname(fullPath))) {
@@ -129,7 +122,6 @@ function getClusterConfig (fullPath, options) {
     .then(onTokens.bind(null, options))
     .then(loadClusterFile.bind(null, options))
     .then(onConfig.bind(null, options))
-    .then(fingerprint.bind(null, options))
 }
 
 function getTokenList (fullPath) {
@@ -169,12 +161,6 @@ function getTokenList (fullPath) {
           return tokens
         })))
     })
-}
-
-function hashData (data) {
-  const hash = crypto.createHash('sha256')
-  hash.update(JSON.stringify(data))
-  return hash.digest('base64')
 }
 
 function onConfig (options, config) {
