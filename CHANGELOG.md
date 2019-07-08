@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/npm-wharf/mcgonagall/compare/v1.14.0...v2.0.0) (2019-07-08)
+
+
+### Bug Fixes
+
+* make cronJob generate valid resources ([b90f3ad](https://github.com/npm-wharf/mcgonagall/commit/b90f3ad))
+* make daemonSet generate valid resources ([df28bee](https://github.com/npm-wharf/mcgonagall/commit/df28bee))
+* make job generate valid resources ([ba77f73](https://github.com/npm-wharf/mcgonagall/commit/ba77f73))
+
+
+### Features
+
+* add 1.13-1.15 to api version maps ([bf55bc8](https://github.com/npm-wharf/mcgonagall/commit/bf55bc8))
+* remove unused contentHash and dataHash properties ([7a78761](https://github.com/npm-wharf/mcgonagall/commit/7a78761))
+
+
+### BREAKING CHANGES
+
+* this removes properties that may be used by someone
+
+
+
 <a name="1.14.0"></a>
 # [1.14.0](https://github.com/npm-wharf/mcgonagall/compare/v1.13.0...v1.14.0) (2019-04-30)
 
