@@ -33,7 +33,7 @@
     "rimraf": "^2.6.2",
     "sinon": "^7.3.0",
     "standard": "^12.0.1",
-    "standard-version": "^4.4.0"
+    "standard-version": "^8.0.1"
   },
   "gitHead": "b02d01b04cd64d3d86a620f2be41b6160387aa6a",
   "homepage": "https://github.com/npm-wharf/mcgonagall#readme",
